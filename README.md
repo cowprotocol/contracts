@@ -1,6 +1,7 @@
-# Gnosis Protocol V2
+# CoW Protocol
 
-This repository contains the Solidity smart contract code for the Gnosis Protocol version 2.
+This repository contains the Solidity smart contract code for the **CoW Protocol** (formerly know as **Gnosis Protocol**).
+
 For more documentation on how the protocol works on a smart contract level, see the [documentation pages](docs/index.md).
 
 ## Getting Started
@@ -57,7 +58,7 @@ yarn bench:trace
 ## Deployment
 
 Contracts deployment (including contract verification) is run automatically with GitHub Actions. The deployment process is triggered manually.
-Maintainers of this repository can deploy a new version of the contract in the "Actions" tab, "Deploy GPv2 contracts", "Run workflow". The target branch can be selected before running.
+Maintainers of this repository can deploy a new version of the contract in the "Actions" tab, "Deploy CoW Protocol contracts", "Run workflow". The target branch can be selected before running.
 A successful workflow results in a new PR asking to merge the deployment artifacts into the main branch.
 
 Contracts can also be deployed and verified manually as follows.

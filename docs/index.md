@@ -1,4 +1,4 @@
-# Gnosis Protocol V2 Smart Contracts
+# CoW Protocol Smart Contracts
 
 - [Architecture](architecture.md)
 

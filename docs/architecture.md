@@ -2,7 +2,7 @@
 
 Below is a brief description of the smart contracts located in the `src/contracts/` directory:
 
-- `GPv2Settlement.sol`: The entrypoint for Gnosis Protocol V2; authenticated solvers call the `settle` function on this contract to perform batched settlements.
+- `GPv2Settlement.sol`: The entrypoint for CoW Protocol; authenticated solvers call the `settle` function on this contract to perform batched settlements.
 - `GPv2AllowListAuthentication.sol`: The allow list authentication contract is a simple `GPv2Authentication` implementation that manages a list of solvers that are authorized to perform settlements.
 - `GPv2VaultRelayer.sol`: The vault relayer is the contract users authorize on the Balancer v2 `Vault` enabling control of user balances; it is intentionally kept as a separate contracts so that SC interactions do not have access to this authorization.
 - `interfaces/`

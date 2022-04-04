@@ -151,7 +151,7 @@ export class BenchFixture {
   ) {}
 
   public static async create(): Promise<BenchFixture> {
-    debug("deploying GPv2 contracts");
+    debug("deploying CoW Protocol contracts");
     const deployment = await deployTestContracts();
     const {
       vaultAuthorizer,

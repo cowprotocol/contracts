@@ -1,4 +1,4 @@
-name: Deploy GPv2 contracts
+name: Deploy CoW Protocol contracts
 
 on:
   workflow_dispatch:
