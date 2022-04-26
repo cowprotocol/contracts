@@ -21,6 +21,7 @@ import {
   domain,
   computeOrderUid,
   decodeOrder,
+  OrderBalance,
 } from "../ts";
 
 import {
@@ -153,7 +154,13 @@ function displayTrade(
     flags,
     signature,
   } = trade;
-  const { kind, partiallyFillable, signingScheme } = decodeTradeFlags(flags);
+  const {
+    kind,
+    partiallyFillable,
+    signingScheme,
+    buyTokenBalance,
+    sellTokenBalance,
+  } = decodeTradeFlags(flags);
   let owner = null;
   let orderUid = null;
   if (domainSeparator !== null) {
@@ -187,8 +194,20 @@ function displayTrade(
       BigNumber.from(validTo).toNumber() * 1000,
     ).toISOString()} (${validTo.toString()})`,
   );
-  console.log(label(`Trade`), `sell ${prettyAmount(sellAmount, sellToken)}`);
-  console.log("      ", ` buy ${prettyAmount(buyAmount, buyToken, true)}`);
+  console.log(
+    label(`Trade`),
+    `sell ${prettyAmount(sellAmount, sellToken)}` +
+      (sellTokenBalance !== OrderBalance.ERC20
+        ? `, from Balancer ${sellTokenBalance} balance`
+        : ""),
+  );
+  console.log(
+    "      ",
+    ` buy ${prettyAmount(buyAmount, buyToken, true)}` +
+      (buyTokenBalance !== OrderBalance.ERC20
+        ? `, to Balancer ${buyTokenBalance} balance`
+        : ""),
+  );
   console.log("      ", ` fee ${prettyAmount(feeAmount, sellToken)}`);
   if (partiallyFillable) {
     console.log(
