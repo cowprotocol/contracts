@@ -1,6 +1,6 @@
 # Intellectual Property Notice
 
-Copyright (c) 2022 Gnosis Ltd  
+Copyright (c) 2021 Gnosis Ltd  
 Copyright (c) 2022 Cow Services Lda
 
 Except as otherwise noted (below and/or in individual files), this project is licensed under
