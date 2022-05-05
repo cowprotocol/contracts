@@ -22,7 +22,7 @@ export class TypedDataVersionedSigner implements TypedDataSigner {
   _isSigner = true;
   _signMethod: string;
 
-  constructor(signer: Signer, version?: "v1" | "v2" | "v3" | "v4") {
+  constructor(signer: Signer, version?: "v3" | "v4") {
     this.signer = signer;
     const versionSufix = version ? "_" + version : "";
     this._signMethod = "eth_signTypedData" + versionSufix;
