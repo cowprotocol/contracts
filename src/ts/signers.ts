@@ -16,13 +16,16 @@ import {
  * Takes a Signer instance on creation.
  * All other Signer methods are proxied to initial instance.
  */
-export class TypedDataV3Signer implements TypedDataSigner {
+export class TypedDataVersionedSigner implements TypedDataSigner {
   signer: Signer;
   provider: JsonRpcProvider;
   _isSigner = true;
+  _signMethod: string;
 
-  constructor(signer: Signer) {
+  constructor(signer: Signer, version?: "v1" | "v2" | "v3" | "v4") {
     this.signer = signer;
+    const versionSufix = version ? "_" + version : "";
+    this._signMethod = "eth_signTypedData" + versionSufix;
 
     if (!signer.provider) {
       throw new Error("Signer does not have a provider set");
@@ -56,7 +59,7 @@ export class TypedDataV3Signer implements TypedDataSigner {
     const address = await this.getAddress();
 
     // Actual signing
-    return (await this.provider.send("eth_signTypedData_v3", [
+    return (await this.provider.send(this._signMethod, [
       address.toLowerCase(),
       msg,
     ])) as string;
