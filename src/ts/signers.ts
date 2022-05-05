@@ -59,10 +59,10 @@ export class TypedDataVersionedSigner implements TypedDataSigner {
     const address = await this.getAddress();
 
     // Actual signing
-    return (await this.provider.send(this._signMethod, [
+    return this.provider.send(this._signMethod, [
       address.toLowerCase(),
       msg,
-    ])) as string;
+    ])
   }
 
   // --- start boilerplate proxy methods ---
