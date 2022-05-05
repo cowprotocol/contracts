@@ -10,8 +10,8 @@ import {
 } from "./types/ethers";
 
 /**
- * Wrapper around a TypedDataSigner Signer object that implements `_signTypedData` using
- * `eth_signTypedData_v3` instead of `eth_signTypedData_v4`.
+ * Wrapper around a TypedDataSigner Signer object that implements `_signTypedData`. It allows to specify the version of 
+ * EIP-712 used.
  *
  * Takes a Signer instance on creation.
  * All other Signer methods are proxied to initial instance.
