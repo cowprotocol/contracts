@@ -29,12 +29,14 @@ export const NATIVE_TOKEN_SYMBOL: Record<SupportedNetwork | "hardhat", string> =
     hardhat: "ETH",
     mainnet: "ETH",
     rinkeby: "ETH",
+    goerli: "ETH",
     xdai: "xDAI",
   };
 
 export const WRAPPED_NATIVE_TOKEN_ADDRESS: Record<SupportedNetwork, string> = {
   mainnet: WethNetworks.WETH9[1].address,
   rinkeby: WethNetworks.WETH9[4].address,
+  goerli: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
   xdai: "0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d",
 };
 

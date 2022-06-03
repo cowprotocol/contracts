@@ -34,6 +34,8 @@ export function transactionUrl(
       return `https://etherscan.io/tx/${hash}`;
     case "rinkeby":
       return `https://rinkeby.etherscan.io/tx/${hash}`;
+    case "goerli":
+      return `https://goerli.etherscan.io/tx/${hash}`;
     case "xdai":
       return `https://blockscout.com/xdai/mainnet/tx/${hash}`;
     default:
