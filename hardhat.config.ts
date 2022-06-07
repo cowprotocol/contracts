@@ -38,7 +38,7 @@ if (PK) {
 }
 
 if (
-  ["rinkeby", "mainnet"].includes(argv.network) &&
+  ["rinkeby", "goerli", "mainnet"].includes(argv.network) &&
   NODE_URL === undefined &&
   INFURA_KEY === undefined
 ) {
@@ -115,6 +115,11 @@ export default {
       url: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
       ...sharedNetworkConfig,
       chainId: 4,
+    },
+    goerli: {
+      url: `https://goerli.infura.io/v3/${INFURA_KEY}`,
+      ...sharedNetworkConfig,
+      chainId: 5,
     },
     xdai: {
       url: "https://xdai.poanetwork.dev",

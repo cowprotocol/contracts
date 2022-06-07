@@ -13,21 +13,27 @@ import { InteractionDecoder } from "./template";
 
 const ROUTERS: Record<string, Record<string, string>> = {
   rinkeby: {
-    // https://uniswap.org/docs/v2/smart-contracts/router02/#address (same as mainnet)
+    // https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02 (same as mainnet)
     "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D": "Uniswap",
-    // https://dev.sushi.com/sushiswap/contracts#alternative-networks (same as xdai)
+    // https://dev.sushi.com/docs/Developers/Deployment Addresses (same as xdai)
+    "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506": "Sushiswap",
+  },
+  goerli: {
+    // https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02 (same as mainnet)
+    "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D": "Uniswap",
+    // https://dev.sushi.com/docs/Developers/Deployment Addresses (same as xdai)
     "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506": "Sushiswap",
   },
   mainnet: {
-    // https://uniswap.org/docs/v2/smart-contracts/router02/#address (same as rinkeby)
+    // https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02
     "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D": "Uniswap",
-    // https://dev.sushi.com/sushiswap/contracts#sushiv-2-router02
+    // https://dev.sushi.com/docs/Developers/Deployment Addresses
     "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F": "Sushiswap",
   },
   xdai: {
-    // https://wiki.1hive.org/projects/honeyswap/honeyswap-on-xdai-1#amm-contracts
+    // https://wiki.1hive.org/projects/honeyswap/honeyswap-on-xdai
     "0x1C232F01118CB8B424793ae03F870aa7D0ac7f77": "Honeyswap",
-    // https://dev.sushi.com/sushiswap/contracts#alternative-networks (same as rinkeby)
+    // https://dev.sushi.com/docs/Developers/Deployment Addresses
     "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506": "Sushiswap",
   },
 };

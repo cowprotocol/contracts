@@ -21,6 +21,11 @@ export const REFERENCE_TOKEN: Record<SupportedNetwork, ReferenceToken> = {
     decimals: 18,
     address: "0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea",
   },
+  goerli: {
+    symbol: "DAI",
+    decimals: 18,
+    address: "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60",
+  },
   mainnet: {
     symbol: "DAI",
     decimals: 18,
