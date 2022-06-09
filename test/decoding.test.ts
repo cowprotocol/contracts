@@ -21,6 +21,7 @@ import {
 } from "../src/ts";
 
 import { fillDistinctBytes, SAMPLE_ORDER } from "./testHelpers";
+import { EcdsaSignature } from '../lib/commonjs'
 
 type UnknownArray = unknown[] | readonly unknown[];
 // [A, B, C] -> [A, B]
@@ -142,7 +143,7 @@ describe("Signer", () => {
     it(`ecdsa ${scheme}`, async () => {
       const signature = await utils.joinSignature(
         (
-          await signOrder(domainSeparator, SAMPLE_ORDER, ecdsaSigner, scheme)
+          (await signOrder(domainSeparator, SAMPLE_ORDER, ecdsaSigner, scheme)) as EcdsaSignature
         ).data,
       );
       expect(

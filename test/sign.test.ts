@@ -88,7 +88,7 @@ describe("signOrderCancellation", () => {
         scheme,
         hashOrderCancellation(domain, orderUid),
       );
-      expect(ethers.utils.recoverAddress(signingHash, signature)).to.equal(
+      expect(ethers.utils.recoverAddress(signingHash, signature as string)).to.equal(
         signer.address,
       );
     }

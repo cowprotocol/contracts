@@ -24,6 +24,7 @@ import {
   encodeEip1271SignatureData,
   signOrder,
   decodeEip1271SignatureData,
+  Eip1271SignatureData,
 } from "./sign";
 import { TypedDataDomain } from "./types/ethers";
 
@@ -310,9 +311,9 @@ export function encodeSignatureData(sig: Signature): string {
   switch (sig.scheme) {
     case SigningScheme.EIP712:
     case SigningScheme.ETHSIGN:
-      return ethers.utils.joinSignature(sig.data);
+      return ethers.utils.joinSignature(sig.data as string);
     case SigningScheme.EIP1271:
-      return encodeEip1271SignatureData(sig.data);
+      return encodeEip1271SignatureData(sig.data as Eip1271SignatureData);
     case SigningScheme.PRESIGN:
       return ethers.utils.getAddress(sig.data);
     default:

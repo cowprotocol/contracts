@@ -60,10 +60,14 @@ export enum SigningScheme {
 
 export type EcdsaSigningScheme = SigningScheme.EIP712 | SigningScheme.ETHSIGN;
 
+export type Eip1271SigningScheme = SigningScheme.EIP1271;
+
+export type OffChainSigningScheme = EcdsaSigningScheme | Eip1271SigningScheme;
+
 /**
  * The signature of an order.
  */
-export type Signature = EcdsaSignature | Eip1271Signature | PreSignSignature;
+export type Signature = EcdsaSignature | Eip1271Signature | PreSignSignature | OffChainSignature;
 
 /**
  * ECDSA signature of an order.
@@ -77,6 +81,17 @@ export interface EcdsaSignature {
    * The ECDSA signature.
    */
   data: SignatureLike;
+}
+
+export interface OffChainSignature {
+  /**
+   * The signing scheme used in the signature.
+   */
+  scheme: EcdsaSigningScheme | Eip1271SigningScheme;
+  /**
+   * The 1271 signature.
+   */
+  data: SignatureLike | Eip1271SignatureData;
 }
 
 /**
@@ -104,7 +119,7 @@ export interface Eip1271Signature {
   /**
    * The signature data.
    */
-  data: Eip1271SignatureData;
+  data: Eip1271SignatureData | string;
 }
 
 /**
@@ -121,8 +136,8 @@ export interface PreSignSignature {
   data: string;
 }
 
-async function ecdsaSignTypedData(
-  scheme: EcdsaSigningScheme,
+async function signTypedData(
+  scheme: EcdsaSigningScheme | Eip1271SigningScheme,
   owner: Signer,
   domain: TypedDataDomain,
   types: TypedDataTypes,
@@ -131,6 +146,7 @@ async function ecdsaSignTypedData(
   let signature: string | null = null;
 
   switch (scheme) {
+    case SigningScheme.EIP1271:
     case SigningScheme.EIP712:
       if (!isTypedDataSigner(owner)) {
         throw new Error("signer does not support signing typed data");
@@ -149,7 +165,11 @@ async function ecdsaSignTypedData(
   // Passing the signature through split/join to normalize the `v` byte.
   // Some wallets do not pad it with `27`, which causes a signature failure
   // `splitSignature` pads it if needed, and `joinSignature` simply puts it back together
-  return ethers.utils.joinSignature(ethers.utils.splitSignature(signature));
+
+  if (scheme !== SigningScheme.EIP1271) {
+    return ethers.utils.joinSignature(ethers.utils.splitSignature(signature));
+  }
+  return signature
 }
 
 /**
@@ -170,11 +190,11 @@ export async function signOrder(
   domain: TypedDataDomain,
   order: Order,
   owner: Signer,
-  scheme: EcdsaSigningScheme,
-): Promise<EcdsaSignature> {
+  scheme: EcdsaSigningScheme | Eip1271SigningScheme,
+): Promise<EcdsaSignature | Eip1271Signature> {
   return {
     scheme,
-    data: await ecdsaSignTypedData(
+    data: await signTypedData(
       scheme,
       owner,
       domain,
@@ -199,11 +219,11 @@ export async function signOrderCancellation(
   domain: TypedDataDomain,
   orderUid: BytesLike,
   owner: Signer,
-  scheme: EcdsaSigningScheme,
-): Promise<EcdsaSignature> {
+  scheme: EcdsaSigningScheme | Eip1271SigningScheme,
+): Promise<EcdsaSignature | Eip1271Signature> {
   return {
     scheme,
-    data: await ecdsaSignTypedData(
+    data: await signTypedData(
       scheme,
       owner,
       domain,

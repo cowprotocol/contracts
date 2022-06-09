@@ -327,7 +327,7 @@ describe("GPv2Signing", () => {
       // NOTE: `v` must be either `27` or `28`, so just set it to something else
       // to generate an invalid signature.
       const invalidSignature = ethers.utils.arrayify(
-        ethers.utils.joinSignature(signature),
+        ethers.utils.joinSignature(signature as string),
       );
       invalidSignature[64] = 42;
 
@@ -351,7 +351,7 @@ describe("GPv2Signing", () => {
       // NOTE: `v` must be either `27` or `28`, so just set it to something else
       // to generate an invalid signature.
       const invalidSignature = ethers.utils.arrayify(
-        ethers.utils.joinSignature(signature),
+        ethers.utils.joinSignature(signature as string),
       );
       invalidSignature[64] = 42;
 
