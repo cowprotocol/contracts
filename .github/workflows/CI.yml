@@ -52,6 +52,8 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository }}
+          labels: |
+            org.opencontainers.image.licenses=LGPL-3.0-or-later
       - uses: docker/build-push-action@v3
         with:
           context: .
