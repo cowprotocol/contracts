@@ -140,7 +140,7 @@ library GPv2Order {
 
         // NOTE: Compute the EIP-712 order struct hash in place. As suggested
         // in the EIP proposal, noting that the order struct has 12 fields, and
-        // including the type hash `(12 + 1) * 32 = 416` bytes to hash.
+        // prefixing the type hash `(1 + 12) * 32 = 416` bytes to hash.
         // <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md#rationale-for-encodedata>
         // solhint-disable-next-line no-inline-assembly
         assembly {
