@@ -19,7 +19,6 @@ import {
   GetDumpInstructionInput,
   getDumpInstructions,
 } from "../../src/tasks/dump";
-import { SupportedNetwork } from "../../src/tasks/ts/deployment";
 import { ProviderGasEstimator } from "../../src/tasks/ts/gas";
 import { Erc20Token, isNativeToken } from "../../src/tasks/ts/tokens";
 import { BUY_ETH_ADDRESS, OrderKind } from "../../src/ts";
@@ -101,7 +100,7 @@ export function mockQuerySellingTokenForEth({
     .expects("estimateTradeAmount")
     .withArgs({
       sellToken: token,
-      buyToken: wrappedNativeToken,
+      buyToken: BUY_ETH_ADDRESS,
       kind: OrderKind.SELL,
       amount,
     })
@@ -121,14 +120,8 @@ async function handledRejection(error?: unknown) {
   return { rejection };
 }
 
-// The getDumpInstructions function depends on the network only to retrieve
-// the right weth address for the network, and even then this is only needed
-// because of an issue in the services where BUY_ETH_ADDRESS cannot be used
-// to get a price quote.
-// TODO: remove when BUY_ETH_ADDRESS is supported and implemented in price
-// quotes.
-const network = undefined as unknown as SupportedNetwork;
-const wrappedNativeToken = undefined as unknown as string;
+// Any network works for testing.
+const network = "mainnet";
 
 describe("getDumpInstructions", () => {
   let consoleLogOutput: unknown = undefined;
