@@ -880,6 +880,9 @@ const setupDumpTask: () => void = () =>
               }. Did you export a valid private key?`,
             );
           } else {
+            // The next lines are a bit hacky since a VoidSigner is not a JsonRpcSigner, but it's still good enough as
+            // it returns an error every time a signing request is made (which shouldn't happen in dry run). The only
+            // method missing from a JsonRpcSigner is sendTransaction, which would fail with an obscure error if called.
             signer = await SignerWithAddress.create(
               new VoidSigner(origin) as unknown as providers.JsonRpcSigner,
             );
