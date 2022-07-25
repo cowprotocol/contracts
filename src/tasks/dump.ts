@@ -737,7 +737,7 @@ export async function dump({
       )} ${toTokenName} to the receiver address ${
         receiver.address
       } will be submitted onchain. The transfer network fee corresponds to about ${
-        feePercent < 0.01 ? "< 0.01" : feePercent.toFixed(1)
+        feePercent < 0.01 ? "< 0.01" : feePercent.toFixed(2)
       }% of the withdrawn amount.`,
     );
     sumReceived = sumReceived.add(amount);
