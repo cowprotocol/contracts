@@ -8,6 +8,8 @@ import {
   ContractTransaction,
   Signer,
   utils,
+  VoidSigner,
+  providers,
 } from "ethers";
 import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -866,16 +868,25 @@ const setupDumpTask: () => void = () =>
           hre.ethers.getSigners(),
           getDeployedContract("GPv2Settlement", hre),
         ]);
-        const signer =
+        let signer =
           origin === undefined
             ? signers[0]
             : signers.find((signer) => signer.address === origin);
         if (signer === undefined) {
-          throw new Error(
-            `No signer found${
-              origin === undefined ? "" : ` for address ${origin}`
-            }. Did you export a valid private key?`,
-          );
+          if (!dryRun) {
+            throw new Error(
+              `No signer found${
+                origin === undefined ? "" : ` for address ${origin}`
+              }. Did you export a valid private key?`,
+            );
+          } else {
+            // The next lines are a bit hacky since a VoidSigner is not a JsonRpcSigner, but it's still good enough as
+            // it returns an error every time a signing request is made (which shouldn't happen in dry run). The only
+            // method missing from a JsonRpcSigner is sendTransaction, which would fail with an obscure error if called.
+            signer = await SignerWithAddress.create(
+              new VoidSigner(origin) as unknown as providers.JsonRpcSigner,
+            );
+          }
         }
         console.log(`Using account ${signer.address}`);
 
