@@ -28,7 +28,7 @@ jobs:
       - run: yarn --frozen-lockfile
       - run: yarn build
       - run: yarn lint
-      - run: yarn coverage
+      - run: MOCHA_CONF='coverage' npx hardhat test
       - run: yarn test:ignored-in-coverage
       - name: Coveralls
         uses: coverallsapp/github-action@master
