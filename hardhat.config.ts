@@ -105,6 +105,7 @@ export default {
     hardhat: {
       blockGasLimit: 12.5e6,
       initialBaseFeePerGas,
+      hardfork: "merge",
     },
     mainnet: {
       url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
