@@ -73,7 +73,7 @@ export function decodeGasTrace(
       }),
       node({
         name: "<entrypoint>",
-        cumulativeGas: trace.gasUsed.addn(transactionGas),
+        cumulativeGas: trace.gasUsed + BigInt(transactionGas),
         gasUsed: trace.gasUsed,
         children: computeGasTrace(trace, transactionGas),
       }),
