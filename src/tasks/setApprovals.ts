@@ -7,6 +7,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { SettlementEncoder } from "../ts";
 
+import { getDeployedContract } from "./ts/deployment";
 import { createGasEstimator, gweiToWei } from "./ts/gas";
 import { prompt } from "./ts/tui";
 
@@ -25,23 +26,14 @@ async function setApprovals(
   { input, dryRun, gasInGwei }: Args,
   hre: HardhatRuntimeEnvironment,
 ) {
-  // Instantiate Settlement Contract
-  const settlementDeployment = await hre.deployments.get("GPv2Settlement");
-  const settlement = new Contract(
-    settlementDeployment.address,
-    settlementDeployment.abi,
-  ).connect(hre.ethers.provider);
+  const settlement = await getDeployedContract("GPv2Settlement", hre);
   const [signer] = await hre.ethers.getSigners();
 
   //Instantiate ERC20 ABI
   const IERC20 = await hre.artifacts.readArtifact(
     "src/contracts/interfaces/IERC20.sol:IERC20",
   );
-  const token = new Contract(
-    hre.ethers.constants.AddressZero,
-    IERC20.abi,
-    hre.ethers.provider,
-  );
+  const token = new hre.ethers.utils.Interface(IERC20.abi);
 
   // Load approval list and encode interaction for each entry
   const approvals: Approval[] = JSON.parse(await fs.readFile(input, "utf-8"));
@@ -49,7 +41,7 @@ async function setApprovals(
   approvals.forEach((approval) => {
     encoder.encodeInteraction({
       target: approval.token,
-      callData: token.interface.encodeFunctionData("approve", [
+      callData: token.encodeFunctionData("approve", [
         approval.spender,
         hre.ethers.constants.MaxUint256,
       ]),
@@ -57,7 +49,7 @@ async function setApprovals(
   });
   const finalSettlement = encoder.encodedSettlement({});
   const gasEstimator = createGasEstimator(hre, {
-    blockNative: true,
+    blockNative: false,
   });
   const gasPrice =
     gasInGwei > 0
