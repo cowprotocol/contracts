@@ -97,6 +97,6 @@ export class BlockNativeGasEstimator implements IGasEstimator {
   }
 }
 
-function gweiToWei(amount: number): BigNumber {
+export function gweiToWei(amount: number): BigNumber {
   return ethers.utils.parseUnits(amount.toFixed(9), 9);
 }
