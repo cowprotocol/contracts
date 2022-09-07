@@ -98,7 +98,7 @@ const setupSetApprovalsTask: () => void = () => {
     )
     .addOptionalParam(
       "gasInGwei",
-      "Fix a gas price instead of using the blockscout gas estimator",
+      "Fix a gas price instead of using the native gas estimator",
       0,
       types.int,
     )
