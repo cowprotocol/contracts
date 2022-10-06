@@ -116,6 +116,22 @@ yarn coverage
 
 A summary of coverage results are printed out to console. More detailed information is presented in the generated file `coverage/index.html`.
 
+## Known issues
+
+If a user creates an order with:
+- zero sell amount
+- zero buy amount
+- partially fillable set to false
+
+then this order could be executed an arbitrary amount of times instead of just a single time.
+This means that any solver could drain the fee amount from the user until not enough funds are available anymore.
+
+We recommend to never sign orders of this form and, if developing a contract that creates orders on behalf of other users, make sure at a contract level that such orders cannot be created.
+
+## Helper scripts
+
+A collection of tools for interacting with the CoW Swap contracts.
+
 ### Solver Authentication
 
 This repo contains scripts to manage the list of authenticated solvers in all networks the contract has been deployed.
