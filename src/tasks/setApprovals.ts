@@ -54,7 +54,7 @@ async function setApprovals(
     gasInGwei > 0
       ? {
           maxFeePerGas: gweiToWei(gasInGwei),
-          maxPriorityFeePerGas: gweiToWei(gasInGwei),
+          maxPriorityFeePerGas: gweiToWei(1.1),
         }
       : await gasEstimator.txGasPrice();
 
