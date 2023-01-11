@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./interfaces/IERC20.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "./interfaces/IVault.sol";
 import "./libraries/GPv2Transfer.sol";
 

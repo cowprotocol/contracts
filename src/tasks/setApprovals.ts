@@ -30,7 +30,7 @@ async function setApprovals(
 
   //Instantiate ERC20 ABI
   const IERC20 = await hre.artifacts.readArtifact(
-    "src/contracts/interfaces/IERC20.sol:IERC20",
+    "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
   );
   const token = new hre.ethers.utils.Interface(IERC20.abi);
 

@@ -37,7 +37,7 @@ import { restoreStandardConsole, useDebugConsole } from "./logging";
 chai.use(chaiAsPromised);
 
 const IERC20 = hre.artifacts.readArtifact(
-  "src/contracts/interfaces/IERC20.sol:IERC20",
+  "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
 );
 async function mockErc20(deployer: Wallet) {
   return waffle.deployMockContract(deployer, (await IERC20).abi);

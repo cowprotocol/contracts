@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./GPv2VaultRelayer.sol";
 import "./interfaces/GPv2Authentication.sol";
-import "./interfaces/IERC20.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "./interfaces/IVault.sol";
 import "./libraries/GPv2Interaction.sol";
 import "./libraries/GPv2Order.sol";

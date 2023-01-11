@@ -74,7 +74,7 @@ async function fastTokenDetails(
     oneinchTokens[address.toLowerCase()] !== undefined
   ) {
     const IERC20 = await hre.artifacts.readArtifact(
-      "src/contracts/interfaces/IERC20.sol:IERC20",
+      "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
     );
     const contract = new Contract(address, IERC20.abi, hre.ethers.provider);
     return { ...oneinchTokens[address.toLowerCase()], contract };

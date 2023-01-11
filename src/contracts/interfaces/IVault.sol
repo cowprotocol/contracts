@@ -14,7 +14,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./IERC20.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 /**
  * @dev Minimal interface for the Vault core contract only containing methods

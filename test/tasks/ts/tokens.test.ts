@@ -22,7 +22,7 @@ describe("token tools", () => {
 
   beforeEach(async () => {
     const IERC20 = await artifacts.readArtifact(
-      "src/contracts/interfaces/IERC20.sol:IERC20",
+      "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
     );
 
     token = await waffle.deployMockContract(deployer, IERC20.abi);
