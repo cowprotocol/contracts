@@ -6,7 +6,7 @@
 // - Added linter directives to ignore low level call and assembly warnings
 // <https://github.com/gnosis/util-contracts/blob/v3.1.0-solc-7/contracts/StorageAccessible.sol>
 
-pragma solidity ^0.7.6;
+pragma solidity >=0.8.0 <0.9.0;
 
 /// @title ViewStorageAccessible - Interface on top of StorageAccessible base class to allow simulations from view functions
 interface ViewStorageAccessible {

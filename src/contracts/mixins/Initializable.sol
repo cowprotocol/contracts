@@ -7,7 +7,7 @@
 // - Inlined `Address.isContract` implementation
 // <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/proxy/Initializable.sol>
 
-pragma solidity ^0.7.6;
+pragma solidity >=0.8.0 <0.9.0;
 
 /**
  * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed

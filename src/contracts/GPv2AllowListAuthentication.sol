@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.7.6;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "./interfaces/GPv2Authentication.sol";
 import "./libraries/GPv2EIP1967.sol";
