@@ -83,6 +83,8 @@ abstract contract GPv2Signing {
     /// @dev Sets a presignature for the specified order UID.
     ///
     /// @param orderUid The unique identifier of the order to pre-sign.
+    /// @param signed True to set the order as tradable with pre-sign, false to
+    /// false to unset it.
     function setPreSignature(bytes calldata orderUid, bool signed) external {
         (, address owner, ) = orderUid.extractOrderUidParams();
         require(owner == msg.sender, "GPv2: cannot presign order");
