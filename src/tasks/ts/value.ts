@@ -1,4 +1,4 @@
-import { BigNumber, utils } from "ethers";
+import { BigNumber } from "ethers";
 
 import { BUY_ETH_ADDRESS, OrderKind } from "../../ts";
 import { Api } from "../../ts/api";
@@ -46,7 +46,7 @@ export async function usdValue(
   referenceToken: ReferenceToken,
   api: Api,
 ): Promise<BigNumber> {
-  return utils.getAddress(token) != utils.getAddress(referenceToken.address)
+  return `${token}`.toLowerCase() != referenceToken.address.toLowerCase()
     ? await api.estimateTradeAmount({
         sellToken: token,
         buyToken: referenceToken.address,
