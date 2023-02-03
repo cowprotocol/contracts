@@ -46,12 +46,14 @@ export async function usdValue(
   referenceToken: ReferenceToken,
   api: Api,
 ): Promise<BigNumber> {
-  return await api.estimateTradeAmount({
-    sellToken: token,
-    buyToken: referenceToken.address,
-    amount,
-    kind: OrderKind.SELL,
-  });
+  return `${token}`.toLowerCase() != referenceToken.address.toLowerCase()
+    ? await api.estimateTradeAmount({
+        sellToken: token,
+        buyToken: referenceToken.address,
+        amount,
+        kind: OrderKind.SELL,
+      })
+    : amount;
 }
 
 export async function usdValueOfEth(

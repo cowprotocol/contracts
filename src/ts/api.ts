@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber, BigNumberish, constants } from "ethers";
 import fetch, { RequestInit } from "node-fetch";
 
 import {
@@ -68,21 +68,23 @@ export interface CommonQuoteQuery {
   sellToken: string;
   buyToken: string;
   receiver?: string;
-  validTo: Timestamp;
-  appData: HashLike;
-  partiallyFillable: boolean;
+  validTo?: Timestamp;
+  appData?: HashLike;
+  partiallyFillable?: boolean;
   sellTokenBalance?: OrderBalance;
   buyTokenBalance?: OrderBalance;
   from: string;
+  priceQuality?: QuotePriceQuality;
+}
+
+export enum QuotePriceQuality {
+  FAST = "fast",
+  OPTIMAL = "optimal",
 }
 
 export interface OrderDetailResponse {
   // Other fields are omitted until needed
   executedSellAmount: string;
-}
-export interface EstimateAmountResponse {
-  amount: string;
-  token: string;
 }
 export interface GetQuoteResponse {
   quote: Order;
@@ -161,20 +163,36 @@ async function estimateTradeAmount({
   amount,
   baseUrl,
 }: EstimateTradeAmountQuery & ApiCall): Promise<BigNumber> {
-  const response: EstimateAmountResponse = await call(
-    `markets/${sellToken}-${buyToken}/${apiKind(kind)}/${BigNumber.from(
-      amount,
-    ).toString()}`,
-    baseUrl,
+  const side: BuyAmountAfterFee | SellAmountAfterFee =
+    kind == OrderKind.SELL
+      ? {
+          kind: OrderKind.SELL,
+          sellAmountAfterFee: amount,
+        }
+      : {
+          kind: OrderKind.BUY,
+          buyAmountAfterFee: amount,
+        };
+  const { quote } = await getQuote(
+    { baseUrl },
+    {
+      from: constants.AddressZero,
+      sellToken,
+      buyToken,
+      priceQuality: QuotePriceQuality.FAST,
+      ...side,
+    },
   );
   // The services return the quote token used for the price. The quote token
   // is checked to make sure that the returned price meets our expectations.
-  if (response.token.toLowerCase() !== buyToken.toLowerCase()) {
+  if (quote.buyToken.toLowerCase() !== buyToken.toLowerCase()) {
     throw new Error(
-      `Price returned for sell token ${sellToken} uses an incorrect quote token (${response.token.toLowerCase()} instead of ${buyToken.toLowerCase()})`,
+      `Price returned for sell token ${sellToken} uses an incorrect quote token (${quote.buyToken.toLowerCase()} instead of ${buyToken.toLowerCase()})`,
     );
   }
-  return BigNumber.from(response.amount);
+  const estimatedAmount =
+    kind == OrderKind.SELL ? quote.buyAmount : quote.sellAmount;
+  return BigNumber.from(estimatedAmount);
 }
 
 async function placeOrder({
