@@ -163,16 +163,16 @@ async function estimateTradeAmount({
   amount,
   baseUrl,
 }: EstimateTradeAmountQuery & ApiCall): Promise<BigNumber> {
-  const side =
+  const side: BuyAmountAfterFee | SellAmountAfterFee =
     kind == OrderKind.SELL
-      ? ({
+      ? {
           kind: OrderKind.SELL,
           sellAmountAfterFee: amount,
-        } as SellAmountAfterFee)
-      : ({
+        }
+      : {
           kind: OrderKind.BUY,
           buyAmountAfterFee: amount,
-        } as BuyAmountAfterFee);
+        };
   const { quote } = await getQuote(
     { baseUrl },
     {
