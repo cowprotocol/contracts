@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 
 import "@nomiclabs/hardhat-ethers";
+import { BigNumber } from "ethers";
 import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -13,6 +14,7 @@ import { prompt } from "./ts/tui";
 interface Approval {
   spender: string;
   token: string;
+  amount: BigNumber;
 }
 
 interface Args {
@@ -42,7 +44,7 @@ async function setApprovals(
       target: approval.token,
       callData: token.encodeFunctionData("approve", [
         approval.spender,
-        hre.ethers.constants.MaxUint256,
+        approval.amount,
       ]),
     });
   });
