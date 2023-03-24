@@ -185,7 +185,8 @@ export async function signOrder(
 }
 
 /**
- * Returns the signature for cancelling an with the signing scheme.
+ * Returns the signature for cancelling a single order with the specified
+ * signing scheme.
  *
  * @param domain The domain to sign the cancellation.
  * @param orderUid The unique identifier of the order being cancelled.
@@ -204,8 +205,8 @@ export async function signOrderCancellation(
 }
 
 /**
- * Returns the signature for cancelling orders by UID using the the signing
- * scheme.
+ * Returns the signature for cancelling multiple orders by UID with the
+ * specified signing scheme.
  *
  * @param domain The domain to sign the cancellation.
  * @param orderUids The unique identifiers of the orders to cancel.
