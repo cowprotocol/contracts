@@ -75,11 +75,11 @@ export interface Order {
 /**
  * Gnosis Protocol v2 order cancellation data.
  */
-export interface OrderCancellation {
+export interface OrderCancellations {
   /**
    * The unique identifier of the order to be cancelled.
    */
-  orderUid: BytesLike;
+  orderUids: BytesLike[];
 }
 
 /**
@@ -166,7 +166,9 @@ export const ORDER_TYPE_FIELDS = [
 /**
  * The EIP-712 type fields definition for a Gnosis Protocol v2 order.
  */
-export const CANCELLATION_TYPE_FIELDS = [{ name: "orderUid", type: "bytes" }];
+export const CANCELLATIONS_TYPE_FIELDS = [
+  { name: "orderUids", type: "bytes[]" },
+];
 
 /**
  * The EIP-712 type hash for a Gnosis Protocol v2 order.
@@ -298,10 +300,24 @@ export function hashOrderCancellation(
   domain: TypedDataDomain,
   orderUid: BytesLike,
 ): string {
+  return hashOrderCancellations(domain, [orderUid]);
+}
+
+/**
+ * Compute the 32-byte signing hash for the specified order cancellations.
+ *
+ * @param domain The EIP-712 domain separator to compute the hash for.
+ * @param orderUids The unique identifiers of the orders to cancel.
+ * @return Hex-encoded 32-byte order digest.
+ */
+export function hashOrderCancellations(
+  domain: TypedDataDomain,
+  orderUids: BytesLike[],
+): string {
   return hashTypedData(
     domain,
-    { OrderCancellation: CANCELLATION_TYPE_FIELDS },
-    { orderUid },
+    { OrderCancellations: CANCELLATIONS_TYPE_FIELDS },
+    { orderUids },
   );
 }
 
