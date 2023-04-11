@@ -1,6 +1,6 @@
 import WETH from "canonical-weth/build/contracts/WETH9.json";
-import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { DeployFunction } from "hardhat-deploy/types";
 
 import Authorizer from "../../balancer/Authorizer.json";
 import Vault from "../../balancer/Vault.json";

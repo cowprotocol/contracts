@@ -1,8 +1,8 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { DeployFunction } from "hardhat-deploy/types";
 
 const NETWORKS_PATH = path.join(__dirname, "../../networks.json");
 const INDENT = "  ";

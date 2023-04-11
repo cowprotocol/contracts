@@ -5,9 +5,9 @@ import readline from "readline";
 
 import chalk from "chalk";
 import { BigNumber, BigNumberish, utils, constants } from "ethers";
-import { Deployment } from "hardhat-deploy/types";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { Deployment } from "hardhat-deploy/types";
 
 import {
   decodeTradeFlags,

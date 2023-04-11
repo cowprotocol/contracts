@@ -379,8 +379,8 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
             if (order.partiallyFillable) {
                 executedSellAmount = executedAmount;
                 executedFeeAmount = order.feeAmount.mul(executedSellAmount).div(
-                        order.sellAmount
-                    );
+                    order.sellAmount
+                );
             } else {
                 executedSellAmount = order.sellAmount;
                 executedFeeAmount = order.feeAmount;

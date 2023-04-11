@@ -2,8 +2,8 @@ import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
 import "@tenderly/hardhat-tenderly";
 
-import { Deployment } from "hardhat-deploy/types";
 import { task } from "hardhat/config";
+import { Deployment } from "hardhat-deploy/types";
 
 function separateProxiedContracts(allDeployments: Record<string, Deployment>): {
   proxied: string[];

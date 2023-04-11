@@ -26,7 +26,7 @@ export const CONTRACT_NAMES = {
 /**
  * The name of a deployed contract.
  */
-export type ContractName = typeof CONTRACT_NAMES[keyof typeof CONTRACT_NAMES];
+export type ContractName = (typeof CONTRACT_NAMES)[keyof typeof CONTRACT_NAMES];
 
 /**
  * The deployment args for a contract.
