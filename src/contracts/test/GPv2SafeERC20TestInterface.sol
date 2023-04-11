@@ -8,11 +8,7 @@ import "../libraries/GPv2SafeERC20.sol";
 contract GPv2SafeERC20TestInterface {
     using GPv2SafeERC20 for IERC20;
 
-    function transfer(
-        IERC20 token,
-        address to,
-        uint256 value
-    ) public {
+    function transfer(IERC20 token, address to, uint256 value) public {
         token.safeTransfer(to, value);
     }
 

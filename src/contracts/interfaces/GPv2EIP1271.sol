@@ -24,8 +24,8 @@ interface EIP1271Verifier {
     /// solc > 0.5)
     /// MUST allow external calls
     ///
-    function isValidSignature(bytes32 _hash, bytes memory _signature)
-        external
-        view
-        returns (bytes4 magicValue);
+    function isValidSignature(
+        bytes32 _hash,
+        bytes memory _signature
+    ) external view returns (bytes4 magicValue);
 }

@@ -142,9 +142,10 @@ library GPv2Transfer {
     ///
     /// @param vault The Balancer vault to use.
     /// @param transfers The batched transfers to perform.
-    function transferToAccounts(IVault vault, Data[] memory transfers)
-        internal
-    {
+    function transferToAccounts(
+        IVault vault,
+        Data[] memory transfers
+    ) internal {
         IVault.UserBalanceOp[] memory balanceOps = new IVault.UserBalanceOp[](
             transfers.length
         );

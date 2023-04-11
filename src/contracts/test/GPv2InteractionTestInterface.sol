@@ -12,11 +12,9 @@ contract GPv2InteractionTestInterface {
         GPv2Interaction.execute(interaction);
     }
 
-    function selectorTest(GPv2Interaction.Data calldata interaction)
-        external
-        pure
-        returns (bytes4)
-    {
+    function selectorTest(
+        GPv2Interaction.Data calldata interaction
+    ) external pure returns (bytes4) {
         return GPv2Interaction.selector(interaction);
     }
 }

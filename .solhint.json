@@ -3,6 +3,7 @@
   "plugins": ["prettier"],
   "rules": {
     "compiler-version": "off",
+    "no-global-import": "off",
     "func-visibility": ["warn", { "ignoreConstructors": true }],
     "prettier/prettier": "error"
   }

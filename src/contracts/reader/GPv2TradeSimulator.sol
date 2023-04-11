@@ -101,9 +101,9 @@ contract GPv2TradeSimulator {
     }
 
     /// @dev Executes interactions.
-    function executeInteractions(GPv2Interaction.Data[] calldata interactions)
-        private
-    {
+    function executeInteractions(
+        GPv2Interaction.Data[] calldata interactions
+    ) private {
         for (uint256 i; i < interactions.length; i++) {
             GPv2Interaction.execute(interactions[i]);
         }
@@ -114,11 +114,9 @@ contract GPv2TradeSimulator {
     ///
     /// This helps organize simulation data and work around "stack too deep"
     /// Solidity errors.
-    function createContext(Trade calldata trade)
-        private
-        view
-        returns (Context memory context)
-    {
+    function createContext(
+        Trade calldata trade
+    ) private view returns (Context memory context) {
         context.gasCounter = gasleft();
 
         address actualReceiver = trade.receiver ==
@@ -186,10 +184,10 @@ contract GPv2TradeSimulator {
     }
 
     /// @dev Computes the simulation result for the given context.
-    function finalizeResult(Context memory context, Result memory result)
-        private
-        view
-    {
+    function finalizeResult(
+        Context memory context,
+        Result memory result
+    ) private view {
         result.executedBuyAmount = context.outTransfers[0].amount;
         computeBalanceDelta(context.contractAccount, result.contractBalance);
         computeBalanceDelta(context.ownerAccount, result.ownerBalance);
@@ -217,11 +215,9 @@ contract GPv2TradeSimulator {
     }
 
     /// @dev Computes the token balance delta for the specified token state.
-    function computeTokenDelta(TokenState memory state)
-        private
-        view
-        returns (int256)
-    {
+    function computeTokenDelta(
+        TokenState memory state
+    ) private view returns (int256) {
         uint256 currentBalance = state.token.balanceOf(state.account);
         return currentBalance.toInt256() - state.initialBalance.toInt256();
     }

@@ -12,11 +12,10 @@ contract GPv2OrderTestInterface {
         return GPv2Order.TYPE_HASH;
     }
 
-    function hashTest(GPv2Order.Data memory order, bytes32 domainSeparator)
-        external
-        pure
-        returns (bytes32 orderDigest)
-    {
+    function hashTest(
+        GPv2Order.Data memory order,
+        bytes32 domainSeparator
+    ) external pure returns (bytes32 orderDigest) {
         orderDigest = order.hash(domainSeparator);
     }
 
@@ -30,14 +29,12 @@ contract GPv2OrderTestInterface {
         orderUid.packOrderUidParams(orderDigest, owner, validTo);
     }
 
-    function extractOrderUidParamsTest(bytes calldata orderUid)
+    function extractOrderUidParamsTest(
+        bytes calldata orderUid
+    )
         external
         pure
-        returns (
-            bytes32 orderDigest,
-            address owner,
-            uint32 validTo
-        )
+        returns (bytes32 orderDigest, address owner, uint32 validTo)
     {
         return orderUid.extractOrderUidParams();
     }

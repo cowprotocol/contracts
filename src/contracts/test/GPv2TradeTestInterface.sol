@@ -13,7 +13,9 @@ contract GPv2TradeTestInterface {
         GPv2Trade.extractOrder(trade, tokens, order);
     }
 
-    function extractFlagsTest(uint256 flags)
+    function extractFlagsTest(
+        uint256 flags
+    )
         external
         pure
         returns (
