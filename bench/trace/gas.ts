@@ -17,17 +17,15 @@ export interface GasTrace {
   children: GasTrace[];
 }
 
-type BN = CallMessageTrace["gasUsed"];
-
-function num(value: BigNumberish | BN): BigNumber {
+function num(value: BigNumberish): BigNumber {
   return BigNumber.from(value.toString());
 }
 
 interface GasTraceish {
   name: string;
-  cumulativeGas: BigNumberish | BN;
-  gasUsed?: BigNumberish | BN;
-  gasRefund?: BigNumberish | BN;
+  cumulativeGas: BigNumberish;
+  gasUsed?: BigNumberish;
+  gasRefund?: BigNumberish;
   children?: GasTrace[];
 }
 
@@ -73,7 +71,7 @@ export function decodeGasTrace(
       }),
       node({
         name: "<entrypoint>",
-        cumulativeGas: trace.gasUsed.addn(transactionGas),
+        cumulativeGas: trace.gasUsed + BigInt(transactionGas),
         gasUsed: trace.gasUsed,
         children: computeGasTrace(trace, transactionGas),
       }),
@@ -156,8 +154,8 @@ function precompileName({ precompile }: PrecompileMessageTrace): string {
 }
 
 interface GasExtension {
-  gasLeft: BN;
-  gasRefund?: BN;
+  gasLeft: bigint;
+  gasRefund?: bigint;
 }
 
 function computeGasTrace(
