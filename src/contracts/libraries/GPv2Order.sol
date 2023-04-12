@@ -114,11 +114,10 @@ library GPv2Order {
     /// it is the same as the order owner.
     ///
     /// @return receiver The actual receiver of trade proceeds.
-    function actualReceiver(Data memory order, address owner)
-        internal
-        pure
-        returns (address receiver)
-    {
+    function actualReceiver(
+        Data memory order,
+        address owner
+    ) internal pure returns (address receiver) {
         if (order.receiver == RECEIVER_SAME_AS_OWNER) {
             receiver = owner;
         } else {
@@ -131,11 +130,10 @@ library GPv2Order {
     /// @param order The order to compute the EIP-712 signing hash for.
     /// @param domainSeparator The EIP-712 domain separator to use.
     /// @return orderDigest The 32 byte EIP-712 struct hash.
-    function hash(Data memory order, bytes32 domainSeparator)
-        internal
-        pure
-        returns (bytes32 orderDigest)
-    {
+    function hash(
+        Data memory order,
+        bytes32 domainSeparator
+    ) internal pure returns (bytes32 orderDigest) {
         bytes32 structHash;
 
         // NOTE: Compute the EIP-712 order struct hash in place. As suggested
@@ -225,14 +223,12 @@ library GPv2Order {
     /// parameters.
     /// @return owner The address of the user who owns this order.
     /// @return validTo The epoch time at which the order will stop being valid.
-    function extractOrderUidParams(bytes calldata orderUid)
+    function extractOrderUidParams(
+        bytes calldata orderUid
+    )
         internal
         pure
-        returns (
-            bytes32 orderDigest,
-            address owner,
-            uint32 validTo
-        )
+        returns (bytes32 orderDigest, address owner, uint32 validTo)
     {
         require(orderUid.length == UID_LENGTH, "GPv2: invalid uid");
 

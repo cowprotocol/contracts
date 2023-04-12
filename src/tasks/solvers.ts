@@ -10,7 +10,7 @@ import { getSolvers } from "./ts/solver";
 import { transactionUrl } from "./ts/tui";
 
 const solversTaskList = ["add", "check", "remove", "list"] as const;
-type SolversTasks = typeof solversTaskList[number];
+type SolversTasks = (typeof solversTaskList)[number];
 
 interface Args {
   solver?: string;

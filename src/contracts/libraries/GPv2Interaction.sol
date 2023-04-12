@@ -53,11 +53,9 @@ library GPv2Interaction {
     /// @param interaction Interaction data.
     /// @return result The 4 byte function selector of the call encoded in
     /// this interaction.
-    function selector(Data calldata interaction)
-        internal
-        pure
-        returns (bytes4 result)
-    {
+    function selector(
+        Data calldata interaction
+    ) internal pure returns (bytes4 result) {
         bytes calldata callData = interaction.callData;
         if (callData.length >= 4) {
             // NOTE: Read the first word of the interaction's calldata. The

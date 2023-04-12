@@ -180,11 +180,10 @@ abstract contract GPv2Signing {
     ///
     /// @param message The signed message.
     /// @param encodedSignature The encoded signature.
-    function ecdsaRecover(bytes32 message, bytes calldata encodedSignature)
-        internal
-        pure
-        returns (address signer)
-    {
+    function ecdsaRecover(
+        bytes32 message,
+        bytes calldata encodedSignature
+    ) internal pure returns (address signer) {
         require(
             encodedSignature.length == ECDSA_SIGNATURE_LENGTH,
             "GPv2: malformed ecdsa signature"

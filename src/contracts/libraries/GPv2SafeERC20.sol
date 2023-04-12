@@ -9,11 +9,7 @@ import "../interfaces/IERC20.sol";
 library GPv2SafeERC20 {
     /// @dev Wrapper around a call to the ERC20 function `transfer` that reverts
     /// also when the token returns `false`.
-    function safeTransfer(
-        IERC20 token,
-        address to,
-        uint256 value
-    ) internal {
+    function safeTransfer(IERC20 token, address to, uint256 value) internal {
         bytes4 selector_ = token.transfer.selector;
 
         // solhint-disable-next-line no-inline-assembly
@@ -71,11 +67,9 @@ library GPv2SafeERC20 {
     /// @dev Verifies that the last return was a successful `transfer*` call.
     /// This is done by checking that the return data is either empty, or
     /// is a valid ABI encoded boolean.
-    function getLastTransferResult(IERC20 token)
-        private
-        view
-        returns (bool success)
-    {
+    function getLastTransferResult(
+        IERC20 token
+    ) private view returns (bool success) {
         // NOTE: Inspecting previous return data requires assembly. Note that
         // we write the return data to memory 0 in the case where the return
         // data size is 32, this is OK since the first 64 bytes of memory are

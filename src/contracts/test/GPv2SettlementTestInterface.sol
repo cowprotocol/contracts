@@ -8,7 +8,10 @@ import "../libraries/GPv2Trade.sol";
 import "../libraries/GPv2Transfer.sol";
 
 contract GPv2SettlementTestInterface is GPv2Settlement {
-    constructor(GPv2Authentication authenticator_, IVault vault)
+    constructor(
+        GPv2Authentication authenticator_,
+        IVault vault
+    )
         GPv2Settlement(authenticator_, vault)
     // solhint-disable-next-line no-empty-blocks
     {

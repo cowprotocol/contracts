@@ -65,12 +65,10 @@ contract SmartSellOrder is EIP1271Verifier {
         selfdestruct(payable(owner));
     }
 
-    function isValidSignature(bytes32 hash, bytes memory signature)
-        external
-        view
-        override
-        returns (bytes4 magicValue)
-    {
+    function isValidSignature(
+        bytes32 hash,
+        bytes memory signature
+    ) external view override returns (bytes4 magicValue) {
         uint256 sellAmount = abi.decode(signature, (uint256));
         GPv2Order.Data memory order = orderForSellAmount(sellAmount);
 
@@ -79,11 +77,9 @@ contract SmartSellOrder is EIP1271Verifier {
         }
     }
 
-    function orderForSellAmount(uint256 sellAmount)
-        public
-        view
-        returns (GPv2Order.Data memory order)
-    {
+    function orderForSellAmount(
+        uint256 sellAmount
+    ) public view returns (GPv2Order.Data memory order) {
         order.sellToken = sellToken;
         order.buyToken = buyToken;
         order.receiver = owner;
@@ -102,11 +98,9 @@ contract SmartSellOrder is EIP1271Verifier {
         order.buyTokenBalance = GPv2Order.BALANCE_ERC20;
     }
 
-    function buyAmountForSellAmount(uint256 sellAmount)
-        private
-        view
-        returns (uint256 buyAmount)
-    {
+    function buyAmountForSellAmount(
+        uint256 sellAmount
+    ) private view returns (uint256 buyAmount) {
         uint256 feeAdjustedBalance = sellToken
             .balanceOf(address(this))
             .mul(totalSellAmount)

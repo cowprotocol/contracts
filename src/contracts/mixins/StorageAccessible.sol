@@ -22,10 +22,10 @@ interface ViewStorageAccessible {
     /**
      * @dev Same as `getStorageAt` on StorageAccessible. This method allows reading aribtrary ranges of storage.
      */
-    function getStorageAt(uint256 offset, uint256 length)
-        external
-        view
-        returns (bytes memory);
+    function getStorageAt(
+        uint256 offset,
+        uint256 length
+    ) external view returns (bytes memory);
 }
 
 /// @title StorageAccessible - generic base contract that allows callers to access all internal storage.
@@ -36,11 +36,10 @@ contract StorageAccessible {
      * @param length - the number of words (32 bytes) of data to read
      * @return the bytes that were read.
      */
-    function getStorageAt(uint256 offset, uint256 length)
-        external
-        view
-        returns (bytes memory)
-    {
+    function getStorageAt(
+        uint256 offset,
+        uint256 length
+    ) external view returns (bytes memory) {
         bytes memory result = new bytes(length * 32);
         for (uint256 index = 0; index < length; index++) {
             // solhint-disable-next-line no-inline-assembly

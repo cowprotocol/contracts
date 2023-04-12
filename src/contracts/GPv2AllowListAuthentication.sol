@@ -100,12 +100,9 @@ contract GPv2AllowListAuthentication is
     }
 
     /// @inheritdoc GPv2Authentication
-    function isSolver(address prospectiveSolver)
-        external
-        view
-        override
-        returns (bool)
-    {
+    function isSolver(
+        address prospectiveSolver
+    ) external view override returns (bool) {
         return solvers[prospectiveSolver];
     }
 }

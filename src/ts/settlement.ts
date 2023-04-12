@@ -186,7 +186,7 @@ export const FLAG_MASKS = {
 } as const;
 
 export type FlagKey = keyof typeof FLAG_MASKS;
-export type FlagOptions<K extends FlagKey> = typeof FLAG_MASKS[K]["options"];
+export type FlagOptions<K extends FlagKey> = (typeof FLAG_MASKS)[K]["options"];
 export type FlagValue<K extends FlagKey> = Exclude<
   FlagOptions<K>[number],
   undefined

@@ -259,10 +259,9 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     ///
     /// @param orderUids The unique identifiers of the expired order to free
     /// storage for.
-    function freeFilledAmountStorage(bytes[] calldata orderUids)
-        external
-        onlyInteraction
-    {
+    function freeFilledAmountStorage(
+        bytes[] calldata orderUids
+    ) external onlyInteraction {
         freeOrderStorage(filledAmount, orderUids);
     }
 
@@ -271,10 +270,9 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     ///
     /// @param orderUids The unique identifiers of the expired order to free
     /// storage for.
-    function freePreSignatureStorage(bytes[] calldata orderUids)
-        external
-        onlyInteraction
-    {
+    function freePreSignatureStorage(
+        bytes[] calldata orderUids
+    ) external onlyInteraction {
         freeOrderStorage(preSignature, orderUids);
     }
 
@@ -381,8 +379,8 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
             if (order.partiallyFillable) {
                 executedSellAmount = executedAmount;
                 executedFeeAmount = order.feeAmount.mul(executedSellAmount).div(
-                        order.sellAmount
-                    );
+                    order.sellAmount
+                );
             } else {
                 executedSellAmount = order.sellAmount;
                 executedFeeAmount = order.feeAmount;
@@ -445,9 +443,9 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
 
     /// @dev Execute a list of arbitrary contract calls from this contract.
     /// @param interactions The list of interactions to execute.
-    function executeInteractions(GPv2Interaction.Data[] calldata interactions)
-        internal
-    {
+    function executeInteractions(
+        GPv2Interaction.Data[] calldata interactions
+    ) internal {
         for (uint256 i; i < interactions.length; i++) {
             GPv2Interaction.Data calldata interaction = interactions[i];
 

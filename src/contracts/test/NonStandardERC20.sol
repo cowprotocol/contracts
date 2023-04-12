@@ -22,11 +22,7 @@ abstract contract NonStandardERC20 {
         balanceOf[to] = balanceOf[to].add(amount);
     }
 
-    function transferFrom_(
-        address from,
-        address to,
-        uint256 amount
-    ) internal {
+    function transferFrom_(address from, address to, uint256 amount) internal {
         allowance[from][msg.sender] = allowance[from][msg.sender].sub(amount);
         balanceOf[from] = balanceOf[from].sub(amount);
         balanceOf[to] = balanceOf[to].add(amount);
@@ -38,11 +34,7 @@ contract ERC20NoReturn is NonStandardERC20 {
         transfer_(to, amount);
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external {
+    function transferFrom(address from, address to, uint256 amount) external {
         transferFrom_(from, to, amount);
     }
 }

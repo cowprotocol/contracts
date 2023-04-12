@@ -38,10 +38,9 @@ contract GPv2VaultRelayer {
     /// - Any ERC20 transfer fails
     ///
     /// @param transfers The transfers to execute.
-    function transferFromAccounts(GPv2Transfer.Data[] calldata transfers)
-        external
-        onlyCreator
-    {
+    function transferFromAccounts(
+        GPv2Transfer.Data[] calldata transfers
+    ) external onlyCreator {
         vault.transferFromAccounts(transfers, msg.sender);
     }
 

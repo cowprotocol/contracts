@@ -10,10 +10,10 @@ contract StateChangingEIP1271 {
     uint256 public state = 0;
 
     // solhint-disable-next-line no-unused-vars
-    function isValidSignature(bytes32 _hash, bytes memory _signature)
-        public
-        returns (bytes4 magicValue)
-    {
+    function isValidSignature(
+        bytes32 _hash,
+        bytes memory _signature
+    ) public returns (bytes4 magicValue) {
         state += 1;
         magicValue = GPv2EIP1271.MAGICVALUE;
 

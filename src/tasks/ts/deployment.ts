@@ -4,7 +4,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { ContractName } from "../../ts";
 
 const supportedNetworks = ["rinkeby", "goerli", "xdai", "mainnet"] as const;
-export type SupportedNetwork = typeof supportedNetworks[number];
+export type SupportedNetwork = (typeof supportedNetworks)[number];
 export function isSupportedNetwork(
   network: string,
 ): network is SupportedNetwork {

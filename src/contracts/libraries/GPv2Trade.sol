@@ -92,7 +92,9 @@ library GPv2Trade {
     ///                                                10: EIP-1271
     ///                                                11: pre_sign
     /// ```
-    function extractFlags(uint256 flags)
+    function extractFlags(
+        uint256 flags
+    )
         internal
         pure
         returns (
