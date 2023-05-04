@@ -18,9 +18,13 @@ const deployAuthenticator: DeployFunction = async function ({
     log: true,
     proxy: {
       owner,
-      methodName: "initializeManager",
+      execute: {
+        init: {
+          methodName: "initializeManager",
+          args: [manager],
+        },
+      },
     },
-    args: [manager],
   });
 };
 
