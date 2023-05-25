@@ -60,6 +60,16 @@ import { submitSettlement } from "./withdraw/settle";
 import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
 import { getAllTradedTokens } from "./withdraw/traded_tokens";
 
+interface Transfer {
+  token: Erc20Token;
+  to: string;
+  amount: BigNumber;
+  amountUsd: BigNumber;
+  extraGas: BigNumber;
+  balance: BigNumber;
+  balanceUsd: BigNumber;
+}
+
 interface DisplayOrder {
   symbol: string;
   balance: string;
@@ -70,9 +80,9 @@ interface DisplayOrder {
   feePercent: string;
   needsAllowance: "yes" | "";
 }
-
 interface ComputeSettlementInput {
   orders: Pick<OrderDetails, "sellToken" | "orderUid" | "needsAllowance">[];
+  transfer?: Omit<Transfer, "extraGas"> | undefined;
   solverForSimulation: string;
   settlement: Contract;
   vaultRelayer: string;
@@ -80,6 +90,7 @@ interface ComputeSettlementInput {
 }
 async function computeSettlement({
   orders,
+  transfer,
   solverForSimulation,
   settlement,
   vaultRelayer,
@@ -105,6 +116,16 @@ async function computeSettlement({
     });
   }
 
+  if (transfer !== undefined) {
+    encoder.encodeInteraction({
+      target: transfer.token.address,
+      callData: transfer.token.contract.interface.encodeFunctionData(
+        "transfer",
+        [transfer.to, transfer.amount],
+      ),
+    });
+  }
+
   const finalSettlement = encoder.encodedSettlement({});
   const gas = await settlement
     .connect(hre.ethers.provider)
@@ -127,6 +148,7 @@ interface ComputeSettlementWithPriceInput
 }
 async function computeSettlementWithPrice({
   orders,
+  transfer,
   solverForSimulation,
   settlement,
   vaultRelayer,
@@ -138,6 +160,7 @@ async function computeSettlementWithPrice({
 }: ComputeSettlementWithPriceInput) {
   const { gas, finalSettlement } = await computeSettlement({
     orders,
+    transfer,
     solverForSimulation,
     settlement,
     vaultRelayer,
@@ -152,9 +175,12 @@ async function computeSettlementWithPrice({
     hre.network.name === "hardhat"
       ? constants.Zero
       : await usdValueOfEth(transactionEthCost, usdReference, network, api);
-  const soldValue = orders.reduce(
-    (sum, { sellAmountUsd }) => sum.add(sellAmountUsd),
-    constants.Zero,
+  const [soldAmountUsd, boughtAmount] = orders.reduce(
+    ([sumSoldAmountUsd, sumBuyAmount], { sellAmountUsd, order }) => [
+      sumSoldAmountUsd.add(sellAmountUsd),
+      sumBuyAmount.add(order.buyAmount),
+    ],
+    [constants.Zero, constants.Zero],
   );
 
   return {
@@ -162,7 +188,90 @@ async function computeSettlementWithPrice({
     transactionEthCost,
     transactionUsdCost,
     gas,
-    soldValue,
+    valueUsd: soldAmountUsd.add(transfer?.amountUsd ?? constants.Zero),
+    receivedAmount: boughtAmount.add(transfer?.amount ?? constants.Zero),
+  };
+}
+
+interface GetTransferInput
+  extends Pick<
+    GetOrdersInput,
+    | "toToken"
+    | "usdReference"
+    | "settlement"
+    | "api"
+    | "hre"
+    | "vaultRelayer"
+    | "solverForSimulation"
+    | "receiver"
+  > {
+  leftoverWei: BigNumber;
+  minValueWei: BigNumber;
+  gasEmptySettlement: Promise<BigNumber>;
+}
+export async function getTransfer({
+  toToken,
+  usdReference,
+  settlement,
+  receiver,
+  api,
+  hre,
+  vaultRelayer,
+  leftoverWei,
+  minValueWei,
+  gasEmptySettlement,
+  solverForSimulation,
+}: GetTransferInput): Promise<Transfer | undefined> {
+  const amounts = await getAmounts({
+    token: toToken,
+    usdReference,
+    settlement,
+    api,
+    leftoverWei,
+    minValueWei,
+    consoleLog: console.log,
+  });
+  if (amounts === null) {
+    return undefined;
+  }
+  const transfer = {
+    token: toToken,
+    to: receiver,
+    amount: amounts.netAmount,
+    amountUsd: amounts.netAmountUsd,
+    balance: amounts.balance,
+    balanceUsd: amounts.balanceUsd,
+  };
+
+  let extraGas;
+  try {
+    extraGas = (
+      await computeSettlement({
+        orders: [],
+        transfer,
+        solverForSimulation,
+        settlement,
+        vaultRelayer,
+        hre,
+      })
+    ).gas.sub(await gasEmptySettlement);
+  } catch (error) {
+    if (!(error instanceof Error)) {
+      throw error;
+    }
+    console.log(
+      ignoredTokenMessage(
+        [toToken, amounts.balance],
+        `cannot transfer token from settlement contract to target (${error.message})`,
+        [usdReference, amounts.balanceUsd],
+      ),
+    );
+    return undefined;
+  }
+
+  return {
+    ...transfer,
+    extraGas,
   };
 }
 
@@ -211,7 +320,10 @@ async function getOrders({
   api,
   domainSeparator,
   solverForSimulation,
-}: GetOrdersInput): Promise<OrderDetails[]> {
+}: GetOrdersInput): Promise<{
+  orders: OrderDetails[];
+  transfer?: Transfer | undefined;
+}> {
   const minValueWei = utils.parseUnits(minValue, usdReference.decimals);
   const leftoverWei = utils.parseUnits(leftover, usdReference.decimals);
   const gasEmptySettlement = computeSettlement({
@@ -222,7 +334,27 @@ async function getOrders({
     hre,
   }).then(({ gas }) => gas);
 
-  const computeOrderInstructions = tokens.map(
+  const tokensExcludingToToken = tokens.filter(
+    (t) => t.toLowerCase() !== toToken.address.toLowerCase(),
+  );
+  const transfer =
+    tokensExcludingToToken.length === tokens.length
+      ? undefined
+      : getTransfer({
+          toToken,
+          usdReference,
+          settlement,
+          receiver,
+          api,
+          hre,
+          vaultRelayer,
+          leftoverWei,
+          minValueWei,
+          gasEmptySettlement,
+          solverForSimulation,
+        });
+
+  const computeOrderInstructions = tokensExcludingToToken.map(
     (tokenAddress) =>
       async ({ consoleLog }: DisappearingLogFunctions) => {
         const sellToken = await fastTokenDetails(tokenAddress, hre);
@@ -351,7 +483,10 @@ async function getOrders({
       message: "retrieving available tokens",
       rateLimit: LIMIT_CONCURRENT_REQUESTS,
     });
-  return processedOrders.filter((order) => order !== null) as OrderDetails[];
+  return {
+    orders: processedOrders.filter((order) => order !== null) as OrderDetails[],
+    transfer: await transfer,
+  };
 }
 
 function formatOrder(
@@ -472,8 +607,8 @@ async function prepareOrders({
   domainSeparator,
 }: SelfSellInput): Promise<{
   orders: OrderDetails[];
-  finalSettlement: EncodedSettlement | null;
-}> {
+  finalSettlement: EncodedSettlement;
+} | null> {
   const vaultRelayer: Promise<string> = settlement.vaultRelayer();
 
   let solverForSimulation: string;
@@ -521,16 +656,9 @@ async function prepareOrders({
   }
   const toToken: Erc20Token = erc20;
 
-  // TODO: send same token to receiver
-  if (tokens.includes(toToken.address)) {
-    throw new Error(
-      `Selling toToken is not yet supported. Remove ${toToken.address} from the list of tokens to dump.`,
-    );
-  }
-
   // TODO: add eth orders
   // TODO: split large transaction in batches
-  let orders = await getOrders({
+  let { orders, transfer } = await getOrders({
     tokens,
     toToken,
     settlement,
@@ -566,46 +694,94 @@ async function prepareOrders({
       .div(oneEth);
     return { ...o, feeUsd: o.feeUsd.add(marginalGasCost) };
   });
-  orders = orders.filter(
-    ({ feeUsd, sellAmountUsd, sellToken, balance, balanceUsd }) => {
-      const approxUsdValue = Number(sellAmountUsd.toString());
-      const approxTotalFee = Number(feeUsd);
-      const feePercent = (100 * approxTotalFee) / approxUsdValue;
-      if (feePercent > maxFeePercent) {
-        console.log(
-          ignoredTokenMessage(
-            [sellToken, balance],
-            `gas plus trade fee is too high (${feePercent.toFixed(
-              2,
-            )}% of the traded amount)`,
-            [usdReference, balanceUsd],
-          ),
-        );
-        return false;
-      }
+  const transferGasCost = (transfer?.extraGas ?? constants.Zero)
+    .mul(gasPrice)
+    .mul(oneEthUsdValue)
+    .div(oneEth);
+  const hasLowFees = ({
+    feeUsd,
+    sellAmountUsd,
+    sellToken,
+    balance,
+    balanceUsd,
+  }: Pick<
+    OrderDetails,
+    "feeUsd" | "sellAmountUsd" | "sellToken" | "balance" | "balanceUsd"
+  >) => {
+    const approxUsdValue = Number(sellAmountUsd.toString());
+    const approxTotalFee = Number(feeUsd);
+    const feePercent = (100 * approxTotalFee) / approxUsdValue;
+    if (feePercent > maxFeePercent) {
+      console.log(
+        ignoredTokenMessage(
+          [sellToken, balance],
+          `fees are too high (${feePercent.toFixed(2)}% of the traded amount)`,
+          [usdReference, balanceUsd],
+        ),
+      );
+      return false;
+    }
 
-      return true;
-    },
-  );
-
-  if (orders.length === 0) {
-    console.log("No tokens to sell.");
-    return { orders: [], finalSettlement: null };
+    return true;
+  };
+  orders = orders.filter(hasLowFees);
+  if (
+    transfer !== undefined &&
+    !hasLowFees({
+      feeUsd: transferGasCost,
+      sellAmountUsd: transfer.amountUsd,
+      sellToken: transfer.token,
+      balance: transfer.balance,
+      balanceUsd: transfer.balanceUsd,
+    })
+  ) {
+    transfer = undefined;
   }
-  displayOrders(orders, usdReference, toToken);
 
-  const { finalSettlement, transactionEthCost, transactionUsdCost, soldValue } =
-    await computeSettlementWithPrice({
-      orders,
-      gasPrice,
-      solverForSimulation,
-      settlement,
-      vaultRelayer: await vaultRelayer,
-      network,
-      usdReference,
-      api,
-      hre,
-    });
+  const willTrade = orders.length !== 0;
+  const willTransfer = transfer !== undefined;
+  if (willTrade) {
+    displayOrders(orders, usdReference, toToken);
+  }
+  if (willTransfer) {
+    // Transfer is not undefined by definition of `willTransfer`.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const { amount, token, amountUsd } = transfer!;
+    const feePercent =
+      (Number(transferGasCost.toString()) * 100) / Number(amountUsd.toString());
+    console.log(
+      `The settlement will ${
+        willTrade ? "also" : ""
+      } transfer ${utils.formatUnits(amount, token.decimals ?? 0)} ${
+        toToken.symbol ?? `units of token ${toToken.address}`
+      } to the receiver address ${receiver}. The transfer network fee corresponds to about ${
+        feePercent < 0.01 ? "< 0.01" : feePercent.toFixed(2)
+      }% of the transferred amount.`,
+    );
+  }
+  if (!(willTrade || willTransfer)) {
+    console.log("Nothing to do.");
+    return null;
+  }
+
+  const {
+    finalSettlement,
+    transactionEthCost,
+    transactionUsdCost,
+    valueUsd,
+    receivedAmount,
+  } = await computeSettlementWithPrice({
+    orders,
+    transfer,
+    gasPrice,
+    solverForSimulation,
+    settlement,
+    vaultRelayer: await vaultRelayer,
+    network,
+    usdReference,
+    api,
+    hre,
+  });
 
   console.log(
     `The settlement transaction will cost approximately ${formatGasCost(
@@ -613,12 +789,18 @@ async function prepareOrders({
       transactionUsdCost,
       network,
       usdReference,
-    )} and will create ${
-      orders.length
-    } orders for an estimated total value of ${formatUsdValue(
-      soldValue,
+    )} and will create ${orders.length} orders${
+      willTransfer ? " and a transfer" : ""
+    } for an estimated value of ${formatUsdValue(
+      valueUsd,
       usdReference,
-    )} USD. The proceeds of the orders will be sent to ${receiver}.`,
+    )} USD. The proceeds (at least ${formatTokenValue(
+      receivedAmount,
+      toToken.decimals ?? 18,
+      10,
+    )} ${
+      toToken.symbol ?? `units of token ${toToken.address}`
+    }) will be sent to ${receiver}.`,
   );
 
   return { orders, finalSettlement };
@@ -640,6 +822,9 @@ async function submitOrdersToApi({
   dryRun,
   doNotPrompt,
 }: SubmitOrderToApiInput) {
+  if (orders.length === 0) {
+    return;
+  }
   if (
     dryRun ||
     !(doNotPrompt || (await prompt(hre, "Submit orders to API?")))
@@ -691,21 +876,21 @@ async function submitOrdersToApi({
   }
 }
 
-export async function selfSell(input: SelfSellInput): Promise<string[] | null> {
-  let orders, finalSettlement;
+export async function selfSell(input: SelfSellInput): Promise<void> {
+  let preparedOrders;
   try {
-    ({ orders, finalSettlement } = await prepareOrders(input));
+    preparedOrders = await prepareOrders(input);
   } catch (error) {
     console.log(
       "Script failed execution but no irreversible operations were performed",
     );
     console.log(error);
-    return null;
+    return;
   }
-
-  if (finalSettlement === null) {
-    return [];
+  if (preparedOrders === null) {
+    return;
   }
+  const { orders, finalSettlement } = preparedOrders;
 
   await submitOrdersToApi({
     orders,
@@ -720,8 +905,6 @@ export async function selfSell(input: SelfSellInput): Promise<string[] | null> {
     settlementContract: input.settlement,
     encodedSettlement: finalSettlement,
   });
-
-  return orders.map((o) => o.sellToken.address);
 }
 
 const setupSelfSellTask: () => void = () =>
