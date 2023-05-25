@@ -1,19 +1,36 @@
 import "@nomiclabs/hardhat-ethers";
 
 import chalk from "chalk";
-import { BigNumber, constants, Contract, utils } from "ethers";
+import { BigNumber, constants, Contract, TypedDataDomain, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { EncodedSettlement, SettlementEncoder } from "../ts";
+import {
+  BUY_ETH_ADDRESS,
+  computeOrderUid,
+  domain,
+  EncodedSettlement,
+  Order,
+  OrderKind,
+  packOrderUidParams,
+  PreSignSignature,
+  SettlementEncoder,
+  SigningScheme,
+} from "../ts";
 import {
   Api,
-  ApiError,
   CallError,
   Environment,
   LIMIT_CONCURRENT_REQUESTS,
 } from "../ts/api";
 
+import {
+  assertNotBuyingNativeAsset,
+  getQuote,
+  computeValidTo,
+  APP_DATA,
+  MAX_ORDER_VALIDITY_SECONDS,
+} from "./dump";
 import {
   getDeployedContract,
   isSupportedNetwork,
@@ -27,7 +44,8 @@ import {
 } from "./ts/rate_limits";
 import { getSolvers } from "./ts/solver";
 import { Align, displayTable } from "./ts/table";
-import { Erc20Token } from "./ts/tokens";
+import { Erc20Token, erc20Token } from "./ts/tokens";
+import { prompt } from "./ts/tui";
 import {
   formatTokenValue,
   formatUsdValue,
@@ -37,49 +55,41 @@ import {
   usdValueOfEth,
   formatGasCost,
 } from "./ts/value";
+import { getAmounts } from "./withdraw";
 import { ignoredTokenMessage } from "./withdraw/messages";
 import { submitSettlement } from "./withdraw/settle";
 import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
 import { getAllTradedTokens } from "./withdraw/traded_tokens";
 
-interface Withdrawal {
-  token: Erc20Token;
-  amount: BigNumber;
-  amountUsd: BigNumber;
-  balance: BigNumber;
-  balanceUsd: BigNumber;
-  gas: BigNumber;
-}
-
-interface DisplayWithdrawal {
+interface DisplayOrder {
   symbol: string;
   balance: string;
-  amount: string;
-  value: string;
+  sellAmount: string;
+  sellAmountUsd: string;
   address: string;
+  buyAmount: string;
+  feePercent: string;
 }
 
 interface ComputeSettlementInput {
-  withdrawals: Omit<Withdrawal, "gas">[];
-  receiver: string;
+  orderUids: string[];
   solverForSimulation: string;
   settlement: Contract;
   hre: HardhatRuntimeEnvironment;
 }
 async function computeSettlement({
-  withdrawals,
-  receiver,
+  orderUids,
   solverForSimulation,
   settlement,
   hre,
 }: ComputeSettlementInput) {
   const encoder = new SettlementEncoder({});
-  withdrawals.forEach(({ token, amount }) =>
+  orderUids.forEach((orderUid) =>
     encoder.encodeInteraction({
-      target: token.address,
-      callData: token.contract.interface.encodeFunctionData("transfer", [
-        receiver,
-        amount,
+      target: settlement.address,
+      callData: settlement.interface.encodeFunctionData("setPreSignature", [
+        orderUid,
+        true,
       ]),
     }),
   );
@@ -96,15 +106,16 @@ async function computeSettlement({
   };
 }
 
-interface ComputeSettlementWithPriceInput extends ComputeSettlementInput {
+interface ComputeSettlementWithPriceInput
+  extends Omit<ComputeSettlementInput, "orderUids"> {
+  orders: OrderDetails[];
   gasPrice: BigNumber;
   network: SupportedNetwork;
   usdReference: ReferenceToken;
   api: Api;
 }
 async function computeSettlementWithPrice({
-  withdrawals,
-  receiver,
+  orders,
   solverForSimulation,
   settlement,
   gasPrice,
@@ -114,8 +125,7 @@ async function computeSettlementWithPrice({
   hre,
 }: ComputeSettlementWithPriceInput) {
   const { gas, finalSettlement } = await computeSettlement({
-    withdrawals,
-    receiver,
+    orderUids: orders.map((o) => o.orderUid),
     solverForSimulation,
     settlement,
     hre,
@@ -129,8 +139,8 @@ async function computeSettlementWithPrice({
     hre.network.name === "hardhat"
       ? constants.Zero
       : await usdValueOfEth(transactionEthCost, usdReference, network, api);
-  const withdrawnValue = withdrawals.reduce(
-    (sum, { amountUsd }) => sum.add(amountUsd),
+  const soldValue = orders.reduce(
+    (sum, { sellAmountUsd }) => sum.add(sellAmountUsd),
     constants.Zero,
   );
 
@@ -139,111 +149,54 @@ async function computeSettlementWithPrice({
     transactionEthCost,
     transactionUsdCost,
     gas,
-    withdrawnValue,
+    soldValue,
   };
 }
 
-export interface GetBalanceToWithdrawInput {
-  token: Erc20Token;
-  usdReference: ReferenceToken;
-  settlement: Contract;
-  api: Api;
-  leftoverWei: BigNumber;
-  minValueWei: BigNumber;
-  consoleLog: typeof console.log;
-}
-export interface BalanceOutput {
-  netAmount: BigNumber;
-  netAmountUsd: BigNumber;
+interface OrderDetails {
+  order: Order;
+  sellAmountUsd: BigNumber;
+  feeUsd: BigNumber;
   balance: BigNumber;
   balanceUsd: BigNumber;
-}
-export async function getAmounts({
-  token,
-  usdReference,
-  settlement,
-  api,
-  leftoverWei,
-  minValueWei,
-  consoleLog,
-}: GetBalanceToWithdrawInput): Promise<BalanceOutput | null> {
-  const balance = await token.contract.balanceOf(settlement.address);
-  if (balance.eq(0)) {
-    return null;
-  }
-  let balanceUsd;
-  try {
-    balanceUsd = await usdValue(token.address, balance, usdReference, api);
-  } catch (e) {
-    if (!(e instanceof Error)) {
-      throw e;
-    }
-    const errorData: ApiError = (e as CallError).apiError ?? {
-      errorType: "script internal error",
-      description: e?.message ?? "no details",
-    };
-    consoleLog(
-      `Warning: price retrieval failed for token ${token.symbol} (${token.address}): ${errorData.errorType} (${errorData.description})`,
-    );
-    balanceUsd = constants.Zero;
-  }
-  // Note: if balanceUsd is zero, then setting either minValue or leftoverWei
-  // to a nonzero value means that nothing should be withdrawn. If neither
-  // flag is set, then whether to withdraw does not depend on the USD value.
-  if (
-    balanceUsd.lt(minValueWei.add(leftoverWei)) ||
-    (balanceUsd.isZero() && !(minValueWei.isZero() && leftoverWei.isZero()))
-  ) {
-    consoleLog(
-      ignoredTokenMessage(
-        [token, balance],
-        "does not satisfy conditions on min value and leftover",
-        [usdReference, balanceUsd],
-      ),
-    );
-    return null;
-  }
-  let netAmount;
-  let netAmountUsd;
-  if (balanceUsd.isZero()) {
-    // Note: minValueWei and leftoverWei are zero. Everything should be
-    // withdrawn.
-    netAmount = balance;
-    netAmountUsd = balanceUsd;
-  } else {
-    netAmount = balance.mul(balanceUsd.sub(leftoverWei)).div(balanceUsd);
-    netAmountUsd = balanceUsd.sub(leftoverWei);
-  }
-  return { netAmount, netAmountUsd, balance, balanceUsd };
+  sellToken: Erc20Token;
+  orderUid: string;
 }
 
-interface GetWithdrawalsInput {
+interface GetOrdersInput {
   tokens: string[];
+  toToken: Erc20Token;
   settlement: Contract;
   minValue: string;
   leftover: string;
-  gasEmptySettlement: Promise<BigNumber>;
+  maxFeePercent: number;
+  slippageBps: number;
+  validity: number;
   hre: HardhatRuntimeEnvironment;
   usdReference: ReferenceToken;
   receiver: string;
-  solverForSimulation: string;
   api: Api;
+  domainSeparator: TypedDataDomain;
 }
-async function getWithdrawals({
+async function getOrders({
   tokens,
+  toToken,
   settlement,
   minValue,
   leftover,
-  gasEmptySettlement,
+  maxFeePercent,
+  slippageBps,
+  validity,
   hre,
   usdReference,
   receiver,
-  solverForSimulation,
   api,
-}: GetWithdrawalsInput): Promise<Withdrawal[]> {
+  domainSeparator,
+}: GetOrdersInput): Promise<OrderDetails[]> {
   const minValueWei = utils.parseUnits(minValue, usdReference.decimals);
   const leftoverWei = utils.parseUnits(leftover, usdReference.decimals);
-  const computeWithdrawalInstructions = tokens.map(
+
+  const computeOrderInstructions = tokens.map(
     (tokenAddress) =>
       async ({ consoleLog }: DisappearingLogFunctions) => {
         const token = await fastTokenDetails(tokenAddress, hre);
@@ -266,22 +219,43 @@ async function getWithdrawals({
           return null;
         }
 
-        const withdrawalWithoutGas = {
-          token,
-          amount: amounts.netAmount,
-          amountUsd: amounts.netAmountUsd,
-          balance: amounts.balance,
-          balanceUsd: amounts.balanceUsd,
+        const validTo = computeValidTo(validity);
+        const owner = settlement.address;
+        const quote = await getQuote({
+          sellToken: token,
+          buyToken: toToken,
+          api,
+          sellAmountBeforeFee: amounts.netAmount,
+          maxFeePercent,
+          slippageBps,
+          validTo,
+          user: owner,
+        });
+        if (quote === null) {
+          return null;
+        }
+
+        const order: Order = {
+          sellToken: token.address,
+          buyToken: (toToken as Erc20Token).address ?? BUY_ETH_ADDRESS,
+          receiver,
+          sellAmount: amounts.netAmount,
+          buyAmount: quote.buyAmount,
+          validTo,
+          appData: APP_DATA,
+          feeAmount: constants.Zero,
+          kind: OrderKind.SELL,
+          partiallyFillable: true,
         };
-        let gas;
+
+        let feeUsd;
         try {
-          ({ gas } = await computeSettlement({
-            withdrawals: [withdrawalWithoutGas],
-            receiver,
-            solverForSimulation,
-            settlement,
-            hre,
-          }));
+          feeUsd = await usdValue(
+            order.sellToken,
+            quote.feeAmount,
+            usdReference,
+            api,
+          );
         } catch (error) {
           if (!(error instanceof Error)) {
             throw error;
@@ -289,73 +263,129 @@ async function getWithdrawals({
           consoleLog(
             ignoredTokenMessage(
               [token, amounts.balance],
-              `cannot execute withdraw transaction (${error.message})`,
+              `cannot determine USD value of fee (${error.message})`,
               [usdReference, amounts.balanceUsd],
             ),
           );
           return null;
         }
         return {
-          ...withdrawalWithoutGas,
-          gas: gas.sub(await gasEmptySettlement),
+          order,
+          feeUsd,
+          sellAmountUsd: amounts.netAmountUsd,
+          balance: amounts.balance,
+          balanceUsd: amounts.balanceUsd,
+          sellToken: token,
+          owner: settlement.address,
+          orderUid: computeOrderUid(domainSeparator, order, owner),
         };
       },
   );
-  const processedWithdrawals: (Withdrawal | null)[] =
-    await promiseAllWithRateLimit(computeWithdrawalInstructions, {
-      message: "computing withdrawals",
+  const processedOrders: (OrderDetails | null)[] =
+    await promiseAllWithRateLimit(computeOrderInstructions, {
+      message: "retrieving available tokens",
       rateLimit: LIMIT_CONCURRENT_REQUESTS,
     });
-  return processedWithdrawals.filter(
-    (withdrawal) => withdrawal !== null,
-  ) as Withdrawal[];
+  return processedOrders.filter((order) => order !== null) as OrderDetails[];
 }
 
-function formatWithdrawal(
-  withdrawal: Withdrawal,
+function formatOrder(
+  order: OrderDetails,
+  toToken: Erc20Token,
   usdReference: ReferenceToken,
-): DisplayWithdrawal {
-  const formatDecimals = withdrawal.token.decimals ?? 18;
+): DisplayOrder {
+  const formatSellTokenDecimals = order.sellToken.decimals ?? 18;
+  const formatBuyTokenDecimals = toToken.decimals ?? 18;
+  const feePercentBps = order.feeUsd.mul(10000).div(order.sellAmountUsd);
+  const feePercent = feePercentBps.lt(1)
+    ? "<0.01"
+    : utils.formatUnits(feePercentBps, 2);
   return {
-    address: withdrawal.token.address,
-    value: formatUsdValue(withdrawal.balanceUsd, usdReference),
-    balance: formatTokenValue(withdrawal.balance, formatDecimals, 18),
-    amount: formatTokenValue(withdrawal.amount, formatDecimals, 18),
-    symbol: withdrawal.token.symbol ?? "unknown token",
+    address: order.sellToken.address,
+    sellAmountUsd: formatUsdValue(order.balanceUsd, usdReference),
+    balance: formatTokenValue(order.balance, formatSellTokenDecimals, 10),
+    sellAmount: formatTokenValue(
+      BigNumber.from(order.order.sellAmount),
+      formatSellTokenDecimals,
+      10,
+    ),
+    symbol: order.sellToken.symbol ?? "unknown token",
+    buyAmount: formatTokenValue(
+      BigNumber.from(order.order.buyAmount),
+      formatBuyTokenDecimals,
+      10,
+    ),
+    feePercent,
   };
 }
 
-function displayWithdrawals(
-  withdrawals: Withdrawal[],
+function displayOrders(
+  orders: OrderDetails[],
   usdReference: ReferenceToken,
+  toToken: Erc20Token,
 ) {
-  const formattedWithdtrawals = withdrawals.map((w) =>
-    formatWithdrawal(w, usdReference),
+  const formattedOrders = orders.map((o) =>
+    formatOrder(o, toToken, usdReference),
   );
-  const order = ["address", "value", "balance", "amount", "symbol"] as const;
+  const order = [
+    "address",
+    "sellAmountUsd",
+    "balance",
+    "sellAmount",
+    "symbol",
+    "buyAmount",
+    "feePercent",
+  ] as const;
   const header = {
     address: "address",
-    value: "balance (usd)",
+    sellAmountUsd: "value (USD)",
     balance: "balance",
-    amount: "withdrawn amount",
+    sellAmount: "sold amount",
     symbol: "symbol",
+    buyAmount: `buy amount${toToken.symbol ? ` (${toToken.symbol})` : ""}`,
+    feePercent: "fee %",
   };
-  console.log(chalk.bold("Amounts to withdraw:"));
-  displayTable(header, formattedWithdtrawals, order, {
-    value: { align: Align.Right },
+  console.log(chalk.bold("Amounts to sell:"));
+  displayTable(header, formattedOrders, order, {
+    sellAmountUsd: { align: Align.Right },
     balance: { align: Align.Right, maxWidth: 30 },
-    amount: { align: Align.Right, maxWidth: 30 },
+    sellAmount: { align: Align.Right, maxWidth: 30 },
     symbol: { maxWidth: 20 },
+    buyAmount: { align: Align.Right, maxWidth: 30 },
   });
   console.log();
 }
 
-interface WithdrawInput {
+async function computeMarginalGasPerOrder(
+  computeSettlementInput: Omit<ComputeSettlementInput, "orderUids">,
+) {
+  const dummyOrderUid = packOrderUidParams({
+    orderDigest: "0x" + "42".repeat(32),
+    owner: computeSettlementInput.settlement.address,
+    validTo: 2 ** 32 - 1,
+  });
+  const [gasEmptySettlement, gasSingleOrderSettlement] = await Promise.all([
+    computeSettlement({
+      ...computeSettlementInput,
+      orderUids: [],
+    }).then(({ gas }) => gas),
+    computeSettlement({
+      ...computeSettlementInput,
+      orderUids: [dummyOrderUid],
+    }).then(({ gas }) => gas),
+  ]);
+  return gasSingleOrderSettlement.sub(gasEmptySettlement);
+}
+
+interface SelfSellInput {
   solver: SignerOrAddress;
   tokens: string[] | undefined;
+  toToken: string;
   minValue: string;
   leftover: string;
   maxFeePercent: number;
+  slippageBps: number;
+  validity: number;
   receiver: string;
   authenticator: Contract;
   settlement: Contract;
@@ -368,14 +398,18 @@ interface WithdrawInput {
   gasEstimator: IGasEstimator;
   doNotPrompt?: boolean | undefined;
   requiredConfirmations?: number | undefined;
+  domainSeparator: TypedDataDomain;
 }
 
-async function prepareWithdrawals({
+async function prepareOrders({
   solver,
   tokens,
+  toToken: toTokenAddress,
   minValue,
   leftover,
   maxFeePercent,
+  validity,
+  slippageBps,
   receiver,
   authenticator,
   settlement,
@@ -386,8 +420,9 @@ async function prepareWithdrawals({
   api,
   dryRun,
   gasEstimator,
-}: WithdrawInput): Promise<{
-  withdrawals: Withdrawal[];
+  domainSeparator,
+}: SelfSellInput): Promise<{
+  orders: OrderDetails[];
   finalSettlement: EncodedSettlement | null;
 }> {
   let solverForSimulation: string;
@@ -395,7 +430,7 @@ async function prepareWithdrawals({
     solverForSimulation = solver.address;
   } else {
     const message =
-      "Current account is not a solver. Only a solver can withdraw funds from the settlement contract.";
+      "Current account is not a solver. Only a solver can execute `settle` in the settlement contract.";
     if (!dryRun) {
       throw Error(message);
     } else {
@@ -403,18 +438,16 @@ async function prepareWithdrawals({
       console.log(message);
       if (solverForSimulation === undefined) {
         throw new Error(
-          `There are no valid solvers for network ${network}, withdrawing is not possible`,
+          `There are no valid solvers for network ${network}, settlements are not possible`,
         );
       }
     }
   }
-  const gasEmptySettlement = computeSettlement({
-    withdrawals: [],
-    receiver,
+  const marginalGasPerOrder = computeMarginalGasPerOrder({
     solverForSimulation,
     settlement,
     hre,
-  }).then(({ gas }) => gas);
+  });
 
   if (tokens === undefined) {
     console.log("Recovering list of traded tokens...");
@@ -426,22 +459,48 @@ async function prepareWithdrawals({
     ));
   }
 
-  // TODO: add eth withdrawal
+  // TODO: remove once native asset orders are fully supported.
+  assertNotBuyingNativeAsset(toTokenAddress);
+  // todo: support dumping ETH by wrapping them
+  if (tokens.includes(BUY_ETH_ADDRESS)) {
+    throw new Error(
+      `Dumping the native token is not supported. Remove the ETH flag address ${BUY_ETH_ADDRESS} from the list of tokens to dump.`,
+    );
+  }
+  const erc20 = await erc20Token(toTokenAddress, hre);
+  if (erc20 === null) {
+    throw new Error(
+      `Input toToken at address ${toTokenAddress} is not a valid Erc20 token.`,
+    );
+  }
+  const toToken: Erc20Token = erc20;
+
+  // TODO: send same token to receiver
+  if (tokens.includes(toToken.address)) {
+    throw new Error(
+      `Selling toToken is not yet supported. Remove ${toToken.address} from the list of tokens to dump.`,
+    );
+  }
+
+  // TODO: add eth orders
   // TODO: split large transaction in batches
-  let withdrawals = await getWithdrawals({
+  let orders = await getOrders({
     tokens,
+    toToken,
     settlement,
     minValue,
     leftover,
-    gasEmptySettlement,
     hre,
     usdReference,
     receiver,
-    solverForSimulation,
     api,
+    validity,
+    maxFeePercent,
+    slippageBps,
+    domainSeparator,
   });
-  withdrawals.sort((lhs, rhs) => {
-    const diff = lhs.balanceUsd.sub(rhs.balanceUsd);
+  orders.sort((lhs, rhs) => {
+    const diff = BigNumber.from(lhs.order.buyAmount).sub(rhs.order.buyAmount);
     return diff.isZero() ? 0 : diff.isNegative() ? -1 : 1;
   });
 
@@ -450,20 +509,25 @@ async function prepareWithdrawals({
     usdValueOfEth(oneEth, usdReference, network, api),
     gasEstimator.gasPriceEstimate(),
   ]);
-  withdrawals = withdrawals.filter(
-    ({ token, balance, balanceUsd, amountUsd, gas }) => {
-      const approxUsdValue = Number(amountUsd.toString());
-      const approxGasCost = Number(
-        gasPrice.mul(gas).mul(oneEthUsdValue).div(oneEth),
-      );
-      const feePercent = (100 * approxGasCost) / approxUsdValue;
+  const marginalGasCost = gasPrice
+    .mul(await marginalGasPerOrder)
+    .mul(oneEthUsdValue)
+    .div(oneEth);
+  // Note: we don't add the gas fee when generating `orders` because we want to
+  // fetch gas prices at the last possible time to limit gas fluctuations.
+  orders = orders.map((o) => ({ ...o, feeUsd: o.feeUsd.add(marginalGasCost) }));
+  orders = orders.filter(
+    ({ feeUsd, sellAmountUsd, sellToken, balance, balanceUsd }) => {
+      const approxUsdValue = Number(sellAmountUsd.toString());
+      const approxTotalFee = Number(feeUsd);
+      const feePercent = (100 * approxTotalFee) / approxUsdValue;
       if (feePercent > maxFeePercent) {
         console.log(
           ignoredTokenMessage(
-            [token, balance],
-            `the gas cost is too high (${feePercent.toFixed(
+            [sellToken, balance],
+            `gas plus trade fee is too high (${feePercent.toFixed(
               2,
-            )}% of the withdrawn amount)`,
+            )}% of the traded amount)`,
             [usdReference, balanceUsd],
           ),
         );
@@ -474,50 +538,112 @@ async function prepareWithdrawals({
     },
   );
 
-  if (withdrawals.length === 0) {
-    console.log("No tokens to withdraw.");
-    return { withdrawals: [], finalSettlement: null };
+  if (orders.length === 0) {
+    console.log("No tokens to sell.");
+    return { orders: [], finalSettlement: null };
   }
-  displayWithdrawals(withdrawals, usdReference);
+  displayOrders(orders, usdReference, toToken);
 
-  const {
-    finalSettlement,
-    transactionEthCost,
-    transactionUsdCost,
-    withdrawnValue,
-  } = await computeSettlementWithPrice({
-    withdrawals,
-    receiver,
-    gasPrice,
-    solverForSimulation,
-    settlement,
-    network,
-    usdReference,
-    api,
-    hre,
-  });
+  const { finalSettlement, transactionEthCost, transactionUsdCost, soldValue } =
+    await computeSettlementWithPrice({
+      orders,
+      gasPrice,
+      solverForSimulation,
+      settlement,
+      network,
+      usdReference,
+      api,
+      hre,
+    });
 
   console.log(
-    `The transaction will cost approximately ${formatGasCost(
+    `The settlement transaction will cost approximately ${formatGasCost(
       transactionEthCost,
       transactionUsdCost,
       network,
       usdReference,
-    )} and will withdraw the balance of ${
-      withdrawals.length
-    } tokens for an estimated total value of ${formatUsdValue(
-      withdrawnValue,
+    )} and will create ${
+      orders.length
+    } orders for an estimated total value of ${formatUsdValue(
+      soldValue,
       usdReference,
-    )} USD. All withdrawn funds will be sent to ${receiver}.`,
+    )} USD. The proceeds of the orders will be sent to ${receiver}.`,
   );
 
-  return { withdrawals, finalSettlement };
+  return { orders, finalSettlement };
 }
 
-export async function withdraw(input: WithdrawInput): Promise<string[] | null> {
-  let withdrawals, finalSettlement;
+interface SubmitOrderToApiInput {
+  orders: OrderDetails[];
+  settlement: Contract;
+  api: Api;
+  hre: HardhatRuntimeEnvironment;
+  dryRun: boolean;
+  doNotPrompt?: boolean;
+}
+async function submitOrdersToApi({
+  orders,
+  settlement,
+  hre,
+  api,
+  dryRun,
+  doNotPrompt,
+}: SubmitOrderToApiInput) {
+  if (
+    dryRun ||
+    !(doNotPrompt || (await prompt(hre, "Submit orders to API?")))
+  ) {
+    return;
+  }
+
+  const from = settlement.address;
+  const preSignSignature: PreSignSignature = {
+    scheme: SigningScheme.PRESIGN,
+    data: from,
+  };
+  for (const order of orders) {
+    console.log(
+      `Posting order selling ${
+        order.sellToken.symbol ?? order.sellToken.address
+      }...`,
+    );
+    try {
+      const apiOrderUid = await api.placeOrder({
+        order: order.order,
+        signature: preSignSignature,
+        from,
+      });
+      console.log(`Successfully created order with uid ${apiOrderUid}`);
+      if (apiOrderUid != order.orderUid) {
+        throw new Error(
+          "CoW Swap API returns different orderUid than what is used to presign the order. This order will not be settled and the code should be checked for bugs.",
+        );
+      }
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error as CallError)?.apiError !== undefined
+      ) {
+        // not null because of the condition in the if statement above
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const { errorType, description } = (error as CallError).apiError!;
+        console.error(
+          `Failed submitting order selling ${
+            order.sellToken.symbol ?? order.sellToken.address
+          }, the server returns ${errorType} (${description})`,
+        );
+        console.error(`Order details: ${JSON.stringify(order)}`);
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
+export async function selfSell(input: SelfSellInput): Promise<string[] | null> {
+  let orders, finalSettlement;
   try {
-    ({ withdrawals, finalSettlement } = await prepareWithdrawals(input));
+    ({ orders, finalSettlement } = await prepareOrders(input));
   } catch (error) {
     console.log(
       "Script failed execution but no irreversible operations were performed",
@@ -530,36 +656,59 @@ export async function withdraw(input: WithdrawInput): Promise<string[] | null> {
     return [];
   }
 
+  await submitOrdersToApi({
+    orders,
+    settlement: input.settlement,
+    api: input.api,
+    hre: input.hre,
+    dryRun: input.dryRun,
+    doNotPrompt: input.doNotPrompt,
+  });
   await submitSettlement({
     ...input,
     settlementContract: input.settlement,
     encodedSettlement: finalSettlement,
   });
 
-  return withdrawals.map((w) => w.token.address);
+  return orders.map((o) => o.sellToken.address);
 }
 
-const setupWithdrawTask: () => void = () =>
-  task("withdraw", "Withdraw funds from the settlement contract")
+const setupSelfSellTask: () => void = () =>
+  task(
+    "self-sell",
+    "Sets up sell orders for the entire balance of the specified tokens from the settlement contract",
+  )
     .addOptionalParam(
       "origin",
-      "Address from which to withdraw. If not specified, it defaults to the first provided account",
+      "Address from which to create the orders. If not specified, it defaults to the first provided account",
     )
     .addOptionalParam(
       "minValue",
-      "If specified, sets a minimum USD value required to withdraw the balance of a token.",
+      "If specified, sets a minimum USD value required to sell the balance of a token.",
       "0",
       types.string,
     )
     .addOptionalParam(
       "leftover",
-      "If specified, withdrawing leaves an amount of each token of USD value specified with this flag.",
+      "If specified, selling leaves an amount of each token of USD value specified with this flag.",
       "0",
       types.string,
     )
     .addOptionalParam(
+      "validity",
+      `How long the sell orders will be valid after their creation in seconds. It cannot be larger than ${MAX_ORDER_VALIDITY_SECONDS}`,
+      20 * 60,
+      types.int,
+    )
+    .addOptionalParam(
+      "slippageBps",
+      "The slippage in basis points for selling the dumped tokens",
+      10,
+      types.int,
+    )
+    .addOptionalParam(
       "maxFeePercent",
-      "If the extra gas needed to include a withdrawal is larger than this percent of the withdrawn amount, the token is not withdrawn.",
+      "If the fees involved in creating a sell order (gas & trading fees) are larger than this percent of the sold amount, the token is not sold.",
       5,
       types.float,
     )
@@ -567,7 +716,7 @@ const setupWithdrawTask: () => void = () =>
       "apiUrl",
       "If set, the script contacts the API using the given url. Otherwise, the default prod url for the current network is used",
     )
-    .addParam("receiver", "The address receiving the withdrawn tokens.")
+    .addParam("receiver", "The receiver of the sold tokens.")
     .addFlag(
       "dryRun",
       "Just simulate the settlement instead of executing the transaction on the blockchain.",
@@ -578,15 +727,22 @@ const setupWithdrawTask: () => void = () =>
     )
     .addOptionalVariadicPositionalParam(
       "tokens",
-      "An optional subset of tokens to consider for withdraw (otherwise all traded tokens will be queried).",
+      "An optional subset of tokens to consider for selling (otherwise all traded tokens will be queried).",
+    )
+    .addOptionalParam(
+      "toToken",
+      "All input tokens will be dumped to this token. If not specified, it defaults to the network's native token (e.g., ETH)",
     )
     .setAction(
       async (
         {
           origin,
+          toToken,
           minValue,
           leftover,
           maxFeePercent,
+          slippageBps,
+          validity,
           receiver: inputReceiver,
           dryRun,
           tokens,
@@ -604,28 +760,36 @@ const setupWithdrawTask: () => void = () =>
         });
         const api = new Api(network, apiUrl ?? Environment.Prod);
         const receiver = utils.getAddress(inputReceiver);
-        const [authenticator, settlementDeployment, solver] = await Promise.all(
-          [
+        const [authenticator, settlementDeployment, solver, chainId] =
+          await Promise.all([
             getDeployedContract("GPv2AllowListAuthentication", hre),
             hre.deployments.get("GPv2Settlement"),
             getSignerOrAddress(hre, origin),
-          ],
-        );
+            hre.ethers.provider.getNetwork().then((n) => n.chainId),
+          ]);
         const settlement = new Contract(
           settlementDeployment.address,
           settlementDeployment.abi,
         ).connect(hre.ethers.provider);
         const settlementDeploymentBlock =
           settlementDeployment.receipt?.blockNumber ?? 0;
+        const domainSeparator = domain(chainId, settlement.address);
         console.log(`Using account ${solver.address}`);
 
-        await withdraw({
+        if (validity > MAX_ORDER_VALIDITY_SECONDS) {
+          throw new Error("Order validity too large");
+        }
+
+        await selfSell({
           solver,
           tokens,
+          toToken,
           minValue,
           leftover,
           receiver,
           maxFeePercent,
+          slippageBps,
+          validity,
           authenticator,
           settlement,
           settlementDeploymentBlock,
@@ -635,8 +799,9 @@ const setupWithdrawTask: () => void = () =>
           api,
           dryRun,
           gasEstimator,
+          domainSeparator,
         });
       },
     );
 
-export { setupWithdrawTask };
+export { setupSelfSellTask };
