@@ -12,7 +12,6 @@ import {
   EncodedSettlement,
   Order,
   OrderKind,
-  packOrderUidParams,
   PreSignSignature,
   SettlementEncoder,
   SigningScheme,
@@ -69,30 +68,42 @@ interface DisplayOrder {
   address: string;
   buyAmount: string;
   feePercent: string;
+  needsAllowance: "yes" | "";
 }
 
 interface ComputeSettlementInput {
-  orderUids: string[];
+  orders: Pick<OrderDetails, "sellToken" | "orderUid" | "needsAllowance">[];
   solverForSimulation: string;
   settlement: Contract;
+  vaultRelayer: string;
   hre: HardhatRuntimeEnvironment;
 }
 async function computeSettlement({
-  orderUids,
+  orders,
   solverForSimulation,
   settlement,
+  vaultRelayer,
   hre,
 }: ComputeSettlementInput) {
   const encoder = new SettlementEncoder({});
-  orderUids.forEach((orderUid) =>
+  for (const order of orders) {
+    if (order.needsAllowance) {
+      encoder.encodeInteraction({
+        target: order.sellToken.address,
+        callData: order.sellToken.contract.interface.encodeFunctionData(
+          "approve",
+          [vaultRelayer, constants.MaxUint256],
+        ),
+      });
+    }
     encoder.encodeInteraction({
       target: settlement.address,
       callData: settlement.interface.encodeFunctionData("setPreSignature", [
-        orderUid,
+        order.orderUid,
         true,
       ]),
-    }),
-  );
+    });
+  }
 
   const finalSettlement = encoder.encodedSettlement({});
   const gas = await settlement
@@ -107,7 +118,7 @@ async function computeSettlement({
 }
 
 interface ComputeSettlementWithPriceInput
-  extends Omit<ComputeSettlementInput, "orderUids"> {
+  extends Omit<ComputeSettlementInput, "orders"> {
   orders: OrderDetails[];
   gasPrice: BigNumber;
   network: SupportedNetwork;
@@ -118,6 +129,7 @@ async function computeSettlementWithPrice({
   orders,
   solverForSimulation,
   settlement,
+  vaultRelayer,
   gasPrice,
   network,
   usdReference,
@@ -125,9 +137,10 @@ async function computeSettlementWithPrice({
   hre,
 }: ComputeSettlementWithPriceInput) {
   const { gas, finalSettlement } = await computeSettlement({
-    orderUids: orders.map((o) => o.orderUid),
+    orders,
     solverForSimulation,
     settlement,
+    vaultRelayer,
     hre,
   });
 
@@ -161,12 +174,15 @@ interface OrderDetails {
   balanceUsd: BigNumber;
   sellToken: Erc20Token;
   orderUid: string;
+  needsAllowance: boolean;
+  extraGas: BigNumber;
 }
 
 interface GetOrdersInput {
   tokens: string[];
   toToken: Erc20Token;
   settlement: Contract;
+  vaultRelayer: string;
   minValue: string;
   leftover: string;
   maxFeePercent: number;
@@ -177,11 +193,13 @@ interface GetOrdersInput {
   receiver: string;
   api: Api;
   domainSeparator: TypedDataDomain;
+  solverForSimulation: string;
 }
 async function getOrders({
   tokens,
   toToken,
   settlement,
+  vaultRelayer,
   minValue,
   leftover,
   maxFeePercent,
@@ -192,22 +210,30 @@ async function getOrders({
   receiver,
   api,
   domainSeparator,
+  solverForSimulation,
 }: GetOrdersInput): Promise<OrderDetails[]> {
   const minValueWei = utils.parseUnits(minValue, usdReference.decimals);
   const leftoverWei = utils.parseUnits(leftover, usdReference.decimals);
+  const gasEmptySettlement = computeSettlement({
+    orders: [],
+    solverForSimulation,
+    settlement,
+    vaultRelayer,
+    hre,
+  }).then(({ gas }) => gas);
 
   const computeOrderInstructions = tokens.map(
     (tokenAddress) =>
       async ({ consoleLog }: DisappearingLogFunctions) => {
-        const token = await fastTokenDetails(tokenAddress, hre);
-        if (token === null) {
+        const sellToken = await fastTokenDetails(tokenAddress, hre);
+        if (sellToken === null) {
           throw new Error(
             `There is no valid ERC20 token at address ${tokenAddress}`,
           );
         }
 
         const amounts = await getAmounts({
-          token,
+          token: sellToken,
           usdReference,
           settlement,
           api,
@@ -219,10 +245,29 @@ async function getOrders({
           return null;
         }
 
+        let allowance;
+        try {
+          allowance = BigNumber.from(
+            await sellToken.contract.allowance(
+              settlement.address,
+              vaultRelayer,
+            ),
+          );
+        } catch (e) {
+          consoleLog(
+            ignoredTokenMessage(
+              [sellToken, amounts.balance],
+              "cannot determine size of vault relayer allowance",
+            ),
+          );
+          return null;
+        }
+        const needsAllowance = allowance.lt(amounts.netAmount);
+
         const validTo = computeValidTo(validity);
         const owner = settlement.address;
         const quote = await getQuote({
-          sellToken: token,
+          sellToken,
           buyToken: toToken,
           api,
           sellAmountBeforeFee: amounts.netAmount,
@@ -236,7 +281,7 @@ async function getOrders({
         }
 
         const order: Order = {
-          sellToken: token.address,
+          sellToken: sellToken.address,
           buyToken: (toToken as Erc20Token).address ?? BUY_ETH_ADDRESS,
           receiver,
           sellAmount: amounts.netAmount,
@@ -247,6 +292,7 @@ async function getOrders({
           kind: OrderKind.SELL,
           partiallyFillable: true,
         };
+        const orderUid = computeOrderUid(domainSeparator, order, owner);
 
         let feeUsd;
         try {
@@ -262,22 +308,41 @@ async function getOrders({
           }
           consoleLog(
             ignoredTokenMessage(
-              [token, amounts.balance],
+              [sellToken, amounts.balance],
               `cannot determine USD value of fee (${error.message})`,
               [usdReference, amounts.balanceUsd],
             ),
           );
           return null;
         }
+
+        const extraGas = (
+          await computeSettlement({
+            orders: [
+              {
+                needsAllowance,
+                orderUid,
+                sellToken,
+              },
+            ],
+            solverForSimulation,
+            settlement,
+            vaultRelayer,
+            hre,
+          })
+        ).gas.sub(await gasEmptySettlement);
+
         return {
           order,
           feeUsd,
           sellAmountUsd: amounts.netAmountUsd,
           balance: amounts.balance,
           balanceUsd: amounts.balanceUsd,
-          sellToken: token,
+          sellToken,
           owner: settlement.address,
-          orderUid: computeOrderUid(domainSeparator, order, owner),
+          orderUid,
+          needsAllowance,
+          extraGas,
         };
       },
   );
@@ -316,6 +381,7 @@ function formatOrder(
       10,
     ),
     feePercent,
+    needsAllowance: order.needsAllowance ? "yes" : "",
   };
 }
 
@@ -327,7 +393,7 @@ function displayOrders(
   const formattedOrders = orders.map((o) =>
     formatOrder(o, toToken, usdReference),
   );
-  const order = [
+  const orderWithoutAllowances = [
     "address",
     "sellAmountUsd",
     "balance",
@@ -336,6 +402,9 @@ function displayOrders(
     "buyAmount",
     "feePercent",
   ] as const;
+  const order = orders.some((o) => o.needsAllowance)
+    ? ([...orderWithoutAllowances, "needsAllowance"] as const)
+    : orderWithoutAllowances;
   const header = {
     address: "address",
     sellAmountUsd: "value (USD)",
@@ -344,6 +413,7 @@ function displayOrders(
     symbol: "symbol",
     buyAmount: `buy amount${toToken.symbol ? ` (${toToken.symbol})` : ""}`,
     feePercent: "fee %",
+    needsAllowance: "needs allowance?",
   };
   console.log(chalk.bold("Amounts to sell:"));
   displayTable(header, formattedOrders, order, {
@@ -354,27 +424,6 @@ function displayOrders(
     buyAmount: { align: Align.Right, maxWidth: 30 },
   });
   console.log();
-}
-
-async function computeMarginalGasPerOrder(
-  computeSettlementInput: Omit<ComputeSettlementInput, "orderUids">,
-) {
-  const dummyOrderUid = packOrderUidParams({
-    orderDigest: "0x" + "42".repeat(32),
-    owner: computeSettlementInput.settlement.address,
-    validTo: 2 ** 32 - 1,
-  });
-  const [gasEmptySettlement, gasSingleOrderSettlement] = await Promise.all([
-    computeSettlement({
-      ...computeSettlementInput,
-      orderUids: [],
-    }).then(({ gas }) => gas),
-    computeSettlement({
-      ...computeSettlementInput,
-      orderUids: [dummyOrderUid],
-    }).then(({ gas }) => gas),
-  ]);
-  return gasSingleOrderSettlement.sub(gasEmptySettlement);
 }
 
 interface SelfSellInput {
@@ -425,6 +474,8 @@ async function prepareOrders({
   orders: OrderDetails[];
   finalSettlement: EncodedSettlement | null;
 }> {
+  const vaultRelayer: Promise<string> = settlement.vaultRelayer();
+
   let solverForSimulation: string;
   if (await authenticator.isSolver(solver.address)) {
     solverForSimulation = solver.address;
@@ -443,11 +494,6 @@ async function prepareOrders({
       }
     }
   }
-  const marginalGasPerOrder = computeMarginalGasPerOrder({
-    solverForSimulation,
-    settlement,
-    hre,
-  });
 
   if (tokens === undefined) {
     console.log("Recovering list of traded tokens...");
@@ -488,6 +534,7 @@ async function prepareOrders({
     tokens,
     toToken,
     settlement,
+    vaultRelayer: await vaultRelayer,
     minValue,
     leftover,
     hre,
@@ -498,6 +545,7 @@ async function prepareOrders({
     maxFeePercent,
     slippageBps,
     domainSeparator,
+    solverForSimulation,
   });
   orders.sort((lhs, rhs) => {
     const diff = BigNumber.from(lhs.order.buyAmount).sub(rhs.order.buyAmount);
@@ -509,13 +557,15 @@ async function prepareOrders({
     usdValueOfEth(oneEth, usdReference, network, api),
     gasEstimator.gasPriceEstimate(),
   ]);
-  const marginalGasCost = gasPrice
-    .mul(await marginalGasPerOrder)
-    .mul(oneEthUsdValue)
-    .div(oneEth);
   // Note: we don't add the gas fee when generating `orders` because we want to
   // fetch gas prices at the last possible time to limit gas fluctuations.
-  orders = orders.map((o) => ({ ...o, feeUsd: o.feeUsd.add(marginalGasCost) }));
+  orders = orders.map((o) => {
+    const marginalGasCost = gasPrice
+      .mul(o.extraGas)
+      .mul(oneEthUsdValue)
+      .div(oneEth);
+    return { ...o, feeUsd: o.feeUsd.add(marginalGasCost) };
+  });
   orders = orders.filter(
     ({ feeUsd, sellAmountUsd, sellToken, balance, balanceUsd }) => {
       const approxUsdValue = Number(sellAmountUsd.toString());
@@ -550,6 +600,7 @@ async function prepareOrders({
       gasPrice,
       solverForSimulation,
       settlement,
+      vaultRelayer: await vaultRelayer,
       network,
       usdReference,
       api,
