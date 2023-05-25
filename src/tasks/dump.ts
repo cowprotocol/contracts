@@ -23,7 +23,13 @@ import {
   signOrder,
   TypedDataDomain,
 } from "../ts";
-import { Api, CallError, Environment, GetQuoteErrorType } from "../ts/api";
+import {
+  Api,
+  CallError,
+  Environment,
+  GetQuoteErrorType,
+  LIMIT_CONCURRENT_REQUESTS,
+} from "../ts/api";
 
 import {
   getDeployedContract,
@@ -46,6 +52,7 @@ import {
 } from "./ts/tokens";
 import { prompt } from "./ts/tui";
 import { formatTokenValue, ethValue } from "./ts/value";
+import { ignoredTokenMessage } from "./withdraw/messages";
 
 export const MAX_LATEST_BLOCK_DELAY_SECONDS = 2 * 60;
 export const MAX_ORDER_VALIDITY_SECONDS = 24 * 3600;
@@ -93,21 +100,6 @@ interface DumpInstructions {
 interface Receiver {
   address: string;
   isSameAsUser: boolean;
-}
-
-function ignoredTokenMessage(
-  token: Erc20Token | NativeToken,
-  amount: BigNumber,
-  reason?: string,
-) {
-  const decimals = token.decimals ?? 18;
-  return `Ignored ${utils.formatUnits(amount, decimals)} units of ${displayName(
-    token,
-  )}${
-    token.decimals === undefined
-      ? ` (no decimals specified in the contract, assuming ${decimals})`
-      : ""
-  }${reason ? `, ${reason}` : ""}`;
 }
 
 interface GetTransferToReceiverInput {
@@ -160,8 +152,7 @@ async function getTransferToReceiver({
   if (feePercent > maxFeePercent) {
     console.log(
       ignoredTokenMessage(
-        toToken,
-        amount,
+        [toToken, amount],
         `the transaction fee is too large compared to the balance (${feePercent.toFixed(
           2,
         )}%).`,
@@ -286,10 +277,10 @@ export async function getDumpInstructions({
           sellToken: token,
           buyToken: toToken,
           api,
-          balance,
+          sellAmountBeforeFee: balance,
           maxFeePercent,
           slippageBps,
-          validTo: validTo(validity),
+          validTo: computeValidTo(validity),
           user,
         });
         if (quote === null) {
@@ -303,7 +294,7 @@ export async function getDumpInstructions({
           needsAllowance,
         };
       }),
-      { rateLimit: 5 },
+      { rateLimit: LIMIT_CONCURRENT_REQUESTS },
     )
   ).filter((inst) => inst !== null);
   // note: null entries have already been filtered out
@@ -325,7 +316,7 @@ export async function getDumpInstructions({
 interface QuoteInput {
   sellToken: Erc20Token;
   buyToken: Erc20Token | NativeToken;
-  balance: BigNumber;
+  sellAmountBeforeFee: BigNumber;
   validTo: number;
   maxFeePercent: number;
   slippageBps: number;
@@ -334,10 +325,10 @@ interface QuoteInput {
 }
 
 // Returns null if the fee is not satisfying balance or maxFeePercent. May throw if an unexpected error occurs
-async function getQuote({
+export async function getQuote({
   sellToken,
   buyToken,
-  balance,
+  sellAmountBeforeFee,
   validTo,
   maxFeePercent,
   slippageBps,
@@ -354,7 +345,7 @@ async function getQuote({
       partiallyFillable: false,
       from: user,
       kind: OrderKind.SELL,
-      sellAmountBeforeFee: balance,
+      sellAmountBeforeFee,
     });
     quote = {
       sellAmount: BigNumber.from(quotedOrder.quote.sellAmount),
@@ -371,8 +362,7 @@ async function getQuote({
     ) {
       console.log(
         ignoredTokenMessage(
-          sellToken,
-          balance,
+          [sellToken, sellAmountBeforeFee],
           "the trading fee is larger than the dumped amount.",
         ),
       );
@@ -382,8 +372,7 @@ async function getQuote({
     ) {
       console.log(
         ignoredTokenMessage(
-          sellToken,
-          balance,
+          [sellToken, sellAmountBeforeFee],
           "not enough liquidity to dump tokens.",
         ),
       );
@@ -392,14 +381,13 @@ async function getQuote({
       throw e;
     }
   }
-  const approxBalance = Number(balance.toString());
+  const approxAmount = Number(sellAmountBeforeFee.toString());
   const approxFee = Number(quote.feeAmount.toString());
-  const feePercent = (100 * approxFee) / approxBalance;
+  const feePercent = (100 * approxFee) / approxAmount;
   if (feePercent > maxFeePercent) {
     console.log(
       ignoredTokenMessage(
-        sellToken,
-        balance,
+        [sellToken, sellAmountBeforeFee],
         `the trading fee is too large compared to the balance (${feePercent.toFixed(
           2,
         )}%).`,
@@ -420,7 +408,7 @@ function buyAmountWithSlippage(
     .div(10000);
 }
 
-function validTo(validity: number) {
+export function computeValidTo(validity: number) {
   const now = Math.floor(Date.now() / 1000);
   return now + validity;
 }
@@ -547,8 +535,8 @@ async function createOrders(
       const updatedQuote = await getQuote({
         sellToken: inst.token,
         buyToken: toToken,
-        balance: inst.balance,
-        validTo: validTo(validity),
+        sellAmountBeforeFee: inst.balance,
+        validTo: computeValidTo(validity),
         user: signer.address,
         api,
         maxFeePercent,
@@ -572,7 +560,7 @@ async function createOrders(
       // todo: switch to true when partially fillable orders will be
       // supported by the services
       partiallyFillable: false,
-      validTo: validTo(validity),
+      validTo: computeValidTo(validity),
       receiver: receiver.isSameAsUser ? undefined : receiver.address,
     };
     const signature = await signOrder(

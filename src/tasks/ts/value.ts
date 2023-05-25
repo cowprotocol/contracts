@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 
 import { BUY_ETH_ADDRESS, OrderKind } from "../../ts";
 import { Api } from "../../ts/api";
@@ -112,4 +112,24 @@ export function formatUsdValue(
   usdReference: ReferenceToken,
 ): string {
   return formatTokenValue(amount, usdReference.decimals, 2);
+}
+
+export function formatGasCost(
+  amount: BigNumber,
+  usdAmount: BigNumber,
+  network: SupportedNetwork,
+  usdReference: ReferenceToken,
+): string {
+  switch (network) {
+    case "mainnet": {
+      return `${utils.formatEther(amount)} ETH (${formatUsdValue(
+        usdAmount,
+        usdReference,
+      )} USD)`;
+    }
+    case "xdai":
+      return `${utils.formatEther(amount)} XDAI`;
+    default:
+      return `${utils.formatEther(amount)} ETH`;
+  }
 }

@@ -17,6 +17,8 @@ export enum Environment {
   Prod,
 }
 
+export const LIMIT_CONCURRENT_REQUESTS = 5;
+
 export function apiUrl(environment: Environment, network: string): string {
   switch (environment) {
     case Environment.Dev:
@@ -41,6 +43,7 @@ export interface EstimateTradeAmountQuery {
 export interface PlaceOrderQuery {
   order: Order;
   signature: Signature;
+  from?: string;
 }
 export interface GetExecutedSellAmountQuery {
   uid: string;
@@ -199,6 +202,7 @@ async function placeOrder({
   order,
   signature,
   baseUrl,
+  from,
 }: PlaceOrderQuery & ApiCall): Promise<string> {
   const normalizedOrder = normalizeOrder(order);
   return await call("orders", baseUrl, {
@@ -216,6 +220,7 @@ async function placeOrder({
       signature: encodeSignatureData(signature),
       signingScheme: apiSigningScheme(signature.scheme),
       receiver: normalizedOrder.receiver,
+      from,
     }),
     headers: { "Content-Type": "application/json" },
   });

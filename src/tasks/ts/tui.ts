@@ -2,6 +2,14 @@ import readline from "readline";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
+// Only a single readline interface should be available at each point in time.
+// If more than one is created, then any input to stdin will be printed more
+// than once to stdout.
+export const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
 export async function prompt(
   { network }: HardhatRuntimeEnvironment,
   message: string,
@@ -11,10 +19,6 @@ export async function prompt(
     return true;
   }
 
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
   const response = await new Promise<string>((resolve) =>
     rl.question(`${message} (y/N) `, (response) => resolve(response)),
   );

@@ -1,14 +1,18 @@
 import "@nomiclabs/hardhat-ethers";
 
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import axios from "axios";
 import chalk from "chalk";
 import { BigNumber, constants, Contract, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { EncodedSettlement, SettlementEncoder } from "../ts";
-import { Api, ApiError, CallError, Environment } from "../ts/api";
+import {
+  Api,
+  ApiError,
+  CallError,
+  Environment,
+  LIMIT_CONCURRENT_REQUESTS,
+} from "../ts/api";
 
 import {
   getDeployedContract,
@@ -16,14 +20,14 @@ import {
   SupportedNetwork,
 } from "./ts/deployment";
 import { createGasEstimator, IGasEstimator } from "./ts/gas";
+import { fastTokenDetails } from "./ts/oneinch_tokens";
 import {
   DisappearingLogFunctions,
   promiseAllWithRateLimit,
 } from "./ts/rate_limits";
 import { getSolvers } from "./ts/solver";
 import { Align, displayTable } from "./ts/table";
-import { Erc20Token, erc20Token } from "./ts/tokens";
-import { prompt } from "./ts/tui";
+import { Erc20Token } from "./ts/tokens";
 import {
   formatTokenValue,
   formatUsdValue,
@@ -31,7 +35,11 @@ import {
   ReferenceToken,
   usdValue,
   usdValueOfEth,
+  formatGasCost,
 } from "./ts/value";
+import { ignoredTokenMessage } from "./withdraw/messages";
+import { submitSettlement } from "./withdraw/settle";
+import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
 import { getAllTradedTokens } from "./withdraw/traded_tokens";
 
 interface Withdrawal {
@@ -49,37 +57,6 @@ interface DisplayWithdrawal {
   amount: string;
   value: string;
   address: string;
-}
-
-// https://api.1inch.exchange/swagger/ethereum/#/Tokens/TokensController_getTokens
-type OneinchTokenList = Record<
-  string,
-  { symbol: string; decimals: number; address: string }
->;
-const ONEINCH_TOKENS: Promise<OneinchTokenList> = axios
-  .get("https://api.1inch.exchange/v3.0/1/tokens")
-  .then((response) => response.data.tokens)
-  .catch(() => {
-    console.log("Warning: unable to recover token list from 1inch");
-    return {};
-  });
-
-async function fastTokenDetails(
-  address: string,
-  hre: HardhatRuntimeEnvironment,
-): Promise<Erc20Token | null> {
-  const oneinchTokens = await ONEINCH_TOKENS;
-  if (
-    hre.network.name === "mainnet" &&
-    oneinchTokens[address.toLowerCase()] !== undefined
-  ) {
-    const IERC20 = await hre.artifacts.readArtifact(
-      "src/contracts/interfaces/IERC20.sol:IERC20",
-    );
-    const contract = new Contract(address, IERC20.abi, hre.ethers.provider);
-    return { ...oneinchTokens[address.toLowerCase()], contract };
-  }
-  return erc20Token(address, hre);
 }
 
 interface ComputeSettlementInput {
@@ -166,23 +143,78 @@ async function computeSettlementWithPrice({
   };
 }
 
-function ignoredTokenMessage(
-  amount: BigNumber,
-  token: Erc20Token,
-  usdReference: ReferenceToken,
-  valueUsd: BigNumber,
-  reason?: string,
-) {
-  const decimals = token.decimals ?? 18;
-  return `Ignored ${utils.formatUnits(amount, decimals)} units of ${
-    token.symbol ?? "unknown token"
-  } (${token.address})${
-    token.decimals === undefined
-      ? ` (no decimals specified in the contract, assuming ${decimals})`
-      : ""
-  } with value ${formatUsdValue(valueUsd, usdReference)} USD${
-    reason ? `, ${reason}` : ""
-  }`;
+export interface GetBalanceToWithdrawInput {
+  token: Erc20Token;
+  usdReference: ReferenceToken;
+  settlement: Contract;
+  api: Api;
+  leftoverWei: BigNumber;
+  minValueWei: BigNumber;
+  consoleLog: typeof console.log;
+}
+export interface BalanceOutput {
+  netAmount: BigNumber;
+  netAmountUsd: BigNumber;
+  balance: BigNumber;
+  balanceUsd: BigNumber;
+}
+export async function getAmounts({
+  token,
+  usdReference,
+  settlement,
+  api,
+  leftoverWei,
+  minValueWei,
+  consoleLog,
+}: GetBalanceToWithdrawInput): Promise<BalanceOutput | null> {
+  const balance = await token.contract.balanceOf(settlement.address);
+  if (balance.eq(0)) {
+    return null;
+  }
+  let balanceUsd;
+  try {
+    balanceUsd = await usdValue(token.address, balance, usdReference, api);
+  } catch (e) {
+    if (!(e instanceof Error)) {
+      throw e;
+    }
+    const errorData: ApiError = (e as CallError).apiError ?? {
+      errorType: "script internal error",
+      description: e?.message ?? "no details",
+    };
+    consoleLog(
+      `Warning: price retrieval failed for token ${token.symbol} (${token.address}): ${errorData.errorType} (${errorData.description})`,
+    );
+    balanceUsd = constants.Zero;
+  }
+  // Note: if balanceUsd is zero, then setting either minValue or leftoverWei
+  // to a nonzero value means that nothing should be withdrawn. If neither
+  // flag is set, then whether to withdraw does not depend on the USD value.
+  if (
+    balanceUsd.lt(minValueWei.add(leftoverWei)) ||
+    (balanceUsd.isZero() && !(minValueWei.isZero() && leftoverWei.isZero()))
+  ) {
+    consoleLog(
+      ignoredTokenMessage(
+        [token, balance],
+        "does not satisfy conditions on min value and leftover",
+        [usdReference, balanceUsd],
+      ),
+    );
+    return null;
+  }
+  let netAmount;
+  let netAmountUsd;
+  if (balanceUsd.isZero()) {
+    // Note: minValueWei and leftoverWei are zero. Everything should be
+    // withdrawn.
+    netAmount = balance;
+    netAmountUsd = balanceUsd;
+  } else {
+    netAmount = balance.mul(balanceUsd.sub(leftoverWei)).div(balanceUsd);
+    netAmountUsd = balanceUsd.sub(leftoverWei);
+  }
+  return { netAmount, netAmountUsd, balance, balanceUsd };
 }
 
 interface GetWithdrawalsInput {
@@ -220,68 +252,26 @@ async function getWithdrawals({
             `There is no valid ERC20 token at address ${tokenAddress}`,
           );
         }
-        const balance = await token.contract.balanceOf(settlement.address);
-        if (balance.eq(0)) {
+
+        const amounts = await getAmounts({
+          token,
+          usdReference,
+          settlement,
+          api,
+          leftoverWei,
+          minValueWei,
+          consoleLog,
+        });
+        if (amounts === null) {
           return null;
-        }
-        let balanceUsd;
-        try {
-          balanceUsd = await usdValue(
-            token.address,
-            balance,
-            usdReference,
-            api,
-          );
-        } catch (e) {
-          if (!(e instanceof Error)) {
-            throw e;
-          }
-          const errorData: ApiError = (e as CallError).apiError ?? {
-            errorType: "script internal error",
-            description: e?.message ?? "no details",
-          };
-          consoleLog(
-            `Warning: price retrieval failed for token ${token.symbol} (${token.address}): ${errorData.errorType} (${errorData.description})`,
-          );
-          balanceUsd = constants.Zero;
-        }
-        // Note: if balanceUsd is zero, then setting either minValue or leftoverWei
-        // to a nonzero value means that nothing should be withdrawn. If neither
-        // flag is set, then whether to withdraw does not depend on the USD value.
-        if (
-          balanceUsd.lt(minValueWei.add(leftoverWei)) ||
-          (balanceUsd.isZero() &&
-            !(minValueWei.isZero() && leftoverWei.isZero()))
-        ) {
-          consoleLog(
-            ignoredTokenMessage(
-              balance,
-              token,
-              usdReference,
-              balanceUsd,
-              "does not satisfy conditions on min value and leftover",
-            ),
-          );
-          return null;
-        }
-        let amount;
-        let amountUsd;
-        if (balanceUsd.isZero()) {
-          // Note: minValueWei and leftoverWei are zero. Everything should be
-          // withdrawn.
-          amount = balance;
-          amountUsd = balanceUsd;
-        } else {
-          amount = balance.mul(balanceUsd.sub(leftoverWei)).div(balanceUsd);
-          amountUsd = balanceUsd.sub(leftoverWei);
         }
 
         const withdrawalWithoutGas = {
           token,
-          amount,
-          amountUsd,
-          balance,
-          balanceUsd,
+          amount: amounts.netAmount,
+          amountUsd: amounts.netAmountUsd,
+          balance: amounts.balance,
+          balanceUsd: amounts.balanceUsd,
         };
         let gas;
         try {
@@ -298,11 +288,9 @@ async function getWithdrawals({
           }
           consoleLog(
             ignoredTokenMessage(
-              balance,
-              token,
-              usdReference,
-              balanceUsd,
+              [token, amounts.balance],
               `cannot execute withdraw transaction (${error.message})`,
+              [usdReference, amounts.balanceUsd],
             ),
           );
           return null;
@@ -316,7 +304,7 @@ async function getWithdrawals({
   const processedWithdrawals: (Withdrawal | null)[] =
     await promiseAllWithRateLimit(computeWithdrawalInstructions, {
       message: "computing withdrawals",
-      rateLimit: 5,
+      rateLimit: LIMIT_CONCURRENT_REQUESTS,
     });
   return processedWithdrawals.filter(
     (withdrawal) => withdrawal !== null,
@@ -360,50 +348,6 @@ function displayWithdrawals(
     symbol: { maxWidth: 20 },
   });
   console.log();
-}
-
-function formatGasCost(
-  amount: BigNumber,
-  usdAmount: BigNumber,
-  network: SupportedNetwork,
-  usdReference: ReferenceToken,
-): string {
-  switch (network) {
-    case "mainnet": {
-      return `${utils.formatEther(amount)} ETH (${formatUsdValue(
-        usdAmount,
-        usdReference,
-      )} USD)`;
-    }
-    case "xdai":
-      return `${utils.formatEther(amount)} XDAI`;
-    default:
-      return `${utils.formatEther(amount)} ETH`;
-  }
-}
-
-type SignerOrAddress =
-  | SignerWithAddress
-  | { address: string; _isSigner: false };
-
-async function getSignerOrAddress(
-  { ethers }: HardhatRuntimeEnvironment,
-  origin?: string,
-): Promise<SignerOrAddress> {
-  const signers = await ethers.getSigners();
-  const originAddress = ethers.utils.getAddress(origin ?? signers[0].address);
-  return (
-    signers.find(({ address }) => address === originAddress) ?? {
-      address: originAddress,
-      // Take advantage of the fact that all Ethers signers have `_isSigner` set
-      // to `true`.
-      _isSigner: false,
-    }
-  );
-}
-
-function isSigner(solver: SignerOrAddress): solver is SignerWithAddress {
-  return solver._isSigner;
 }
 
 interface WithdrawInput {
@@ -516,13 +460,11 @@ async function prepareWithdrawals({
       if (feePercent > maxFeePercent) {
         console.log(
           ignoredTokenMessage(
-            balance,
-            token,
-            usdReference,
-            balanceUsd,
+            [token, balance],
             `the gas cost is too high (${feePercent.toFixed(
               2,
             )}% of the withdrawn amount)`,
+            [usdReference, balanceUsd],
           ),
         );
         return false;
@@ -572,41 +514,6 @@ async function prepareWithdrawals({
   return { withdrawals, finalSettlement };
 }
 
-async function submitWithdrawals(
-  {
-    dryRun,
-    doNotPrompt,
-    hre,
-    settlement,
-    solver,
-    requiredConfirmations,
-    gasEstimator,
-  }: WithdrawInput,
-  finalSettlement: EncodedSettlement,
-) {
-  if (!isSigner(solver)) {
-    const settlementData = settlement.interface.encodeFunctionData(
-      "settle",
-      finalSettlement,
-    );
-    console.log("Settlement transaction:");
-    console.log(`to:   ${settlement.address}`);
-    console.log(`data: ${settlementData}`);
-  } else if (!dryRun && (doNotPrompt || (await prompt(hre, "Submit?")))) {
-    console.log("Executing the withdraw transaction on the blockchain...");
-    const response = await settlement
-      .connect(solver)
-      .settle(...finalSettlement, await gasEstimator.txGasPrice());
-    console.log(
-      "Transaction submitted to the blockchain. Waiting for acceptance in a block...",
-    );
-    const receipt = await response.wait(requiredConfirmations);
-    console.log(
-      `Transaction successfully executed. Transaction hash: ${receipt.transactionHash}`,
-    );
-  }
-}
-
 export async function withdraw(input: WithdrawInput): Promise<string[] | null> {
   let withdrawals, finalSettlement;
   try {
@@ -623,7 +530,11 @@ export async function withdraw(input: WithdrawInput): Promise<string[] | null> {
     return [];
   }
 
-  await submitWithdrawals(input, finalSettlement);
+  await submitSettlement({
+    ...input,
+    settlementContract: input.settlement,
+    encodedSettlement: finalSettlement,
+  });
 
   return withdrawals.map((w) => w.token.address);
 }
