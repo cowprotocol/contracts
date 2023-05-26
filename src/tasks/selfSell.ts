@@ -29,6 +29,7 @@ import {
   computeValidTo,
   APP_DATA,
   MAX_ORDER_VALIDITY_SECONDS,
+  Quote,
 } from "./dump";
 import {
   getDeployedContract,
@@ -54,7 +55,7 @@ import {
   usdValueOfEth,
   formatGasCost,
 } from "./ts/value";
-import { getAmounts } from "./withdraw";
+import { BalanceOutput, getAmounts } from "./withdraw";
 import { ignoredTokenMessage } from "./withdraw/messages";
 import { submitSettlement } from "./withdraw/settle";
 import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
@@ -166,6 +167,71 @@ async function computeSettlementWithPrice({
   };
 }
 
+interface ComputeOrderAfterFeeSlippageInput {
+  quote: Quote;
+  amounts: BalanceOutput;
+  feeSlippageBps: number;
+  receiver: string;
+  usdReference: ReferenceToken;
+  sellToken: Erc20Token;
+  validTo: number;
+}
+function computeOrderAfterFeeSlippage({
+  quote,
+  amounts,
+  feeSlippageBps,
+  receiver,
+  usdReference,
+  sellToken,
+  validTo,
+}: ComputeOrderAfterFeeSlippageInput): {
+  order: Order;
+  adjustedFee: BigNumber;
+} | null {
+  // Tentatively adjust the fee linearly assuming that the order's exchange rate
+  // doesn't depend on the amount.
+
+  // Fee amounts are taken from the sell token. We need to reserve the following
+  // extra amount because it could be taken by a gas price increase:
+  const reservedSellAmountForFeeSlippage = quote.feeAmount
+    .mul(feeSlippageBps)
+    .div(10000);
+
+  const fullSellAmount = quote.sellAmount.add(quote.feeAmount);
+  // We take this extra fee from the buy amount, since the full sell amount is
+  // fixed.
+  const reservedBuyAmountForFeeSlippage = reservedSellAmountForFeeSlippage
+    .mul(quote.buyAmount)
+    .div(fullSellAmount);
+
+  if (reservedBuyAmountForFeeSlippage.gte(quote.buyAmount)) {
+    console.log(
+      ignoredTokenMessage(
+        [sellToken, amounts.balance],
+        `adjusting order for fee slippage requires more than what is obtained from selling`,
+        [usdReference, amounts.balanceUsd],
+      ),
+    );
+    return null;
+  }
+
+  return {
+    order: {
+      sellToken: quote.sellToken,
+      buyToken: quote.buyToken,
+      receiver,
+      sellAmount: fullSellAmount,
+      buyAmount: quote.buyAmount.sub(reservedBuyAmountForFeeSlippage),
+      validTo,
+      appData: APP_DATA,
+      feeAmount: constants.Zero,
+      kind: OrderKind.SELL,
+      partiallyFillable: true,
+    },
+    adjustedFee: quote.feeAmount.add(reservedSellAmountForFeeSlippage),
+  };
+}
+
 interface OrderDetails {
   order: Order;
   sellAmountUsd: BigNumber;
@@ -186,7 +252,8 @@ interface GetOrdersInput {
   minValue: string;
   leftover: string;
   maxFeePercent: number;
-  slippageBps: number;
+  priceSlippageBps: number;
+  feeSlippageBps: number;
   validity: number;
   hre: HardhatRuntimeEnvironment;
   usdReference: ReferenceToken;
@@ -203,7 +270,8 @@ async function getOrders({
   minValue,
   leftover,
   maxFeePercent,
-  slippageBps,
+  priceSlippageBps,
+  feeSlippageBps,
   validity,
   hre,
   usdReference,
@@ -272,33 +340,33 @@ async function getOrders({
           api,
           sellAmountBeforeFee: amounts.netAmount,
           maxFeePercent,
-          slippageBps,
+          slippageBps: priceSlippageBps,
           validTo,
           user: owner,
         });
         if (quote === null) {
           return null;
         }
-
-        const order: Order = {
-          sellToken: sellToken.address,
-          buyToken: (toToken as Erc20Token).address ?? BUY_ETH_ADDRESS,
+        const adjustedOrder = computeOrderAfterFeeSlippage({
+          quote,
+          amounts,
+          feeSlippageBps,
           receiver,
-          sellAmount: amounts.netAmount,
-          buyAmount: quote.buyAmount,
+          usdReference,
+          sellToken,
           validTo,
-          appData: APP_DATA,
-          feeAmount: constants.Zero,
-          kind: OrderKind.SELL,
-          partiallyFillable: true,
-        };
+        });
+        if (adjustedOrder === null) {
+          return null;
+        }
+        const { order, adjustedFee } = adjustedOrder;
         const orderUid = computeOrderUid(domainSeparator, order, owner);
 
         let feeUsd;
         try {
           feeUsd = await usdValue(
             order.sellToken,
-            quote.feeAmount,
+            adjustedFee,
             usdReference,
             api,
           );
@@ -433,7 +501,8 @@ interface SelfSellInput {
   minValue: string;
   leftover: string;
   maxFeePercent: number;
-  slippageBps: number;
+  priceSlippageBps: number;
+  feeSlippageBps: number;
   validity: number;
   receiver: string;
   authenticator: Contract;
@@ -458,7 +527,8 @@ async function prepareOrders({
   leftover,
   maxFeePercent,
   validity,
-  slippageBps,
+  priceSlippageBps,
+  feeSlippageBps,
   receiver,
   authenticator,
   settlement,
@@ -543,7 +613,8 @@ async function prepareOrders({
     api,
     validity,
     maxFeePercent,
-    slippageBps,
+    priceSlippageBps,
+    feeSlippageBps,
     domainSeparator,
     solverForSimulation,
   });
@@ -752,7 +823,13 @@ const setupSelfSellTask: () => void = () =>
       types.int,
     )
     .addOptionalParam(
-      "slippageBps",
+      "feeSlippageBps",
+      "The slippage in basis points to account for changes in the trading fees between when the order is created and when it's executed by CoW Swap",
+      1000,
+      types.int,
+    )
+    .addOptionalParam(
+      "priceSlippageBps",
       "The slippage in basis points for selling the dumped tokens",
       10,
       types.int,
@@ -792,7 +869,8 @@ const setupSelfSellTask: () => void = () =>
           minValue,
           leftover,
           maxFeePercent,
-          slippageBps,
+          priceSlippageBps,
+          feeSlippageBps,
           validity,
           receiver: inputReceiver,
           dryRun,
@@ -839,7 +917,8 @@ const setupSelfSellTask: () => void = () =>
           leftover,
           receiver,
           maxFeePercent,
-          slippageBps,
+          priceSlippageBps,
+          feeSlippageBps,
           validity,
           authenticator,
           settlement,

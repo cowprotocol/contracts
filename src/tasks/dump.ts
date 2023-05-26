@@ -67,7 +67,9 @@ interface DumpInstruction {
   needsAllowance: boolean;
 }
 
-interface Quote {
+export interface Quote {
+  sellToken: string;
+  buyToken: string;
   sellAmount: BigNumber;
   buyAmount: BigNumber;
   feeAmount: BigNumber;
@@ -336,10 +338,13 @@ export async function getQuote({
   api,
 }: QuoteInput): Promise<Quote | null> {
   let quote;
+  const buyTokenAddress = isNativeToken(buyToken)
+    ? BUY_ETH_ADDRESS
+    : buyToken.address;
   try {
     const quotedOrder = await api.getQuote({
       sellToken: sellToken.address,
-      buyToken: isNativeToken(buyToken) ? BUY_ETH_ADDRESS : buyToken.address,
+      buyToken: buyTokenAddress,
       validTo,
       appData: APP_DATA,
       partiallyFillable: false,
@@ -348,6 +353,8 @@ export async function getQuote({
       sellAmountBeforeFee,
     });
     quote = {
+      sellToken: sellToken.address,
+      buyToken: buyTokenAddress,
       sellAmount: BigNumber.from(quotedOrder.quote.sellAmount),
       buyAmount: buyAmountWithSlippage(
         quotedOrder.quote.buyAmount,
