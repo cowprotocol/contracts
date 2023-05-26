@@ -2,6 +2,7 @@ import { setupCopyArtifactsTask } from "./artifacts";
 import { setupDecodeTask } from "./decode";
 import { setupDumpTask } from "./dump";
 import { setupPlaceOrderTask } from "./placeOrder";
+import { setupSelfSellTask } from "./selfSell";
 import { setupSetApprovalsTask } from "./setApprovals";
 import { setupSolversTask } from "./solvers";
 import { setupTenderlyTask } from "./tenderly";
@@ -14,6 +15,7 @@ export function setupTasks(): void {
   setupDecodeTask();
   setupDumpTask();
   setupPlaceOrderTask();
+  setupSelfSellTask();
   setupSetApprovalsTask();
   setupSolversTask();
   setupTenderlyTask();
