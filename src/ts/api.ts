@@ -92,7 +92,8 @@ export interface OrderDetailResponse {
 export interface GetQuoteResponse {
   quote: Order;
   from: string;
-  expirationDate: Timestamp;
+  expiration: Timestamp;
+  id?: number;
 }
 
 export interface ApiError {
