@@ -59,8 +59,8 @@ import { BalanceOutput, getAmounts } from "./withdraw";
 import { ignoredTokenMessage } from "./withdraw/messages";
 import { submitSettlement } from "./withdraw/settle";
 import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
-import { getAllTradedTokens } from "./withdraw/traded_tokens";
 import { getTokensWithBalanceAbove } from "./withdraw/token_balances";
+import { getAllTradedTokens } from "./withdraw/traded_tokens";
 
 interface DisplayOrder {
   symbol: string;
@@ -905,7 +905,13 @@ const setupSelfSellTask: () => void = () =>
           throw new Error("Order validity too large");
         }
 
-        const tokens = (await getTokensWithBalanceAbove(minValue, settlementDeployment.address)).filter((token) => token != toToken);
+        // Exclude the toToken if needed, as we can not sell it for itself (buyToken is not allowed to equal sellToken)
+        const tokens = (
+          await getTokensWithBalanceAbove(
+            minValue,
+            settlementDeployment.address,
+          )
+        ).filter((token) => token != toToken);
 
         await selfSell({
           solver,
