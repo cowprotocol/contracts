@@ -60,6 +60,7 @@ import { ignoredTokenMessage } from "./withdraw/messages";
 import { submitSettlement } from "./withdraw/settle";
 import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
 import { getAllTradedTokens } from "./withdraw/traded_tokens";
+import { getTokensWithBalanceAbove } from "./withdraw/token_balances";
 
 interface DisplayOrder {
   symbol: string;
@@ -853,10 +854,6 @@ const setupSelfSellTask: () => void = () =>
       "blocknativeGasPrice",
       "Use BlockNative gas price estimates for transactions.",
     )
-    .addOptionalVariadicPositionalParam(
-      "tokens",
-      "An optional subset of tokens to consider for selling (otherwise all traded tokens will be queried).",
-    )
     .addOptionalParam(
       "toToken",
       "All input tokens will be dumped to this token. If not specified, it defaults to the network's native token (e.g., ETH)",
@@ -874,7 +871,6 @@ const setupSelfSellTask: () => void = () =>
           validity,
           receiver: inputReceiver,
           dryRun,
-          tokens,
           apiUrl,
           blocknativeGasPrice,
         },
@@ -908,6 +904,8 @@ const setupSelfSellTask: () => void = () =>
         if (validity > MAX_ORDER_VALIDITY_SECONDS) {
           throw new Error("Order validity too large");
         }
+
+        const tokens = (await getTokensWithBalanceAbove(minValue, settlementDeployment.address)).filter((token) => token != toToken);
 
         await selfSell({
           solver,
