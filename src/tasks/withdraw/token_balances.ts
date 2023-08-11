@@ -21,9 +21,7 @@ export async function getTokensWithBalanceAbove(
     `https://api.ethplorer.io/getAddressInfo/${settlementContract}?apiKey=freekey`,
   );
   if (response.status !== 200) {
-    throw new Error(
-      `Error getting tokens from ETHplorer ${response}`
-    );
+    throw new Error(`Error getting tokens from ETHplorer ${response}`);
   }
   const result = [];
   const data = response.data as AddressInfoResponse;
