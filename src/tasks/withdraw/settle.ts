@@ -6,7 +6,6 @@ import { IGasEstimator } from "../ts/gas";
 import { prompt } from "../ts/tui";
 
 import { isSigner, SignerOrAddress } from "./signer";
-import { proposeTransaction } from "./safe"
 
 export interface SubmitSettlementInput {
   dryRun: boolean;
@@ -29,6 +28,7 @@ export async function submitSettlement({
   encodedSettlement,
 }: SubmitSettlementInput) {
   if (
+    isSigner(solver) &&
     !dryRun &&
     (doNotPrompt || (await prompt(hre, "Submit settlement?")))
   ) {
