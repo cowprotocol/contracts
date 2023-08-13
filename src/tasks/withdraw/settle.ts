@@ -6,6 +6,7 @@ import { IGasEstimator } from "../ts/gas";
 import { prompt } from "../ts/tui";
 
 import { isSigner, SignerOrAddress } from "./signer";
+import { proposeTransaction } from "./safe"
 
 export interface SubmitSettlementInput {
   dryRun: boolean;
@@ -27,15 +28,7 @@ export async function submitSettlement({
   gasEstimator,
   encodedSettlement,
 }: SubmitSettlementInput) {
-  if (!isSigner(solver)) {
-    const settlementData = settlementContract.interface.encodeFunctionData(
-      "settle",
-      encodedSettlement,
-    );
-    console.log("Settlement transaction:");
-    console.log(`to:   ${settlementContract.address}`);
-    console.log(`data: ${settlementData}`);
-  } else if (
+  if (
     !dryRun &&
     (doNotPrompt || (await prompt(hre, "Submit settlement?")))
   ) {

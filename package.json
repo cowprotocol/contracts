@@ -86,5 +86,10 @@
     "lib/",
     "networks.json",
     "src/"
-  ]
+  ],
+  "dependencies": {
+    "@safe-global/api-kit": "^1.3.0",
+    "@safe-global/protocol-kit": "^1.2.0",
+    "@safe-global/safe-core-sdk-types": "^2.2.0"
+  }
 }

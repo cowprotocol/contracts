@@ -58,9 +58,10 @@ import {
 import { BalanceOutput, getAmounts } from "./withdraw";
 import { ignoredTokenMessage } from "./withdraw/messages";
 import { submitSettlement } from "./withdraw/settle";
-import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
+import { getSignerOrAddress, isSigner, SignerOrAddress } from "./withdraw/signer";
 import { getTokensWithBalanceAbove } from "./withdraw/token_balances";
 import { getAllTradedTokens } from "./withdraw/traded_tokens";
+import { proposeTransaction } from "./withdraw/safe"
 
 interface DisplayOrder {
   symbol: string;
@@ -787,11 +788,22 @@ export async function selfSell(input: SelfSellInput): Promise<string[] | null> {
     dryRun: input.dryRun,
     doNotPrompt: input.doNotPrompt,
   });
-  await submitSettlement({
-    ...input,
-    settlementContract: input.settlement,
-    encodedSettlement: finalSettlement,
-  });
+
+  if (!isSigner(input.solver)) {
+    const settlementData = input.settlement.interface.encodeFunctionData(
+      "settle",
+      finalSettlement,
+    );
+    const safeTxUrl = await proposeTransaction(input.hre, input.hre.network.name, {to: input.settlement.address, data: settlementData, authoringSafe: input.solver.address});
+    // TODO send slack message
+    console.log(`Sign settlement transaction in the Safe UI: ${safeTxUrl}`);
+  } else {
+    await submitSettlement({
+      ...input,
+      settlementContract: input.settlement,
+      encodedSettlement: finalSettlement,
+    });
+  }
 
   return orders.map((o) => o.sellToken.address);
 }
