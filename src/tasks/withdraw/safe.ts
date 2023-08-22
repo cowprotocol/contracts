@@ -1,6 +1,5 @@
 import SafeApiKit from "@safe-global/api-kit";
 import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
-import { SafeTransactionDataPartial } from "@safe-global/safe-core-sdk-types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 interface Transaction {

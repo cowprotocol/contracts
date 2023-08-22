@@ -59,11 +59,7 @@ import { BalanceOutput, getAmounts } from "./withdraw";
 import { ignoredTokenMessage } from "./withdraw/messages";
 import { proposeTransaction } from "./withdraw/safe";
 import { submitSettlement } from "./withdraw/settle";
-import {
-  getSignerOrAddress,
-  isSigner,
-  SignerOrAddress,
-} from "./withdraw/signer";
+import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
 import { getTokensWithBalanceAbove } from "./withdraw/token_balances";
 import { getAllTradedTokens } from "./withdraw/traded_tokens";
 
@@ -884,7 +880,7 @@ const setupSelfSellTask: () => void = () =>
       "All input tokens will be dumped to this token. If not specified, it defaults to the network's native token (e.g., ETH)",
     )
     .addFlag(
-      "--safe",
+      "safe",
       "Whether the solver is a Safe and the script should propose the transaction to the Safe UI instead of sending a transaction directly",
     )
     .setAction(
@@ -964,7 +960,7 @@ const setupSelfSellTask: () => void = () =>
           dryRun,
           gasEstimator,
           domainSeparator,
-          solverIsSafe: safe
+          solverIsSafe: safe,
         });
       },
     );
