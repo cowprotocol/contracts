@@ -523,6 +523,7 @@ interface SelfSellInput {
   doNotPrompt?: boolean | undefined;
   requiredConfirmations?: number | undefined;
   domainSeparator: TypedDataDomain;
+  solverIsSafe: boolean;
 }
 
 async function prepareOrders({
@@ -793,7 +794,7 @@ export async function selfSell(input: SelfSellInput): Promise<string[] | null> {
     doNotPrompt: input.doNotPrompt,
   });
 
-  if (!isSigner(input.solver)) {
+  if (input.solverIsSafe) {
     const settlementData = input.settlement.interface.encodeFunctionData(
       "settle",
       finalSettlement,
@@ -882,6 +883,10 @@ const setupSelfSellTask: () => void = () =>
       "toToken",
       "All input tokens will be dumped to this token. If not specified, it defaults to the network's native token (e.g., ETH)",
     )
+    .addFlag(
+      "--safe",
+      "Whether the solver is a Safe and the script should propose the transaction to the Safe UI instead of sending a transaction directly",
+    )
     .setAction(
       async (
         {
@@ -897,6 +902,7 @@ const setupSelfSellTask: () => void = () =>
           dryRun,
           apiUrl,
           blocknativeGasPrice,
+          safe,
         },
         hre: HardhatRuntimeEnvironment,
       ) => {
@@ -958,6 +964,7 @@ const setupSelfSellTask: () => void = () =>
           dryRun,
           gasEstimator,
           domainSeparator,
+          solverIsSafe: safe
         });
       },
     );

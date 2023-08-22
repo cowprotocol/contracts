@@ -25,13 +25,13 @@ export async function proposeTransaction(
   network: string,
   { authoringSafe, to, data }: Transaction,
 ): Promise<string> {
-  const proposer = (await ethers.getSigners())[0];
+  const [proposer] = await ethers.getSigners();
   const ethAdapter = new EthersAdapter({
     ethers,
     signerOrProvider: proposer,
   });
 
-  const safeTransactionData: SafeTransactionDataPartial = {
+  const safeTransactionData = {
     to,
     data,
     value: "0",
