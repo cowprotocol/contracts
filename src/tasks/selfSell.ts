@@ -57,6 +57,7 @@ import {
 } from "./ts/value";
 import { BalanceOutput, getAmounts } from "./withdraw";
 import { ignoredTokenMessage } from "./withdraw/messages";
+import { proposeTransaction } from "./withdraw/safe";
 import { submitSettlement } from "./withdraw/settle";
 import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
 import { getTokensWithBalanceAbove } from "./withdraw/token_balances";
@@ -518,6 +519,7 @@ interface SelfSellInput {
   doNotPrompt?: boolean | undefined;
   requiredConfirmations?: number | undefined;
   domainSeparator: TypedDataDomain;
+  solverIsSafe: boolean;
 }
 
 async function prepareOrders({
@@ -787,11 +789,30 @@ export async function selfSell(input: SelfSellInput): Promise<string[] | null> {
     dryRun: input.dryRun,
     doNotPrompt: input.doNotPrompt,
   });
-  await submitSettlement({
-    ...input,
-    settlementContract: input.settlement,
-    encodedSettlement: finalSettlement,
-  });
+
+  if (input.solverIsSafe) {
+    const settlementData = input.settlement.interface.encodeFunctionData(
+      "settle",
+      finalSettlement,
+    );
+    const safeTxUrl = await proposeTransaction(
+      input.hre,
+      input.hre.network.name,
+      {
+        to: input.settlement.address,
+        data: settlementData,
+        authoringSafe: input.solver.address,
+      },
+    );
+    // TODO send slack message
+    console.log(`Sign settlement transaction in the Safe UI: ${safeTxUrl}`);
+  } else {
+    await submitSettlement({
+      ...input,
+      settlementContract: input.settlement,
+      encodedSettlement: finalSettlement,
+    });
+  }
 
   return orders.map((o) => o.sellToken.address);
 }
@@ -858,6 +879,10 @@ const setupSelfSellTask: () => void = () =>
       "toToken",
       "All input tokens will be dumped to this token. If not specified, it defaults to the network's native token (e.g., ETH)",
     )
+    .addFlag(
+      "safe",
+      "Whether the solver is a Safe and the script should propose the transaction to the Safe UI instead of sending a transaction directly",
+    )
     .setAction(
       async (
         {
@@ -873,6 +898,7 @@ const setupSelfSellTask: () => void = () =>
           dryRun,
           apiUrl,
           blocknativeGasPrice,
+          safe,
         },
         hre: HardhatRuntimeEnvironment,
       ) => {
@@ -934,6 +960,7 @@ const setupSelfSellTask: () => void = () =>
           dryRun,
           gasEstimator,
           domainSeparator,
+          solverIsSafe: safe,
         });
       },
     );
