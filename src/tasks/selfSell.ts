@@ -792,7 +792,9 @@ export async function selfSell(input: SelfSellInput): Promise<string[] | null> {
     doNotPrompt: input.doNotPrompt,
   });
 
-  if (input.solverIsSafe) {
+  if (input.dryRun) {
+    console.log("Not sending transaction in dryRun mode");
+  } else if (input.solverIsSafe) {
     const settlementData = input.settlement.interface.encodeFunctionData(
       "settle",
       finalSettlement,
