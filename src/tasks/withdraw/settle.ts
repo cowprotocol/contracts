@@ -27,8 +27,15 @@ export async function submitSettlement({
   gasEstimator,
   encodedSettlement,
 }: SubmitSettlementInput) {
-  if (
-    isSigner(solver) &&
+  if (!isSigner(solver)) {
+    const settlementData = settlementContract.interface.encodeFunctionData(
+      "settle",
+      encodedSettlement,
+    );
+    console.log("Settlement transaction:");
+    console.log(`to:   ${settlementContract.address}`);
+    console.log(`data: ${settlementData}`);
+  } else if (
     !dryRun &&
     (doNotPrompt || (await prompt(hre, "Submit settlement?")))
   ) {
