@@ -60,6 +60,7 @@ import { ignoredTokenMessage } from "./withdraw/messages";
 import { proposeTransaction } from "./withdraw/safe";
 import { submitSettlement } from "./withdraw/settle";
 import { getSignerOrAddress, SignerOrAddress } from "./withdraw/signer";
+import { sendSlackMessage } from "./withdraw/slack";
 import { getTokensWithBalanceAbove } from "./withdraw/token_balances";
 import { getAllTradedTokens } from "./withdraw/traded_tokens";
 
@@ -520,6 +521,7 @@ interface SelfSellInput {
   requiredConfirmations?: number | undefined;
   domainSeparator: TypedDataDomain;
   solverIsSafe: boolean;
+  notifySlackChannel?: string;
 }
 
 async function prepareOrders({
@@ -804,8 +806,10 @@ export async function selfSell(input: SelfSellInput): Promise<string[] | null> {
         authoringSafe: input.solver.address,
       },
     );
-    // TODO send slack message
     console.log(`Sign settlement transaction in the Safe UI: ${safeTxUrl}`);
+    if (input.notifySlackChannel) {
+      await sendSlackMessage(input.notifySlackChannel, safeTxUrl);
+    }
   } else {
     await submitSettlement({
       ...input,
@@ -872,6 +876,10 @@ const setupSelfSellTask: () => void = () =>
       "Just simulate the settlement instead of executing the transaction on the blockchain.",
     )
     .addFlag(
+      "doNotPrompt",
+      "Automatically propose/execute the transaction without asking for confirmation.",
+    )
+    .addFlag(
       "blocknativeGasPrice",
       "Use BlockNative gas price estimates for transactions.",
     )
@@ -882,6 +890,10 @@ const setupSelfSellTask: () => void = () =>
     .addFlag(
       "safe",
       "Whether the solver is a Safe and the script should propose the transaction to the Safe UI instead of sending a transaction directly",
+    )
+    .addOptionalParam(
+      "notifySlackChannel",
+      "The slack channel id to send the proposed transaction to (requires SLACK_TOKEN env variable to be set)",
     )
     .setAction(
       async (
@@ -899,6 +911,8 @@ const setupSelfSellTask: () => void = () =>
           apiUrl,
           blocknativeGasPrice,
           safe,
+          notifySlackChannel,
+          doNotPrompt,
         },
         hre: HardhatRuntimeEnvironment,
       ) => {
@@ -961,6 +975,8 @@ const setupSelfSellTask: () => void = () =>
           gasEstimator,
           domainSeparator,
           solverIsSafe: safe,
+          notifySlackChannel,
+          doNotPrompt,
         });
       },
     );
