@@ -876,6 +876,10 @@ const setupSelfSellTask: () => void = () =>
       "Just simulate the settlement instead of executing the transaction on the blockchain.",
     )
     .addFlag(
+      "doNotPrompt",
+      "Automatically propose/execute the transaction without asking for confirmation.",
+    )
+    .addFlag(
       "blocknativeGasPrice",
       "Use BlockNative gas price estimates for transactions.",
     )
@@ -908,6 +912,7 @@ const setupSelfSellTask: () => void = () =>
           blocknativeGasPrice,
           safe,
           notifySlackChannel,
+          doNotPrompt,
         },
         hre: HardhatRuntimeEnvironment,
       ) => {
@@ -971,6 +976,7 @@ const setupSelfSellTask: () => void = () =>
           domainSeparator,
           solverIsSafe: safe,
           notifySlackChannel,
+          doNotPrompt,
         });
       },
     );
