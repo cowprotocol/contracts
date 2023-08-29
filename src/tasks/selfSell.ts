@@ -772,11 +772,11 @@ export async function selfSell(input: SelfSellInput): Promise<string[] | null> {
   try {
     ({ orders, finalSettlement } = await prepareOrders(input));
   } catch (error) {
-    console.log(
+    console.error(
       "Script failed execution but no irreversible operations were performed",
     );
-    console.log(error);
-    return null;
+    console.error(error);
+    throw error;
   }
 
   if (finalSettlement === null) {
