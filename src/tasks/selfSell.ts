@@ -953,7 +953,9 @@ const setupSelfSellTask: () => void = () =>
             minValue,
             settlementDeployment.address,
           )
-        ).filter((token) => token != toToken);
+        ).filter(
+          (token) => utils.getAddress(token) != utils.getAddress(toToken),
+        );
 
         await selfSell({
           solver,

@@ -27,6 +27,7 @@
     "bench:trace": "hardhat run bench/trace/index.ts",
     "bench:uniswap": "hardhat run bench/uniswap/index.ts",
     "fmt:sol": "prettier 'src/contracts/**/*.sol' -w",
+    "fmt:ts": "npx eslint --max-warnings 0 . --fix",
     "prepack": "yarn build"
   },
   "peerDependencies": {
