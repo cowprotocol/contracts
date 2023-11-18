@@ -88,6 +88,15 @@ export ETHERSCAN_API_KEY=<Your Key>
 yarn verify:etherscan --network $NETWORK
 ```
 
+Single contracts can be verified as well, but the input parameters must be explicitly given to the command.
+A common example is the vault relayer contract, which is not automatically verified with the command above since it is only deployed indirectly during initialization. This contract can be manually verified with:
+
+```sh
+npx hardhat verify --network $NETWORK 0xC92E8bdf79f0507f65a392b0ab4667716BFE0110  0xBA12222222228d8Ba445958a75a0704d566BF2C8
+```
+
+The first address is the vault relayer address, the second is the deployment input (usually, the Balancer vault).
+
 #### Tenderly
 
 For verifying all deployed contracts:
