@@ -9,11 +9,17 @@ import { getNamedSigner } from "./ts/signers";
 import { getSolvers } from "./ts/solver";
 import { transactionUrl } from "./ts/tui";
 
-const solversTaskList = ["add", "check", "remove", "list"] as const;
+const solversTaskList = [
+  "add",
+  "check",
+  "remove",
+  "list",
+  "setManager",
+] as const;
 type SolversTasks = (typeof solversTaskList)[number];
 
 interface Args {
-  solver?: string;
+  address?: string;
   printTransaction: boolean;
 }
 
@@ -25,9 +31,13 @@ const removeSolver = async (args: Args, hre: HardhatRuntimeEnvironment) => {
   await performSolverManagement("removeSolver", args, hre);
 };
 
+const setManager = async (args: Args, hre: HardhatRuntimeEnvironment) => {
+  await performSolverManagement("setManager", args, hre);
+};
+
 async function performSolverManagement(
-  method: "addSolver" | "removeSolver",
-  { solver, printTransaction }: Args,
+  method: "addSolver" | "removeSolver" | "setManager",
+  { address, printTransaction }: Args,
   hre: HardhatRuntimeEnvironment,
 ): Promise<void> {
   const authenticator = await getDeployedContract(
@@ -36,13 +46,13 @@ async function performSolverManagement(
   );
 
   if (printTransaction) {
-    const data = authenticator.interface.encodeFunctionData(method, [solver]);
+    const data = authenticator.interface.encodeFunctionData(method, [address]);
     console.log(`\`${method}\` transaction:`);
     console.log(`To:   ${authenticator.address}`);
     console.log(`Data: ${data}`);
   } else {
     const owner = await getNamedSigner(hre, "manager");
-    const tx = await authenticator.connect(owner)[method](solver);
+    const tx = await authenticator.connect(owner)[method](address);
     console.log(transactionUrl(hre, tx));
     await tx.wait();
     console.log(`Executed \`${method}\`.`);
@@ -72,7 +82,10 @@ async function listSolvers(hre: HardhatRuntimeEnvironment) {
 }
 
 const setupSolversTask: () => void = () => {
-  task("solvers", "Reads and changes the list of allowed solvers in GPv2.")
+  task(
+    "solvers",
+    "Reads and changes the state of the authenticator in CoW Protocol.",
+  )
     .addPositionalParam<SolversTasks>(
       "subtask",
       `The action to execute on the authenticator. Allowed subtasks: ${solversTaskList.join(
@@ -80,7 +93,7 @@ const setupSolversTask: () => void = () => {
       )}`,
     )
     .addOptionalPositionalParam<string>(
-      "solver",
+      "address",
       "The solver account to add, remove, or check",
     )
     .addFlag(
@@ -101,7 +114,7 @@ const setupSolversTask: () => void = () => {
     "solvers-add",
     "Adds a solver to the list of allowed solvers in GPv2.",
   )
-    .addPositionalParam<string>("solver", "The solver account to add.")
+    .addPositionalParam<string>("address", "The solver account to add.")
     .addFlag("printTransaction", "Prints the transaction to standard out.")
     .setAction(addSolver);
 
@@ -109,17 +122,28 @@ const setupSolversTask: () => void = () => {
     "solvers-remove",
     "Removes a solver from the list of allowed solvers in GPv2.",
   )
-    .addPositionalParam<string>("solver", "The solver account to remove.")
+    .addPositionalParam<string>("address", "The solver account to remove.")
     .addFlag("printTransaction", "Prints the transaction to standard out.")
     .setAction(removeSolver);
+
+  subtask(
+    "solvers-setManager",
+    "Changes the manager who is responsible to add and remove solvers.",
+  )
+    .addPositionalParam<string>(
+      "address",
+      "The address that is going to replace the current manager.",
+    )
+    .addFlag("printTransaction", "Prints the transaction to standard out.")
+    .setAction(setManager);
 
   subtask(
     "solvers-check",
     "Checks that an address is registered as a solver of GPv2.",
   )
-    .addPositionalParam<string>("solver", "The solver account to check.")
-    .setAction(async ({ solver }, hardhatRuntime) => {
-      await isSolver(solver, hardhatRuntime);
+    .addPositionalParam<string>("address", "The solver account to check.")
+    .setAction(async ({ address }, hardhatRuntime) => {
+      await isSolver(address, hardhatRuntime);
     });
 
   subtask(

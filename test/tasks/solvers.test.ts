@@ -7,6 +7,7 @@ import { deployTestContracts } from "../e2e/fixture";
 let manager: Wallet;
 let solver: Wallet;
 let notSolver: Wallet;
+let notManager: Wallet;
 
 let authenticator: Contract;
 
@@ -17,7 +18,7 @@ describe("Task: solvers", () => {
     ({
       manager,
       authenticator,
-      wallets: [solver, notSolver],
+      wallets: [solver, notSolver, notManager],
     } = deployment);
 
     await authenticator.connect(manager).addSolver(solver.address);
@@ -39,7 +40,7 @@ describe("Task: solvers", () => {
     it("valid solver", async () => {
       await run("solvers", {
         subtask: "check",
-        solver: solver.address,
+        address: solver.address,
       });
       expect(output).to.equal(`${solver.address} is a solver.`);
     });
@@ -47,7 +48,7 @@ describe("Task: solvers", () => {
     it("invalid solver", async () => {
       await run("solvers", {
         subtask: "check",
-        solver: notSolver.address,
+        address: notSolver.address,
       });
       expect(output).to.equal(`${notSolver.address} is NOT a solver.`);
     });
@@ -58,7 +59,7 @@ describe("Task: solvers", () => {
       expect(await authenticator.isSolver(notSolver.address)).to.be.false;
       await run("solvers", {
         subtask: "add",
-        solver: notSolver.address,
+        address: notSolver.address,
       });
       expect(await authenticator.isSolver(notSolver.address)).to.be.true;
     });
@@ -67,7 +68,7 @@ describe("Task: solvers", () => {
       expect(await authenticator.isSolver(notSolver.address)).to.be.false;
       await run("solvers", {
         subtask: "add",
-        solver: notSolver.address,
+        address: notSolver.address,
         printTransaction: true,
       });
       expect(await authenticator.isSolver(notSolver.address)).to.be.false;
@@ -79,7 +80,7 @@ describe("Task: solvers", () => {
       expect(await authenticator.isSolver(solver.address)).to.be.true;
       await run("solvers", {
         subtask: "remove",
-        solver: solver.address,
+        address: solver.address,
       });
       expect(await authenticator.isSolver(solver.address)).to.be.false;
     });
@@ -88,10 +89,31 @@ describe("Task: solvers", () => {
       expect(await authenticator.isSolver(solver.address)).to.be.true;
       await run("solvers", {
         subtask: "remove",
-        solver: solver.address,
+        address: solver.address,
         printTransaction: true,
       });
       expect(await authenticator.isSolver(solver.address)).to.be.true;
+    });
+  });
+
+  describe("setManager", () => {
+    it("sets the manager", async () => {
+      expect(await authenticator.manager()).not.to.equal(notManager.address);
+      await run("solvers", {
+        subtask: "setManager",
+        address: notManager.address,
+      });
+      expect(await authenticator.manager()).to.equal(notManager.address);
+    });
+
+    it("does not set the manager when --print-transaction is specified", async () => {
+      expect(await authenticator.isSolver(notSolver.address)).to.be.false;
+      await run("solvers", {
+        subtask: "add",
+        address: notSolver.address,
+        printTransaction: true,
+      });
+      expect(await authenticator.isSolver(notSolver.address)).to.be.false;
     });
   });
 });
