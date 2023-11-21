@@ -88,7 +88,7 @@ export ETHERSCAN_API_KEY=<Your Key>
 yarn verify:etherscan --network $NETWORK
 ```
 
-Single contracts can be verified as well, but the input parameters must be explicitly given to the command.
+Single contracts can be verified as well, but the constructor arguments must be explicitly given to the command.
 A common example is the vault relayer contract, which is not automatically verified with the command above since it is only deployed indirectly during initialization. This contract can be manually verified with:
 
 ```sh
