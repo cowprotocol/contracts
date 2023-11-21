@@ -26,12 +26,12 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     using SafeMath for uint256;
 
     /// @dev The authenticator is used to determine who can call the settle function.
-    /// That is, only authorised solvers have the ability to invoke settlements.
+    /// That is, only authorized solvers have the ability to invoke settlements.
     /// Any valid authenticator implements an isSolver method called by the onlySolver
     /// modifier below.
     GPv2Authentication public immutable authenticator;
 
-    /// @dev The Balancer Vault the protocol uses for managing user funds.
+    /// @dev The Balancer Vault the protocol used for managing user funds.
     IVault public immutable vault;
 
     /// @dev The Balancer Vault relayer which can interact on behalf of users.
@@ -59,12 +59,12 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
 
     /// @dev Event emitted for each executed interaction.
     ///
-    /// For gas effeciency, only the interaction calldata selector (first 4
+    /// For gas efficiency, only the interaction calldata selector (first 4
     /// bytes) is included in the event. For interactions without calldata or
     /// whose calldata is shorter than 4 bytes, the selector will be `0`.
     event Interaction(address indexed target, uint256 value, bytes4 selector);
 
-    /// @dev Event emitted when a settlement complets
+    /// @dev Event emitted when a settlement completes
     event Settlement(address indexed solver);
 
     /// @dev Event emitted when an order is invalidated.
@@ -212,7 +212,7 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
 
         // NOTE: Check that the orders were completely filled and update their
         // filled amounts to avoid replaying them. The limit price and order
-        // validity have already been verified when executing the swap through
+        // validity has already been verified when executing the swap through
         // the `limit` and `deadline` parameters.
         require(filledAmount[orderUid] == 0, "GPv2: order filled");
         if (order.kind == GPv2Order.KIND_SELL) {
@@ -245,7 +245,7 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     ///
     /// @param orderUid The unique identifier of the order that is to be made
     /// invalid after calling this function. The user that created the order
-    /// must be the the sender of this message. See [`extractOrderUidParams`]
+    /// must be the sender of this message. See [`extractOrderUidParams`]
     /// for details on orderUid.
     function invalidateOrder(bytes calldata orderUid) external {
         (, address owner, ) = orderUid.extractOrderUidParams();
@@ -303,7 +303,7 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
         inTransfers = new GPv2Transfer.Data[](trades.length);
         outTransfers = new GPv2Transfer.Data[](trades.length);
 
-        for (uint256 i = 0; i < trades.length; i++) {
+        for (uint256 i; i < trades.length; ++i) {
             GPv2Trade.Data calldata trade = trades[i];
 
             recoverOrderFromTrade(recoveredOrder, tokens, trade);
@@ -446,7 +446,7 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     function executeInteractions(
         GPv2Interaction.Data[] calldata interactions
     ) internal {
-        for (uint256 i; i < interactions.length; i++) {
+        for (uint256 i; i < interactions.length; ++i) {
             GPv2Interaction.Data calldata interaction = interactions[i];
 
             // To prevent possible attack on user funds, we explicitly disable
@@ -475,7 +475,7 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
         mapping(bytes => uint256) storage orderStorage,
         bytes[] calldata orderUids
     ) internal {
-        for (uint256 i = 0; i < orderUids.length; i++) {
+        for (uint256 i; i < orderUids.length; ++i) {
             bytes calldata orderUid = orderUids[i];
 
             (, , uint32 validTo) = orderUid.extractOrderUidParams();
