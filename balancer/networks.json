@@ -15,6 +15,10 @@
     "100": {
       "address": "0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6",
       "transactionHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "11155111": {
+      "address": "0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6",
+      "transactionHash": "0x9e0daaeebe76f1005e633a4b024d213651dbce9471192ed1b7eb43bc144b312b"
     }
   },
   "Vault": {
