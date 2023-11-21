@@ -27,7 +27,7 @@ describe("Task: transfer ownership", () => {
       expect(await proxy.owner()).to.equal(newOwner);
     });
 
-    it("only tansfers proxy ownership", async () => {
+    it("only transfers proxy ownership", async () => {
       const { manager } = await getNamedAccounts();
       const newOwner = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
       await run("transfer-ownership", {
