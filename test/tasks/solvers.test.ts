@@ -107,13 +107,13 @@ describe("Task: solvers", () => {
     });
 
     it("does not set the manager when --print-transaction is specified", async () => {
-      expect(await authenticator.isSolver(notSolver.address)).to.be.false;
+      expect(await authenticator.manager()).not.to.equal(notManager.address);
       await run("solvers", {
-        subtask: "add",
-        address: notSolver.address,
+        subtask: "setManager",
+        address: notManager.address,
         printTransaction: true,
       });
-      expect(await authenticator.isSolver(notSolver.address)).to.be.false;
+      expect(await authenticator.manager()).not.to.equal(notManager.address);
     });
   });
 });
