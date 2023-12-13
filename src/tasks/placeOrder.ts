@@ -1,5 +1,5 @@
 import { BigNumberish } from "@ethersproject/bignumber";
-import { utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -73,8 +73,9 @@ async function placeOrder(
     from: signer.address,
     ...amount,
   });
+  quote.quote.buyAmount = BigNumber.from(quote.quote.buyAmount).mul(9).div(10);
 
-  console.log("Received quote:", quote);
+  console.log("Received quote after slippage adjustment:", quote);
 
   if (await prompt(hre, "Would you like to place this order?")) {
     const domainSeparator = domain(parseInt(chainId), settlement.address);
