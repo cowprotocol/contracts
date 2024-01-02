@@ -57,12 +57,6 @@ yarn bench:trace
 
 ## Deployment
 
-Contracts deployment (including contract verification) is run automatically with GitHub Actions. The deployment process is triggered manually.
-Maintainers of this repository can deploy a new version of the contract in the "Actions" tab, "Deploy CoW Protocol contracts", "Run workflow". The target branch can be selected before running.
-A successful workflow results in a new PR asking to merge the deployment artifacts into the main branch.
-
-Contracts can also be deployed and verified manually as follows.
-
 ### Deploying Contracts
 
 Choose the network and gas price in wei for the deployment.
@@ -196,3 +190,15 @@ npx hardhat decode --txhash 0xc12e5bc2ef9c116932301495738d555ea1d658977dacd6c798
 ```
 
 Note that you will be expected to have your `INFURA_KEY` exported to your environment variables.
+
+## Releases
+
+The content of this repo is published on NPM as [`@cowprotocol/contracts`](https://www.npmjs.com/package/@cowprotocol/contracts).
+
+Maintainers this repository can manually trigger a new release. The steps are as follows:
+
+1. Update the package version number in `./package.json` on branch `main`.
+
+2. On GitHub, visit the "Actions" tab, "Publish package to NPM", "Run workflow" with `main` as the target branch.
+
+Once the workflow has been executed successfully, a new NPM package version should be available as well as a new git tag named after the released version.
