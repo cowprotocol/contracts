@@ -146,17 +146,30 @@ yarn solvers command [arg ...]
 ```
 
 Here is a list of available commands.
-The commands flagged with [*] require the private key of the authentication contract owner to be available to the script, for example by exporting it with `export PK=<private key>`.
+The commands flagged with [**] require exporting the private key of the authentication contract owner, while those flagged with [*] require the address of either the owner or the manager.
+The private key can be exported with `export PK=<private key>`.
 
 1. `add $ADDRESS` [*]. Adds the address to the list of registered solvers.
 2. `remove $ADDRESS` [*]. Removes the address from the list of registered solvers.
 3. `check $ADDRESS`. Checks if the given address is in the list of registered solvers.
+3. `list`. Lists all registered solvers.
+3. `setManager $ADDRESS` [**]. Sets the manager of the authenticator to the input address.
 
 For example, adding the address `0x0000000000000000000000000000000000000042` to the solver list:
 
 ```sh
 export PK=<private key>
 yarn solvers add 0x0000000000000000000000000000000000000042
+```
+
+### Transfer Ownership
+
+There is a dedicated script to change the owner of the authenticator proxy.
+
+Usage and parameters can be seen by running:
+
+```sh
+yarn hardhat transfer-ownership --help
 ```
 
 ### Fee Withdrawals
