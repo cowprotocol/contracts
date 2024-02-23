@@ -672,7 +672,15 @@ async function prepareOrders({
   }
   if (orders.length > maxOrders) {
     console.log(`Truncating total of ${orders.length} order to ${maxOrders}`);
-    orders = orders.slice(0, maxOrders);
+    // Remove the least profitable orders
+    orders = orders
+      .sort((o1, o2) => {
+        const first_proceeds = o1.sellAmountUsd.sub(o1.feeUsd);
+        const second_proceeds = o2.sellAmountUsd.sub(o2.feeUsd);
+        // We want to sort in descending order
+        return first_proceeds.lt(second_proceeds) ? 1 : -1;
+      })
+      .slice(0, maxOrders);
   }
   displayOrders(orders, usdReference, toToken);
 
