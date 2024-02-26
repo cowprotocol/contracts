@@ -24,10 +24,10 @@ import {
 } from "../ts/api";
 
 import {
-  assertNotBuyingNativeAsset,
-  getQuote,
-  computeValidTo,
   APP_DATA,
+  assertNotBuyingNativeAsset,
+  computeValidTo,
+  getQuote,
   MAX_ORDER_VALIDITY_SECONDS,
   Quote,
 } from "./dump";
@@ -47,13 +47,13 @@ import { Align, displayTable } from "./ts/table";
 import { Erc20Token, erc20Token } from "./ts/tokens";
 import { prompt } from "./ts/tui";
 import {
+  formatGasCost,
   formatTokenValue,
   formatUsdValue,
   REFERENCE_TOKEN,
   ReferenceToken,
   usdValue,
   usdValueOfEth,
-  formatGasCost,
 } from "./ts/value";
 import { BalanceOutput, getAmounts } from "./withdraw";
 import { ignoredTokenMessage } from "./withdraw/messages";
@@ -522,6 +522,7 @@ interface SelfSellInput {
   domainSeparator: TypedDataDomain;
   solverIsSafe: boolean;
   notifySlackChannel?: string;
+  maxOrders: number;
 }
 
 async function prepareOrders({
@@ -545,6 +546,7 @@ async function prepareOrders({
   dryRun,
   gasEstimator,
   domainSeparator,
+  maxOrders,
 }: SelfSellInput): Promise<{
   orders: OrderDetails[];
   finalSettlement: EncodedSettlement | null;
@@ -667,6 +669,18 @@ async function prepareOrders({
   if (orders.length === 0) {
     console.log("No tokens to sell.");
     return { orders: [], finalSettlement: null };
+  }
+  if (orders.length > maxOrders) {
+    console.log(`Truncating total of ${orders.length} order to ${maxOrders}`);
+    // Remove the least profitable orders
+    orders = orders
+      .sort((o1, o2) => {
+        const first_proceeds = o1.sellAmountUsd.sub(o1.feeUsd);
+        const second_proceeds = o2.sellAmountUsd.sub(o2.feeUsd);
+        // We want to sort in descending order
+        return first_proceeds.lt(second_proceeds) ? 1 : -1;
+      })
+      .slice(0, maxOrders);
   }
   displayOrders(orders, usdReference, toToken);
 
@@ -897,6 +911,12 @@ const setupSelfSellTask: () => void = () =>
       "notifySlackChannel",
       "The slack channel id to send the proposed transaction to (requires SLACK_TOKEN env variable to be set)",
     )
+    .addOptionalParam(
+      "maxOrders",
+      "Limit the amount of orders per settlement to this value.",
+      50,
+      types.int,
+    )
     .setAction(
       async (
         {
@@ -915,6 +935,7 @@ const setupSelfSellTask: () => void = () =>
           safe,
           notifySlackChannel,
           doNotPrompt,
+          maxOrders,
         },
         hre: HardhatRuntimeEnvironment,
       ) => {
@@ -981,6 +1002,7 @@ const setupSelfSellTask: () => void = () =>
           solverIsSafe: safe,
           notifySlackChannel,
           doNotPrompt,
+          maxOrders,
         });
       },
     );
