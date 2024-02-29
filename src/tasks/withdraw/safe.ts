@@ -48,7 +48,7 @@ export async function proposeTransaction(
   try {
     nonce = await recommendedNonce(chainId, authoringSafe);
   } catch {
-    console.log("Unable to determine recommended nonce");
+    console.log("Unable to determine recommended nonce, using current one");
     nonce = undefined;
   }
 
