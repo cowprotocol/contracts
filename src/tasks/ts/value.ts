@@ -31,6 +31,11 @@ export const REFERENCE_TOKEN: Record<SupportedNetwork, ReferenceToken> = {
     decimals: 18,
     address: "0x6b175474e89094c44da98b954eedeac495271d0f",
   },
+  sepolia: {
+    symbol: "DAI",
+    decimals: 18,
+    address: "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
+  },
   xdai: {
     // todo: replace with XDAI when native token price queries will be supported
     // by the services.
