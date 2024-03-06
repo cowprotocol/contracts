@@ -130,8 +130,9 @@ export default {
       chainId: 5,
     },
     sepolia: {
-      ...sharedNetworkConfig,
       url: "https://ethereum-sepolia.publicnode.com",
+      ...sharedNetworkConfig,
+      chainId: 11155111,
     },
     xdai: {
       url: "https://rpc.gnosischain.com",

@@ -10,7 +10,7 @@ interface Transaction {
 }
 
 function serviceUrlForNetwork(network: string): string {
-  if (["goerli", "mainnet", "gnosis-chain"].includes(network)) {
+  if (["goerli", "mainnet", "gnosis-chain", "sepolia"].includes(network)) {
     return `https://safe-transaction-${network}.safe.global`;
   } else if (network === "xdai") {
     return "https://safe-transaction-gnosis-chain.safe.global/";
