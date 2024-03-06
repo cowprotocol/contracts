@@ -899,10 +899,7 @@ const setupSelfSellTask: () => void = () =>
       "blocknativeGasPrice",
       "Use BlockNative gas price estimates for transactions.",
     )
-    .addOptionalParam(
-      "toToken",
-      "All input tokens will be dumped to this token. If not specified, it defaults to the network's native token (e.g., ETH)",
-    )
+    .addParam("toToken", "All input tokens will be dumped to this token.")
     .addFlag(
       "safe",
       "Whether the solver is a Safe and the script should propose the transaction to the Safe UI instead of sending a transaction directly",
