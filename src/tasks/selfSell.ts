@@ -914,6 +914,10 @@ const setupSelfSellTask: () => void = () =>
       50,
       types.int,
     )
+    .addOptionalVariadicPositionalParam(
+      "tokens",
+      "The list of tokens to sell. If unspecified, the script will generate this list automatically.",
+    )
     .setAction(
       async (
         {
@@ -933,6 +937,7 @@ const setupSelfSellTask: () => void = () =>
           notifySlackChannel,
           doNotPrompt,
           maxOrders,
+          tokens,
         },
         hre: HardhatRuntimeEnvironment,
       ) => {
@@ -965,14 +970,22 @@ const setupSelfSellTask: () => void = () =>
           throw new Error("Order validity too large");
         }
 
+        if (tokens == undefined || tokens.length === 0) {
+          if (chainId === 1) {
+            tokens = await getTokensWithBalanceAbove(
+              minValue,
+              settlementDeployment.address,
+            );
+          } else {
+            throw new Error(
+              "Automatic token list generation is only supported on mainnet",
+            );
+          }
+        }
         // Exclude the toToken if needed, as we can not sell it for itself (buyToken is not allowed to equal sellToken)
-        const tokens = (
-          await getTokensWithBalanceAbove(
-            minValue,
-            settlementDeployment.address,
-          )
-        ).filter(
-          (token) => utils.getAddress(token) != utils.getAddress(toToken),
+        tokens = tokens.filter(
+          (token: string) =>
+            utils.getAddress(token) != utils.getAddress(toToken),
         );
 
         await selfSell({
