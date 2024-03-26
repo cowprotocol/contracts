@@ -20,14 +20,13 @@ import {
   SupportedNetwork,
 } from "./ts/deployment";
 import { createGasEstimator, IGasEstimator } from "./ts/gas";
-import { fastTokenDetails } from "./ts/oneinch_tokens";
 import {
   DisappearingLogFunctions,
   promiseAllWithRateLimit,
 } from "./ts/rate_limits";
 import { getSolvers } from "./ts/solver";
 import { Align, displayTable } from "./ts/table";
-import { Erc20Token } from "./ts/tokens";
+import { erc20Token, Erc20Token } from "./ts/tokens";
 import {
   formatTokenValue,
   formatUsdValue,
@@ -246,7 +245,7 @@ async function getWithdrawals({
   const computeWithdrawalInstructions = tokens.map(
     (tokenAddress) =>
       async ({ consoleLog }: DisappearingLogFunctions) => {
-        const token = await fastTokenDetails(tokenAddress, hre);
+        const token = await erc20Token(tokenAddress, hre);
         if (token === null) {
           throw new Error(
             `There is no valid ERC20 token at address ${tokenAddress}`,
