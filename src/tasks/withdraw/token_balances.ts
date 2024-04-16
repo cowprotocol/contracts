@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export interface GetTokensInput {
-  minValueUsd: string;
+  minValueUsd: number;
   settlementContract: string;
   chainId: number;
 }
@@ -43,7 +43,7 @@ interface EthplorerAddressInfoResponse {
 }
 
 export async function getMainnetTokensWithBalanceAbove(
-  minValueUsd: string,
+  minValueUsd: number,
   settlementContract: string,
 ): Promise<string[]> {
   const response = await axios.get(
@@ -58,7 +58,7 @@ export async function getMainnetTokensWithBalanceAbove(
     const tokenUsdValue =
       token.tokenInfo.price.rate *
       (token.balance / Math.pow(10, token.tokenInfo.decimals));
-    if (tokenUsdValue > parseInt(minValueUsd)) {
+    if (tokenUsdValue > minValueUsd) {
       result.push(token.tokenInfo.address);
     }
   }
@@ -76,7 +76,7 @@ interface BlockscoutSingleTokenInfo {
 }
 
 export async function getGnosisChainTokensWithBalanceAbove(
-  minValueUsd: string,
+  minValueUsd: number,
   settlementContract: string,
 ): Promise<string[]> {
   const response = await axios.get(
@@ -91,7 +91,7 @@ export async function getGnosisChainTokensWithBalanceAbove(
     const tokenUsdValue =
       parseFloat(token.exchange_rate) *
       (parseInt(value) / Math.pow(10, parseInt(token.decimals)));
-    if (tokenUsdValue > parseInt(minValueUsd)) {
+    if (tokenUsdValue > minValueUsd) {
       result.push(token.address);
     }
   }

@@ -973,7 +973,7 @@ const setupSelfSellTask: () => void = () =>
           tokens = await getTokensWithBalanceAbove({
             chainId,
             settlementContract: settlementDeployment.address,
-            minValueUsd: minValue,
+            minValueUsd: parseInt(minValue),
           });
         }
         // Exclude the toToken if needed, as we can not sell it for itself (buyToken is not allowed to equal sellToken)
