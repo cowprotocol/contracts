@@ -970,16 +970,11 @@ const setupSelfSellTask: () => void = () =>
         }
 
         if (tokens == undefined || tokens.length === 0) {
-          if (chainId === 1) {
-            tokens = await getTokensWithBalanceAbove(
-              minValue,
-              settlementDeployment.address,
-            );
-          } else {
-            throw new Error(
-              "Automatic token list generation is only supported on mainnet",
-            );
-          }
+          tokens = await getTokensWithBalanceAbove({
+            chainId,
+            settlementContract: settlementDeployment.address,
+            minValueUsd: minValue,
+          });
         }
         // Exclude the toToken if needed, as we can not sell it for itself (buyToken is not allowed to equal sellToken)
         tokens = tokens.filter(
