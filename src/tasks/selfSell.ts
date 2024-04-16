@@ -37,7 +37,6 @@ import {
   SupportedNetwork,
 } from "./ts/deployment";
 import { createGasEstimator, IGasEstimator } from "./ts/gas";
-import { fastTokenDetails } from "./ts/oneinch_tokens";
 import {
   DisappearingLogFunctions,
   promiseAllWithRateLimit,
@@ -296,7 +295,7 @@ async function getOrders({
   const computeOrderInstructions = tokens.map(
     (tokenAddress) =>
       async ({ consoleLog }: DisappearingLogFunctions) => {
-        const sellToken = await fastTokenDetails(tokenAddress, hre);
+        const sellToken = await erc20Token(tokenAddress, hre);
         if (sellToken === null) {
           throw new Error(
             `There is no valid ERC20 token at address ${tokenAddress}`,
