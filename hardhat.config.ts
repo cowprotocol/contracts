@@ -139,6 +139,10 @@ export default {
       ...sharedNetworkConfig,
       chainId: 100,
     },
+    arbitrum: {
+      ...sharedNetworkConfig,
+      url: "https://arb1.arbitrum.io/rpc",
+    },
   },
   namedAccounts: {
     // Note: accounts defined by a number refer to the the accounts as configured
