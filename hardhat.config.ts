@@ -169,6 +169,7 @@ export default {
   etherscan: {
     apiKey: {
       sepolia: ETHERSCAN_API_KEY,
+      arbitrumOne: ETHERSCAN_API_KEY,
     },
   },
 };
