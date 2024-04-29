@@ -139,7 +139,7 @@ export default {
       ...sharedNetworkConfig,
       chainId: 100,
     },
-    arbitrum: {
+    arbitrumOne: {
       ...sharedNetworkConfig,
       url: "https://arb1.arbitrum.io/rpc",
     },
