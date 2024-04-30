@@ -18,6 +18,10 @@
     "11155111": {
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
       "transactionHash": "0xad2b992f7363e5eb8523a7034a7d36a311485f126db9938d4847cc38d2d86b86"
+    },
+    "42161": {
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "transactionHash": "0x084c7e025a5064a2649adbce79f94f23666c1c7e4c7ce02466412524502097ad"
     }
   },
   "GPv2AllowListAuthentication_Proxy": {
@@ -40,6 +44,10 @@
     "11155111": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x73c54c75b3f382304f3adf33e3876c8999fb10df786d4a902733369251033cd1"
+    },
+    "42161": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0xe994adff141a2e72bd9dab3eb7b3480637013bdfb1aa42c62d9d6c90de091237"
     }
   },
   "GPv2AllowListAuthentication": {
@@ -62,6 +70,10 @@
     "11155111": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x73c54c75b3f382304f3adf33e3876c8999fb10df786d4a902733369251033cd1"
+    },
+    "42161": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0xe994adff141a2e72bd9dab3eb7b3480637013bdfb1aa42c62d9d6c90de091237"
     }
   },
   "GPv2Settlement": {
@@ -84,6 +96,10 @@
     "11155111": {
       "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
       "transactionHash": "0x6bba22a00ffcff6bca79aced546e18d2a5a4f4e484a4e4dbafab13daf42f718d"
+    },
+    "42161": {
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "transactionHash": "0x240486f35ebf42ea69b2b3f1569d587c18c87f98c0ec997bef7d18182ca4c38c"
     }
   },
   "GPv2VaultRelayer": {
@@ -106,6 +122,10 @@
     "11155111": {
       "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
       "transactionHash": "0x6bba22a00ffcff6bca79aced546e18d2a5a4f4e484a4e4dbafab13daf42f718d"
+    },
+    "42161": {
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "transactionHash": "0x240486f35ebf42ea69b2b3f1569d587c18c87f98c0ec997bef7d18182ca4c38c"
     }
   }
 }
