@@ -79,7 +79,7 @@
     "sinon": "^15.0.3",
     "solhint": "^3.4.1",
     "solhint-plugin-prettier": "^0.0.5",
-    "solidity-coverage": "^0.8.2",
+    "solidity-coverage": "^0.8.12",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
     "yargs": "^17.7.1"
