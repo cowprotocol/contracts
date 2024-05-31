@@ -11,26 +11,35 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
     - name: Check if PR modifies specific path
       id: check-path
       run: |
-        if echo "${{ steps.files.outputs.files }}" | grep -q '^src/'; then
-          echo "::set-output name=specific_path::true"
+        files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | tr '\n' ' ')
+        if echo "$files" | grep -q 'src/'; then
+          echo "specific_path=true" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=specific_path::false"
+          echo "specific_path=false" >> $GITHUB_OUTPUT
+        fi
         fi
 
     - name: Ensure required reviewers
       id: ensure-reviewers
       run: |
+        set -e  # Exit on error
         GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
         PR_NUMBER=${{ github.event.pull_request.number }}
         REPO=${{ github.repository }}
         
-        # Fetch reviewers of the PR
+        # Fetch approved and non-dismissed reviews of the PR
         REVIEWERS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
                     "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/reviews" \
-                    | jq -r '.[].user.login')
+                    | jq -r '.[] | select(.state == "APPROVED" and .dismissed_at == null) | .user.login')
+
+        if [ $? -ne 0 ]; then
+          echo "Failed to fetch reviews"
+          exit 1
+        fi
 
         NUM_REVIEWERS=$(echo "$REVIEWERS" | wc -w)
 
@@ -38,13 +47,13 @@ jobs:
         if [ "${{ steps.check-path.outputs.specific_path }}" == "true" ]; then
           if [ "$NUM_REVIEWERS" -lt 2 ]; then
             echo "Insufficient reviewers for src/ path. Required: 2 reviewers."
-            echo "::set-output name=review_check_passed::false"
+            echo "review_check_passed=false" >> $GITHUB_OUTPUT
             exit 1
           fi
         fi
 
-        echo "::set-output name=review_check_passed::true"
+        echo "review_check_passed=true" >> $GITHUB_OUTPUT
 
     - name: Success message
-      if: success()
+      if: steps.ensure-reviewers.outputs.review_check_passed == 'true'
       run: echo "Review checks passed successfully!"
