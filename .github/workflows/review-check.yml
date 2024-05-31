@@ -15,6 +15,7 @@ jobs:
     - name: Check if PR modifies specific path
       id: check-path
       run: |
+        set -e  # Exit on error
         files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | tr '\n' ' ')
         if echo "$files" | grep -q 'src/'; then
           echo "specific_path=true" >> $GITHUB_OUTPUT
