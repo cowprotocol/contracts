@@ -1,5 +1,0 @@
-.dockerignore
-.gitignore
-.git
-state.json
-node_modules/
