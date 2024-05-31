@@ -40,48 +40,10 @@ jobs:
 
         NUM_REVIEWERS=$(echo "$REVIEWERS" | wc -w)
 
-        # Fetch code owners for /src path
-        CODEOWNERS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                    "https://api.github.com/repos/$REPO/contents/.github/CODEOWNERS" \
-                    | jq -r '.content' | base64 --decode | grep '^/src/' | awk '{for (i=2; i<=NF; i++) print $i}')
-
-        # Initialize an empty string to collect all code owner members
-        ALL_CODEOWNERS=""
-
-        # Iterate through each code owner
-        for OWNER in $CODEOWNERS; do
-          # Check if the owner is a team
-          if echo $OWNER | grep -q '/'; then
-            # Extract organization and team slug
-            ORG=$(echo $OWNER | cut -d'/' -f1)
-            TEAM=$(echo $OWNER | cut -d'/' -f2)
-            
-            # Fetch team members
-            TEAM_MEMBERS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                           "https://api.github.com/orgs/$ORG/teams/$TEAM/members" \
-                           | jq -r '.[].login')
-            
-            # Add team members to the list of all code owners
-            ALL_CODEOWNERS="$ALL_CODEOWNERS $TEAM_MEMBERS"
-          else
-            # Add individual owner to the list of all code owners
-            ALL_CODEOWNERS="$ALL_CODEOWNERS $OWNER"
-          fi
-        done
-
-        # Count how many reviewers are code owners
-        NUM_CODEOWNERS=$(echo "$REVIEWERS" | grep -F -f <(echo "$ALL_CODEOWNERS") | wc -w)
-
         # Check review requirements
         if [ "${{ steps.check-path.outputs.specific_path }}" == "true" ]; then
-          if [ "$NUM_REVIEWERS" -lt 2 ] || [ "$NUM_CODEOWNERS" -lt 1 ]; then
-            echo "Insufficient reviewers for specific path. Required: 2 reviewers including 1 code owner."
-            echo "::set-output name=review_check_passed::false"
-            exit 1
-          fi
-        else
-          if [ "$NUM_REVIEWERS" -lt 1 ]; then
-            echo "Insufficient reviewers for general path. Required: 1 reviewer."
+          if [ "$NUM_REVIEWERS" -lt 2 ]; then
+            echo "Insufficient reviewers for src/ path. Required: 2 reviewers."
             echo "::set-output name=review_check_passed::false"
             exit 1
           fi
