@@ -38,7 +38,7 @@ jobs:
         # Fetch approved and non-dismissed reviews of the PR
         REVIEWERS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
                     "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/reviews" \
-                    | jq -r '.[] | select(.state == "APPROVED" and .dismissed_at == null) | .user.login')
+                    | jq -r '[.[] | select(.state == "APPROVED" and .dismissed_at == null) | .user.login] | unique | .[]')
 
         if [ $? -ne 0 ]; then
           echo "Failed to fetch reviews"
