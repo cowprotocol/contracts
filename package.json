@@ -81,7 +81,7 @@
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.8.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.4",
+    "typescript": "^5.4.5",
     "yargs": "^17.7.1"
   },
   "main": "lib/commonjs/index.js",
