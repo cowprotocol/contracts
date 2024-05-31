@@ -21,7 +21,6 @@ jobs:
         else
           echo "specific_path=false" >> $GITHUB_OUTPUT
         fi
-        fi
 
     - name: Ensure required reviewers
       id: ensure-reviewers
