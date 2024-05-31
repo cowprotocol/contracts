@@ -10,13 +10,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Get list of files changed
-      id: files
-      run: |
-        echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | tr '\n' ' ')"
-    
+      uses: actions/checkout@v4
     - name: Check if PR modifies specific path
       id: check-path
       run: |
