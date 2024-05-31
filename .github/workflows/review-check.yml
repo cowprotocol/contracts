@@ -21,7 +21,7 @@ jobs:
         git fetch origin $BASE_SHA $HEAD_SHA
         files=$(git diff --name-only $BASE_SHA $HEAD_SHA | tr '\n' ' ')
         echo "files=$files" >> $GITHUB_OUTPUT
-        if echo "$files" | grep -q '^src/'; then
+        if echo "$files" | grep -q 'src/'; then
           echo "specific_path=true" >> $GITHUB_OUTPUT
         else
           echo "specific_path=false" >> $GITHUB_OUTPUT
