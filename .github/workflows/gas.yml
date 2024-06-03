@@ -43,5 +43,3 @@ jobs:
 
       - name: Check gas snapshots
         run: forge snapshot --check
-        # TODO: Remove the following line to allow the workflow to fail if the formatting is incorrect
-        continue-on-error: true

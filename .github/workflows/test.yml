@@ -54,5 +54,3 @@ jobs:
         run: |
           forge test -vvv
         id: test
-        # TODO: Remove the following line after adding the first foundry test
-        continue-on-error: true
