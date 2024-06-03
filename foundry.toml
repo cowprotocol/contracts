@@ -15,7 +15,6 @@ remappings = [
 
 # Compiler settings
 solc = "0.7.6"
-bytecode_hash = "none"
 via_ir = false
 optimizer = true
 optimizer_runs = 1000000
