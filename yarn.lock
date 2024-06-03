@@ -5754,10 +5754,10 @@ hardhat-deploy@^0.11.10, hardhat-deploy@^0.11.26:
     qs "^6.9.4"
     zksync-web3 "^0.14.3"
 
-hardhat-gas-reporter@^1.0.9:
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/hardhat-gas-reporter/-/hardhat-gas-reporter-1.0.9.tgz#9a2afb354bc3b6346aab55b1c02ca556d0e16450"
-  integrity sha512-INN26G3EW43adGKBNzYWOlI3+rlLnasXTwW79YNnUhXPDa+yHESgt639dJEs37gCjhkbNKcRRJnomXEuMFBXJg==
+hardhat-gas-reporter@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/hardhat-gas-reporter/-/hardhat-gas-reporter-1.0.10.tgz#ebe5bda5334b5def312747580cd923c2b09aef1b"
+  integrity sha512-02N4+So/fZrzJ88ci54GqwVA3Zrf0C9duuTyGt0CFRIh/CdNwbnTgkXkRfojOMLBQ+6t+lBIkgbsOtqMvNwikA==
   dependencies:
     array-uniq "1.0.3"
     eth-gas-reporter "^0.2.25"
