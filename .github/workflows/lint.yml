@@ -1,0 +1,34 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.sol'
+      - '**.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**.sol'
+      - '**.yml'
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Check formatting
+        run: forge fmt --check
+        # TODO: Remove the following line to allow the workflow to fail if the formatting is incorrect
+        continue-on-error: true
