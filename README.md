@@ -131,38 +131,7 @@ This means that any solver could drain the fee amount from the user until not en
 
 We recommend to never sign orders of this form and, if developing a contract that creates orders on behalf of other users, make sure at a contract level that such orders cannot be created.
 
-## Helper scripts
-
-A collection of tools for interacting with the CoW Swap contracts.
-
-### Solver Authentication
-
-This repo contains scripts to manage the list of authenticated solvers in all networks the contract has been deployed.
-
-The scripts are called with:
-
-```sh
-yarn solvers command [arg ...]
-```
-
-Here is a list of available commands.
-The commands flagged with [**] require exporting the private key of the authentication contract owner, while those flagged with [*] require the address of either the owner or the manager.
-The private key can be exported with `export PK=<private key>`.
-
-1. `add $ADDRESS` [*]. Adds the address to the list of registered solvers.
-2. `remove $ADDRESS` [*]. Removes the address from the list of registered solvers.
-3. `check $ADDRESS`. Checks if the given address is in the list of registered solvers.
-3. `list`. Lists all registered solvers.
-3. `setManager $ADDRESS` [**]. Sets the manager of the authenticator to the input address.
-
-For example, adding the address `0x0000000000000000000000000000000000000042` to the solver list:
-
-```sh
-export PK=<private key>
-yarn solvers add 0x0000000000000000000000000000000000000042
-```
-
-### Transfer Ownership
+## Transfer Ownership
 
 There is a dedicated script to change the owner of the authenticator proxy.
 
@@ -171,38 +140,6 @@ Usage and parameters can be seen by running:
 ```sh
 yarn hardhat transfer-ownership --help
 ```
-
-### Fee Withdrawals
-
-Script to withdraw all balances of the Settlement contract. Allows to specify what minimum value the contract must have for a token to be considered (breadcrumbs might not be worth the gas costs) and how much remaining value should be left in the contract (e.g. to feed token buffers).
-
-If no token list is passed in all traded token balances will be fetched from chain (can take a long time...)
-
-```sh
-export PK=<private key>
-yarn hardhat withdraw --receiver 0x6C2999B6B1fAD608ECEA71B926D68Ee6c62BeEf8 --min-value 10000 --leftover 500 0x038a68ff68c393373ec894015816e33ad41bd564 0x913d8adf7ce6986a8cbfee5a54725d9eea4f0729
-```
-
-### Decoding Settlement CallData
-
-This project exposes some handy scripts for parsing settlement calldata into human readable format.
-
-The `decode` script can be used in two ways:
-
-1. By specifying the transaction hash of an existing settlement transaction `--txhash 0x...`
-
-```sh
-npx hardhat decode --txhash 0xc12e5bc2ef9c116932301495738d555ea1d658977dacd6c7989a6d77125a17d2 --network mainnet
-```
-
-2. When no `txhash` is specified, by reading the calldata from stdin (`< calldata.txt`). If stdin is a terminal, the user is prompted to paste the calldata into the terminal.
-
-```sh
-> npx hardhat decode --network mainnet
-# Paste in the calldata to decode
-```
-
-Note that you will be expected to have your `INFURA_KEY` exported to your environment variables.
 
 ## Releases
 
