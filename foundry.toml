@@ -19,6 +19,3 @@ bytecode_hash = "none"
 via_ir = false
 optimizer = true
 optimizer_runs = 1000000
-
-# Test settings
-fuzz_runs = 10000
