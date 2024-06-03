@@ -2,8 +2,6 @@ name: Gas
 
 on:
   pull_request:
-    branches:
-      - main
     paths:
       - '**.sol'
       - '**.yml'
