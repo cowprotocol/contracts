@@ -1,0 +1,9 @@
+{
+	"name": "Foundry + Node",
+	"image": "mcr.microsoft.com/devcontainers/base:0",
+
+	"features": {
+		"ghcr.io/nlordell/features/foundry": {},
+		"ghcr.io/devcontainers/features/node:1": {}
+	}
+}
