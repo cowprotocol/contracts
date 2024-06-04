@@ -1,5 +1,5 @@
 > [!IMPORTANT]  
-> This repository is in the process of being migrated to the [Foundry](https://getfoundry.sh) Ethereum application development environment. Developers wishing to integrate and/or develop on the CoW Protocol smart contracts with hardhat should refer to tag [`v1.6.0`](https://github.com/cowprotocol/contracts/releases/tag/v1.6.0).
+> This repository is in the process of being migrated to the [Foundry](https://getfoundry.sh) Ethereum application development environment. Developers wishing to integrate and/or develop on the CoW Protocol smart contracts with hardhat should refer to tag [`v1.6.0`](https://github.com/cowprotocol/contracts/releases/tag/v1.6.0) [Browse files](https://github.com/cowprotocol/contracts/tree/1d673839a7402bdb2949175ebb61e8b5c4f39ecb).
 
 # CoW Protocol
 
