@@ -1,8 +1,11 @@
+> [!IMPORTANT]  
+> This repository is in the process of being migrated to the [Foundry](https://getfoundry.sh) Ethereum application development environment. Developers wishing to integrate and/or develop on the CoW Protocol smart contracts with hardhat should refer to tag [`v1.6.0`](https://github.com/cowprotocol/contracts/releases/tag/v1.6.0).
+
 # CoW Protocol
 
 This repository contains the Solidity smart contract code for the **CoW Protocol** (formerly known as **Gnosis Protocol**).
 
-For more documentation on how the protocol works on a smart contract level, see the [documentation pages](docs/index.md).
+Extensive [documentation](https://docs.cow.fi/cow-protocol/reference/contracts/core) is available detailing how the protocol works on a smart contract level.
 
 ## Getting Started
 
