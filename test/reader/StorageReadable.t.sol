@@ -2,7 +2,7 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import {Test, console} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {StorageAccessibleWrapper} from "../../src/contracts/test/vendor/StorageAccessibleWrapper.sol";
 
 contract StorageReadableTest is Test {
@@ -34,19 +34,10 @@ contract StorageReadableTest is Test {
         arr[1] = 1337;
         instance.setBaz(arr);
         bytes memory data = instance.getStorageAt(slot, 1);
-        uint256 length;
-        assembly {
-            length := mload(add(data, 0x20))
-        }
+        uint256 length = abi.decode(data, (uint256));
         assertEq(length, 2);
-
-        bytes memory packed = instance.getStorageAt(uint256(keccak256(abi.encode([slot]))), length);
-        uint256 firstValue;
-        uint256 secondValue;
-        assembly {
-            firstValue := mload(add(packed, 0x20))
-            secondValue := mload(add(packed, 0x40))
-        }
+        bytes memory packed = instance.getStorageAt(uint256(keccak256(abi.encode(slot))), length);
+        (uint256 firstValue, uint256 secondValue) = abi.decode(packed, (uint256, uint256));
         assertEq(firstValue, 42);
         assertEq(secondValue, 1337);
     }
@@ -54,22 +45,14 @@ contract StorageReadableTest is Test {
     function test_can_read_mappings() public {
         instance.setQuxKeyValue(42, 69);
         bytes memory data = instance.getStorageAt(uint256(keccak256(abi.encode([42, instance.SLOT_QUX()]))), 1);
-        uint256 value;
-        assembly {
-            value := mload(add(data, 0x20))
-        }
+        uint256 value = abi.decode(data, (uint256));
         assertEq(value, 69);
     }
 
     function test_can_read_structs() public {
         instance.setFoobar(19, 21);
         bytes memory packed = instance.getStorageAt(instance.SLOT_FOOBAR(), 10);
-        uint256 firstValue;
-        uint256 secondValue;
-        assembly {
-            firstValue := mload(add(packed, 0x20))
-            secondValue := mload(add(packed, 0x40))
-        }
+        (uint256 firstValue, uint256 secondValue) = abi.decode(packed, (uint256, uint256));
         assertEq(firstValue, 19);
         assertEq(secondValue, 21);
     }
