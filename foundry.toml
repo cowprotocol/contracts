@@ -1,0 +1,10 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["node_modules", "lib"]
+
+# Compiler settings
+solc = "0.7.6"
+via_ir = false
+optimizer = true
+optimizer_runs = 1000000
