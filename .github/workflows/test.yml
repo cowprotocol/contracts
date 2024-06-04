@@ -26,6 +26,8 @@ jobs:
   test:
     strategy:
       fail-fast: true
+      matrix:
+        profile: [solc-0.7.6,solc-0.8.26]
 
     name: Foundry project
     runs-on: ubuntu-latest
@@ -50,13 +52,18 @@ jobs:
         with:
           version: nightly
 
-      - name: Run Forge build
-        run: |
-          forge --version
-          forge build --sizes
+      - name: Run Forge build with ${{ matrix.profile }}
+        # We always build with 0.7.6 to ensure that the project is compatible with the oldest version
+        run: >
+          ( forge --version ) &&
+          (( [ "${{ matrix.profile }}" == "solc-0.7.6" ] &&
+            forge build --use 0.7.6 --sizes --skip 'test/*' ) ||
+          ( [ "${{ matrix.profile }}" == "solc-0.8.26" ] &&
+            forge build --use 0.8.26 --sizes ))
         id: build
 
       - name: Run Forge tests
+        if: matrix.profile == 'solc-0.8.26'
         run: |
           forge test -vvv
         id: test
