@@ -54,11 +54,13 @@ jobs:
 
       - name: Run Forge build with ${{ matrix.profile }}
         # We always build with 0.7.6 to ensure that the project is compatible with the oldest version
-        run: >
-          ( forge --version ) &&
-          (( [ "${{ matrix.profile }}" == "solc-0.7.6" ] &&
-            forge build --use 0.7.6 --sizes --skip 'test/*' ) ||
-          ( forge build --sizes ))
+        run: |
+          forge --version
+          if [ "${{ matrix.profile }}" == "solc-0.7.6" ]; then
+            forge build --sizes --use 0.7.6 --skip 'test/*'
+          else
+            forge build --sizes
+          fi
         id: build
 
       - name: Run Forge tests
