@@ -5,12 +5,20 @@ on:
     paths:
       - '**.sol'
       - '**.yml'
+      - '**.toml'
+      - 'lib/**'
+      - '.gitmodules'
+      - '.gas-snapshot'
   push:
     branches:
       - main
     paths:
       - '**.sol'
       - '**.yml'
+      - '**.toml'
+      - 'lib/**'
+      - '.gitmodules'
+      - '.gas-snapshot'
 
 env:
   FOUNDRY_PROFILE: ci

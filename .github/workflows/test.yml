@@ -6,12 +6,18 @@ on:
     paths:
       - '**.sol'
       - '**.yml'
+      - '**.toml'
+      - 'lib/**'
+      - '.gitmodules'
   push:
     branches:
       - main
     paths:
       - '**.sol'
       - '**.yml'
+      - '**.toml'
+      - 'lib/**'
+      - '.gitmodules'
 
 env:
   FOUNDRY_PROFILE: ci
