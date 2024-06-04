@@ -1,5 +1,4 @@
 {
-  "solidity.packageDefaultDependenciesDirectory": ["node_modules", "lib"],
   "[solidity]": {
     "editor.defaultFormatter": "JuanBlanco.solidity"
   },

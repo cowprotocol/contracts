@@ -8,7 +8,7 @@
 // - Convert to `type(*).*` notation
 // <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/utils/SafeCast.sol>
 
-pragma solidity ^0.7.6;
+pragma solidity >=0.7.6 <0.9.0;
 
 /**
  * @dev Wrappers over Solidity's uintXX/intXX casting operators with added overflow
