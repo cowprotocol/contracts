@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
-pragma solidity ^0.7.6;
+pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, Vm} from "forge-std/Test.sol";
 import {StorageAccessibleWrapper, ExternalStorageReader} from "src/contracts/test/vendor/StorageAccessibleWrapper.sol";
 import {ViewStorageAccessible} from "src/contracts/mixins/StorageAccessible.sol";
 
@@ -25,6 +25,8 @@ contract StorageAccessibleTest is Test {
 
     function test_can_simulateDelegatecall_a_function_with_side_effects() public {
         instance.setFoo(42);
+        vm.startStateDiffRecording();
+
         bytes memory data =
             instance.simulateDelegatecall(address(reader), abi.encodeWithSignature("setAndGetFoo(uint256)", 69));
         uint256 result = abi.decode(data, (uint256));
@@ -35,6 +37,17 @@ contract StorageAccessibleTest is Test {
             ViewStorageAccessible(address(instance)), abi.encodeWithSignature("getFoo()")
         );
         assertEq(foo, 42);
+
+        // Using state changes to make sure foo isn't changed
+        Vm.AccountAccess[] memory records = vm.stopAndReturnStateDiff();
+        for (uint256 i; i < records.length; i++) {
+            uint256 storageCalls = records[i].storageAccesses.length;
+            for (uint256 j; j < storageCalls; j++) {
+                if (records[i].storageAccesses[j].isWrite) {
+                    assertEq(records[i].storageAccesses[j].reverted, true);
+                }
+            }
+        }
     }
 
     function test_can_simulateDelegatecall_a_function_that_reverts() public {
