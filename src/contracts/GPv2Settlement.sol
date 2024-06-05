@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.7.6;
+pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
 import "./GPv2VaultRelayer.sol";
@@ -250,7 +250,7 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     function invalidateOrder(bytes calldata orderUid) external {
         (, address owner, ) = orderUid.extractOrderUidParams();
         require(owner == msg.sender, "GPv2: caller does not own order");
-        filledAmount[orderUid] = uint256(-1);
+        filledAmount[orderUid] = type(uint256).max;
         emit OrderInvalidated(owner, orderUid);
     }
 
