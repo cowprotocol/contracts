@@ -2,7 +2,6 @@ import { BytesLike, ethers, Signer } from "ethers";
 
 import {
   ORDER_TYPE_FIELDS,
-  CANCELLATIONS_TYPE_FIELDS,
   Order,
   normalizeOrder,
   hashTypedData,
@@ -180,55 +179,6 @@ export async function signOrder(
       domain,
       { Order: ORDER_TYPE_FIELDS },
       normalizeOrder(order),
-    ),
-  };
-}
-
-/**
- * Returns the signature for cancelling a single order with the specified
- * signing scheme.
- *
- * @param domain The domain to sign the cancellation.
- * @param orderUid The unique identifier of the order being cancelled.
- * @param owner The owner for the order used to sign.
- * @param scheme The signing scheme to use. See {@link SigningScheme} for more
- * details.
- * @return Encoded signature including signing scheme for the cancellation.
- */
-export async function signOrderCancellation(
-  domain: TypedDataDomain,
-  orderUid: BytesLike,
-  owner: Signer,
-  scheme: EcdsaSigningScheme,
-): Promise<EcdsaSignature> {
-  return signOrderCancellations(domain, [orderUid], owner, scheme);
-}
-
-/**
- * Returns the signature for cancelling multiple orders by UID with the
- * specified signing scheme.
- *
- * @param domain The domain to sign the cancellation.
- * @param orderUids The unique identifiers of the orders to cancel.
- * @param owner The owner for the order used to sign.
- * @param scheme The signing scheme to use. See {@link SigningScheme} for more
- * details.
- * @return Encoded signature including signing scheme for the cancellation.
- */
-export async function signOrderCancellations(
-  domain: TypedDataDomain,
-  orderUids: BytesLike[],
-  owner: Signer,
-  scheme: EcdsaSigningScheme,
-): Promise<EcdsaSignature> {
-  return {
-    scheme,
-    data: await ecdsaSignTypedData(
-      scheme,
-      owner,
-      domain,
-      { OrderCancellations: CANCELLATIONS_TYPE_FIELDS },
-      { orderUids },
     ),
   };
 }
