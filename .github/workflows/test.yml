@@ -57,7 +57,7 @@ jobs:
         run: |
           forge --version
           if [ "${{ matrix.profile }}" == "solc-0.7.6" ]; then
-            forge build --sizes --use 0.7.6 --skip 'test/*'
+            forge build --sizes --use 0.7.6 --skip 'test/*' --skip 'src/scripts/*'
           else
             forge build --sizes
           fi
