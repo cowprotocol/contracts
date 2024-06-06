@@ -6,7 +6,7 @@
 // - Added `name`, `symbol` and `decimals` function declarations
 // <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/token/ERC20/IERC20.sol>
 
-pragma solidity ^0.7.6;
+pragma solidity >=0.7.6 <0.9.0;
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.

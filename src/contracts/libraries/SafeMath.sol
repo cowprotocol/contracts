@@ -8,7 +8,7 @@
 // - Added `ceilDiv` method
 // <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/math/SafeMath.sol>
 
-pragma solidity ^0.7.6;
+pragma solidity >=0.7.6 <0.9.0;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
