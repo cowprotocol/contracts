@@ -8,6 +8,8 @@ via_ir = false
 optimizer = true
 optimizer_runs = 1000000
 
+fs_permissions = [{ access = "read", path = "./networks.json"}]
+
 [fmt]
 ignore = [
   # We don't want to change the formatting of our main contracts until the

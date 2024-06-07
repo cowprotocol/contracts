@@ -10,8 +10,6 @@ import type { HttpNetworkUserConfig } from "hardhat/types";
 import type { MochaOptions } from "mocha";
 import yargs from "yargs";
 
-import { setupTasks } from "./src/tasks";
-
 const argv = yargs
   .option("network", {
     type: "string",
@@ -65,24 +63,22 @@ switch (MOCHA_CONF) {
   case undefined:
     break;
   case "coverage":
-    // End to end and task tests are skipped because:
+    // End to end tests are skipped because:
     // - coverage tool does not play well with proxy deployment with
     //   hardhat-deploy
     // - coverage compiles without optimizer and, unlike Waffle, hardhat-deploy
     //   strictly enforces the contract size limits from EIP-170
-    mocha.grep = /^(?!E2E|Task)/;
+    mocha.grep = /^(?!E2E)/;
     // Note: unit is Wei, not GWei. This is a workaround to make the coverage
     // tool work with the London hardfork.
     initialBaseFeePerGas = 1;
     break;
   case "ignored in coverage":
-    mocha.grep = /^E2E|Task/;
+    mocha.grep = /^E2E/;
     break;
   default:
     throw new Error("Invalid MOCHA_CONF");
 }
-
-setupTasks();
 
 export default {
   mocha,
