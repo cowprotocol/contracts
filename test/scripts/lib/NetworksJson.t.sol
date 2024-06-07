@@ -25,7 +25,7 @@ contract TestTransferOwnership is Test {
         );
     }
 
-    function test_reads_address_json_on_unsupported_chain_id() public {
+    function test_reverts_reads_address_json_on_unsupported_chain_id() public {
         uint256 chainId = 31333333333333337;
         vm.expectRevert();
         networksJson.addressByChainId("GPv2Settlement", chainId);
