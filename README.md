@@ -138,10 +138,24 @@ We recommend to never sign orders of this form and, if developing a contract tha
 
 There is a dedicated script to change the owner of the authenticator proxy.
 
-Usage and parameters can be seen by running:
+The following parameters can be set:
 
 ```sh
-yarn hardhat transfer-ownership --help
+export ETH_RPC_URL='https://rpc.url.example.com'
+export NEW_OWNER=0x1111111111111111111111111111111111111111 
+export RESET_MANAGER=true # true if the new owner should also become the manager, false otherwise
+```
+
+To test run the script from a specific owner (sender):
+
+```sh
+forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --sender 0xcA771eda0c70aA7d053aB1B25004559B918FE662
+```
+
+To actually execute the transaction:
+
+```sh
+forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --private-key 0x0000000000000000000000000000000000000000000000000000000000000001 --broadcast
 ```
 
 ## Releases

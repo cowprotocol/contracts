@@ -2,7 +2,7 @@ build/
 coverage/
 deployments/*/solcInputs
 deployments/localhost/
-lib/
+/lib/
 node_modules/
 coverage.json
 yarn-error.log
@@ -15,9 +15,10 @@ cache/
 out/
 
 # Ignores development broadcast logs
-!/broadcast
 /broadcast/*/31337/
 /broadcast/**/dry-run/
+# Ignores logs of some scripts
+/broadcast/TransferOwnership.s.sol/
 
 # Dotenv file
 .env
