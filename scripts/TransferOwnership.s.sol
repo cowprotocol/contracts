@@ -116,7 +116,7 @@ contract TransferOwnership is NetworksJson {
             });
     }
 
-    function checkIsProxy(address candidate) internal view returns (bool) {
+    function checkIsProxy(address candidate) internal view {
         if (address(candidate).code.length == 0) {
             revert(
                 string.concat(
