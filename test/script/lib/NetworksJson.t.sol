@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
-import {NetworksJson} from "scripts/lib/NetworksJson.sol";
+import {NetworksJson} from "script/lib/NetworksJson.sol";
 
 contract TestTransferOwnership is Test {
     NetworksJson private networksJson;
