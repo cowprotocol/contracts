@@ -149,13 +149,13 @@ export RESET_MANAGER=true # true if the new owner should also become the manager
 To test run the script from a specific owner (sender):
 
 ```sh
-forge script scripts/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --sender 0xcA771eda0c70aA7d053aB1B25004559B918FE662
+forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --sender 0xcA771eda0c70aA7d053aB1B25004559B918FE662
 ```
 
 To actually execute the transaction:
 
 ```sh
-forge script scripts/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --private-key 0x0000000000000000000000000000000000000000000000000000000000000001 --broadcast
+forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --private-key 0x0000000000000000000000000000000000000000000000000000000000000001 --broadcast
 ```
 
 ## Releases
