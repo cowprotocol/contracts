@@ -42,10 +42,7 @@ contract SmartSellOrder is EIP1271Verifier {
         totalSellAmount = totalSellAmount_;
         totalFeeAmount = totalFeeAmount_;
 
-        sellToken_.approve(
-            address(settlement.vaultRelayer()),
-            type(uint256).max
-        );
+        sellToken_.approve(address(settlement.vaultRelayer()), type(uint256).max);
     }
 
     modifier onlyOwner() {
@@ -65,10 +62,12 @@ contract SmartSellOrder is EIP1271Verifier {
         selfdestruct(payable(owner));
     }
 
-    function isValidSignature(
-        bytes32 hash,
-        bytes memory signature
-    ) external view override returns (bytes4 magicValue) {
+    function isValidSignature(bytes32 hash, bytes memory signature)
+        external
+        view
+        override
+        returns (bytes4 magicValue)
+    {
         uint256 sellAmount = abi.decode(signature, (uint256));
         GPv2Order.Data memory order = orderForSellAmount(sellAmount);
 
@@ -77,9 +76,7 @@ contract SmartSellOrder is EIP1271Verifier {
         }
     }
 
-    function orderForSellAmount(
-        uint256 sellAmount
-    ) public view returns (GPv2Order.Data memory order) {
+    function orderForSellAmount(uint256 sellAmount) public view returns (GPv2Order.Data memory order) {
         order.sellToken = sellToken;
         order.buyToken = buyToken;
         order.receiver = owner;
@@ -98,22 +95,14 @@ contract SmartSellOrder is EIP1271Verifier {
         order.buyTokenBalance = GPv2Order.BALANCE_ERC20;
     }
 
-    function buyAmountForSellAmount(
-        uint256 sellAmount
-    ) private view returns (uint256 buyAmount) {
-        uint256 feeAdjustedBalance = sellToken
-            .balanceOf(address(this))
-            .mul(totalSellAmount)
-            .div(totalSellAmount.add(totalFeeAmount));
-        uint256 soldAmount = totalSellAmount > feeAdjustedBalance
-            ? totalSellAmount - feeAdjustedBalance
-            : 0;
+    function buyAmountForSellAmount(uint256 sellAmount) private view returns (uint256 buyAmount) {
+        uint256 feeAdjustedBalance =
+            sellToken.balanceOf(address(this)).mul(totalSellAmount).div(totalSellAmount.add(totalFeeAmount));
+        uint256 soldAmount = totalSellAmount > feeAdjustedBalance ? totalSellAmount - feeAdjustedBalance : 0;
 
         // NOTE: This is currently a silly price strategy where the xrate
         // increases linearly from 1:1 to 1:2 as the smart order gets filled.
         // This can be extended to more complex "price curves".
-        buyAmount = sellAmount
-            .mul(totalSellAmount.add(sellAmount).add(soldAmount))
-            .div(totalSellAmount);
+        buyAmount = sellAmount.mul(totalSellAmount.add(sellAmount).add(soldAmount)).div(totalSellAmount);
     }
 }

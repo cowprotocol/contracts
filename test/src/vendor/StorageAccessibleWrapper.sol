@@ -71,23 +71,16 @@ contract ExternalStorageReader {
         revert();
     }
 
-    function invokeDoRevertViaStorageAccessible(StorageAccessible target)
-        public
-    {
-        target.simulateDelegatecall(
-            address(this),
-            abi.encodeWithSignature("doRevert()")
-        );
+    function invokeDoRevertViaStorageAccessible(StorageAccessible target) public {
+        target.simulateDelegatecall(address(this), abi.encodeWithSignature("doRevert()"));
     }
 
-    function invokeStaticDelegatecall(
-        ViewStorageAccessible target,
-        bytes calldata encodedCall
-    ) public view returns (uint256) {
-        uint256 result = abi.decode(
-            target.simulateDelegatecall(address(this), encodedCall),
-            (uint256)
-        );
+    function invokeStaticDelegatecall(ViewStorageAccessible target, bytes calldata encodedCall)
+        public
+        view
+        returns (uint256)
+    {
+        uint256 result = abi.decode(target.simulateDelegatecall(address(this), encodedCall), (uint256));
         return result;
     }
 }

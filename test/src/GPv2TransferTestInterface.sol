@@ -5,26 +5,19 @@ pragma abicoder v2;
 import "src/contracts/libraries/GPv2Transfer.sol";
 
 contract GPv2TransferTestInterface {
-    function fastTransferFromAccountTest(
-        IVault vault,
-        GPv2Transfer.Data calldata transfer,
-        address recipient
-    ) external {
+    function fastTransferFromAccountTest(IVault vault, GPv2Transfer.Data calldata transfer, address recipient)
+        external
+    {
         GPv2Transfer.fastTransferFromAccount(vault, transfer, recipient);
     }
 
-    function transferFromAccountsTest(
-        IVault vault,
-        GPv2Transfer.Data[] calldata transfers,
-        address recipient
-    ) external {
+    function transferFromAccountsTest(IVault vault, GPv2Transfer.Data[] calldata transfers, address recipient)
+        external
+    {
         GPv2Transfer.transferFromAccounts(vault, transfers, recipient);
     }
 
-    function transferToAccountsTest(
-        IVault vault,
-        GPv2Transfer.Data[] memory transfers
-    ) external {
+    function transferToAccountsTest(IVault vault, GPv2Transfer.Data[] memory transfers) external {
         GPv2Transfer.transferToAccounts(vault, transfers);
     }
 

@@ -8,15 +8,9 @@ import "src/contracts/libraries/GPv2Trade.sol";
 import "src/contracts/libraries/GPv2Transfer.sol";
 
 contract GPv2SettlementTestInterface is GPv2Settlement {
-    constructor(
-        GPv2Authentication authenticator_,
-        IVault vault
-    )
-        GPv2Settlement(authenticator_, vault)
+    constructor(GPv2Authentication authenticator_, IVault vault) GPv2Settlement(authenticator_, vault) 
     // solhint-disable-next-line no-empty-blocks
-    {
-
-    }
+    {}
 
     function setFilledAmount(bytes calldata orderUid, uint256 amount) external {
         filledAmount[orderUid] = amount;
@@ -26,18 +20,8 @@ contract GPv2SettlementTestInterface is GPv2Settlement {
         IERC20[] calldata tokens,
         uint256[] calldata clearingPrices,
         GPv2Trade.Data[] calldata trades
-    )
-        external
-        returns (
-            GPv2Transfer.Data[] memory inTransfers,
-            GPv2Transfer.Data[] memory outTransfers
-        )
-    {
-        (inTransfers, outTransfers) = computeTradeExecutions(
-            tokens,
-            clearingPrices,
-            trades
-        );
+    ) external returns (GPv2Transfer.Data[] memory inTransfers, GPv2Transfer.Data[] memory outTransfers) {
+        (inTransfers, outTransfers) = computeTradeExecutions(tokens, clearingPrices, trades);
     }
 
     function computeTradeExecutionMemoryTest() external returns (uint256 mem) {
@@ -63,9 +47,7 @@ contract GPv2SettlementTestInterface is GPv2Settlement {
         }
     }
 
-    function executeInteractionsTest(
-        GPv2Interaction.Data[] calldata interactions
-    ) external {
+    function executeInteractionsTest(GPv2Interaction.Data[] calldata interactions) external {
         executeInteractions(interactions);
     }
 

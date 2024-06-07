@@ -7,10 +7,11 @@ import "src/contracts/libraries/GPv2Trade.sol";
 import "src/contracts/mixins/GPv2Signing.sol";
 
 contract GPv2SigningTestInterface is GPv2Signing {
-    function recoverOrderFromTradeTest(
-        IERC20[] calldata tokens,
-        GPv2Trade.Data calldata trade
-    ) external view returns (RecoveredOrder memory recoveredOrder) {
+    function recoverOrderFromTradeTest(IERC20[] calldata tokens, GPv2Trade.Data calldata trade)
+        external
+        view
+        returns (RecoveredOrder memory recoveredOrder)
+    {
         recoveredOrder = allocateRecoveredOrder();
         recoverOrderFromTrade(recoveredOrder, tokens, trade);
     }

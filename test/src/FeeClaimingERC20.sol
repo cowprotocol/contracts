@@ -7,11 +7,7 @@ contract FeeClaimingERC20 is ERC20PresetMinterPauser {
     // solhint-disable-next-line no-empty-blocks
     constructor() ERC20PresetMinterPauser("FEE", "FEE") {}
 
-    function _transfer(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) internal override {
+    function _transfer(address sender, address recipient, uint256 amount) internal override {
         uint256 finalAmount = (amount * 99) / 100;
         uint256 burnAmount = amount - finalAmount;
 
