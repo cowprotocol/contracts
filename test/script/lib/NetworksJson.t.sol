@@ -19,10 +19,7 @@ contract TestTransferOwnership is Test {
             address(0x9008D19f58AAbD9eD0D60971565AA8510560ab41)
         );
         vm.chainId(chainId);
-        assertEq(
-            networksJson.addressOf("GPv2Settlement"),
-            address(0x9008D19f58AAbD9eD0D60971565AA8510560ab41)
-        );
+        assertEq(networksJson.addressOf("GPv2Settlement"), address(0x9008D19f58AAbD9eD0D60971565AA8510560ab41));
     }
 
     function test_reverts_reads_address_json_on_unsupported_chain_id() public {

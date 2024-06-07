@@ -13,8 +13,7 @@ contract TransferOwnership is NetworksJson {
     string private constant INPUT_ENV_NEW_OWNER = "NEW_OWNER";
     string private constant INPUT_ENV_RESET_MANAGER = "RESET_MANAGER";
     // Optional input
-    string private constant INPUT_ENV_AUTHENTICATOR_PROXY =
-        "AUTHENTICATOR_PROXY";
+    string private constant INPUT_ENV_AUTHENTICATOR_PROXY = "AUTHENTICATOR_PROXY";
 
     NetworksJson internal networksJson;
 
@@ -40,17 +39,10 @@ contract TransferOwnership is NetworksJson {
 
         address owner = params.authenticatorProxy.owner();
         if (owner != msg.sender) {
-            revert(
-                string.concat(
-                    "Account does NOT match current owner ",
-                    vm.toString(owner)
-                )
-            );
+            revert(string.concat("Account does NOT match current owner ", vm.toString(owner)));
         }
 
-        GPv2AllowListAuthentication authenticator = GPv2AllowListAuthentication(
-            address(params.authenticatorProxy)
-        );
+        GPv2AllowListAuthentication authenticator = GPv2AllowListAuthentication(address(params.authenticatorProxy));
 
         // Make sure to reset the manager BEFORE transferring ownership, or else
         // we will not be able to do it once we lose permissions.
@@ -70,10 +62,7 @@ contract TransferOwnership is NetworksJson {
 
         console.log(
             string.concat(
-                "Setting new authenticator proxy owner from ",
-                vm.toString(owner),
-                " to ",
-                vm.toString(params.newOwner)
+                "Setting new authenticator proxy owner from ", vm.toString(owner), " to ", vm.toString(params.newOwner)
             )
         );
         vm.broadcast(msg.sender);
@@ -89,9 +78,7 @@ contract TransferOwnership is NetworksJson {
         try vm.envAddress(INPUT_ENV_AUTHENTICATOR_PROXY) returns (address env) {
             authenticatorProxy = env;
         } catch {
-            try
-                networksJson.addressOf("GPv2AllowListAuthentication_Proxy")
-            returns (address addr) {
+            try networksJson.addressOf("GPv2AllowListAuthentication_Proxy") returns (address addr) {
                 authenticatorProxy = addr;
             } catch {
                 revert(
@@ -108,29 +95,20 @@ contract TransferOwnership is NetworksJson {
             }
         }
 
-        return
-            ScriptParams({
-                newOwner: newOwner,
-                resetManager: resetManager,
-                authenticatorProxy: ERC173(authenticatorProxy)
-            });
+        return ScriptParams({
+            newOwner: newOwner,
+            resetManager: resetManager,
+            authenticatorProxy: ERC173(authenticatorProxy)
+        });
     }
 
     function checkIsProxy(address candidate) internal view {
         if (address(candidate).code.length == 0) {
-            revert(
-                string.concat(
-                    "No code at target authenticator proxy ",
-                    vm.toString(address(candidate)),
-                    "."
-                )
-            );
+            revert(string.concat("No code at target authenticator proxy ", vm.toString(address(candidate)), "."));
         }
 
         bool isERC173;
-        try
-            ERC165(candidate).supportsInterface(type(ERC173).interfaceId)
-        returns (bool isERC173_) {
+        try ERC165(candidate).supportsInterface(type(ERC173).interfaceId) returns (bool isERC173_) {
             isERC173 = isERC173_;
         } catch {
             isERC173 = false;
