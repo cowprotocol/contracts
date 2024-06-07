@@ -16,3 +16,4 @@ contract GPv2SafeERC20TestInterface {
         token.safeTransferFrom(from, to, value);
     }
 }
+
