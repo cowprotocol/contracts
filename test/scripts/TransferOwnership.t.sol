@@ -3,8 +3,8 @@ pragma solidity ^0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
-import {TransferOwnership, ERC173} from "src/scripts/TransferOwnership.s.sol";
-import {ERC165} from "src/scripts/interfaces/ERC173.sol";
+import {TransferOwnership, ERC173} from "scripts/TransferOwnership.s.sol";
+import {ERC165} from "scripts/interfaces/ERC173.sol";
 import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 
 contract TestTransferOwnership is Test {
