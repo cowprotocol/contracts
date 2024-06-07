@@ -5,7 +5,7 @@ import {console} from "forge-std/Script.sol";
 
 import {GPv2AllowListAuthentication} from "../contracts/GPv2AllowListAuthentication.sol";
 
-import {ERC173} from "./interfaces/ERC173.sol";
+import {ERC173, ERC165} from "./interfaces/ERC173.sol";
 import {NetworksJson} from "./lib/NetworksJson.sol";
 
 contract TransferOwnership is NetworksJson {
@@ -36,28 +36,9 @@ contract TransferOwnership is NetworksJson {
     function runWith(ScriptParams memory params) public {
         console.log(string.concat("Using account ", vm.toString(msg.sender)));
 
-        address owner;
-        if (address(params.authenticatorProxy).code.length == 0) {
-            revert(
-                string.concat(
-                    "No code at target authenticator proxy ",
-                    vm.toString(address(params.authenticatorProxy)),
-                    "."
-                )
-            );
-        }
-        try params.authenticatorProxy.owner() returns (address owner_) {
-            owner = owner_;
-        } catch {
-            revert(
-                string.concat(
-                    "Not a valid proxy contract: could not retrieve the owner of ",
-                    vm.toString(address(params.authenticatorProxy)),
-                    "."
-                )
-            );
-        }
+        checkIsProxy(address(params.authenticatorProxy));
 
+        address owner = params.authenticatorProxy.owner();
         if (owner != msg.sender) {
             revert(
                 string.concat(
@@ -133,5 +114,35 @@ contract TransferOwnership is NetworksJson {
                 resetManager: resetManager,
                 authenticatorProxy: ERC173(authenticatorProxy)
             });
+    }
+
+    function checkIsProxy(address candidate) internal view returns (bool) {
+        if (address(candidate).code.length == 0) {
+            revert(
+                string.concat(
+                    "No code at target authenticator proxy ",
+                    vm.toString(address(candidate)),
+                    "."
+                )
+            );
+        }
+
+        bool isERC173;
+        try
+            ERC165(candidate).supportsInterface(type(ERC173).interfaceId)
+        returns (bool isERC173_) {
+            isERC173 = isERC173_;
+        } catch {
+            isERC173 = false;
+        }
+        if (!isERC173) {
+            revert(
+                string.concat(
+                    "Not a valid proxy contract: target address ",
+                    vm.toString(address(candidate)),
+                    " does not support the ERC173 interface."
+                )
+            );
+        }
     }
 }

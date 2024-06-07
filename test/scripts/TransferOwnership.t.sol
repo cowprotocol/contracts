@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 import {Test} from "forge-std/Test.sol";
 
 import {TransferOwnership, ERC173} from "src/scripts/TransferOwnership.s.sol";
+import {ERC165} from "src/scripts/interfaces/ERC173.sol";
 import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 
 contract TestTransferOwnership is Test {
@@ -84,6 +85,62 @@ contract TestTransferOwnership is Test {
                     "No code at target authenticator proxy ",
                     vm.toString(notAProxy),
                     "."
+                )
+            )
+        );
+        script.runWith(params);
+    }
+
+    function test_reverts_if_proxy_does_not_support_ERC173() public {
+        address noERC173Proxy = makeAddr("proxy not supporting ERC173");
+        TransferOwnership.ScriptParams memory params = TransferOwnership
+            .ScriptParams({
+                newOwner: makeAddr("some owner"),
+                authenticatorProxy: ERC173(noERC173Proxy),
+                resetManager: false
+            });
+        vm.etch(noERC173Proxy, hex"1337");
+        vm.mockCall(
+            noERC173Proxy,
+            abi.encodeCall(ERC165.supportsInterface, type(ERC173).interfaceId),
+            abi.encode(false)
+        );
+
+        vm.expectRevert(
+            bytes(
+                string.concat(
+                    "Not a valid proxy contract: target address ",
+                    vm.toString(noERC173Proxy),
+                    " does not support the ERC173 interface."
+                )
+            )
+        );
+        script.runWith(params);
+    }
+
+    function test_reverts_if_proxy_reverts_on_supportsInterface() public {
+        address revertingProxy = makeAddr(
+            "proxy reverting on calls to supportsInterface"
+        );
+        TransferOwnership.ScriptParams memory params = TransferOwnership
+            .ScriptParams({
+                newOwner: makeAddr("some owner"),
+                authenticatorProxy: ERC173(revertingProxy),
+                resetManager: false
+            });
+        vm.etch(revertingProxy, hex"1337");
+        vm.mockCallRevert(
+            revertingProxy,
+            abi.encodeCall(ERC165.supportsInterface, type(ERC173).interfaceId),
+            abi.encode("some revert error")
+        );
+
+        vm.expectRevert(
+            bytes(
+                string.concat(
+                    "Not a valid proxy contract: target address ",
+                    vm.toString(revertingProxy),
+                    " does not support the ERC173 interface."
                 )
             )
         );
