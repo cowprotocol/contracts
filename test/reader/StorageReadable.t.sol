@@ -3,7 +3,7 @@ pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
 import {Test} from "forge-std/Test.sol";
-import {StorageAccessibleWrapper} from "src/contracts/test/vendor/StorageAccessibleWrapper.sol";
+import {StorageAccessibleWrapper} from "test/src/vendor/StorageAccessibleWrapper.sol";
 
 contract StorageReadableTest is Test {
     StorageAccessibleWrapper instance;

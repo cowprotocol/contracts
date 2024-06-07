@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity >=0.7.6 <0.9.0;
 
-import "../libraries/SafeMath.sol";
+import "src/contracts/libraries/SafeMath.sol";
 
 abstract contract NonStandardERC20 {
     using SafeMath for uint256;
@@ -41,19 +41,14 @@ contract ERC20NoReturn is NonStandardERC20 {
 
 contract ERC20ReturningUint is NonStandardERC20 {
     // Largest 256-bit prime :)
-    uint256 private constant OK =
-        115792089237316195423570985008687907853269984665640564039457584007913129639747;
+    uint256 private constant OK = 115792089237316195423570985008687907853269984665640564039457584007913129639747;
 
     function transfer(address to, uint256 amount) external returns (uint256) {
         transfer_(to, amount);
         return OK;
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (uint256) {
+    function transferFrom(address from, address to, uint256 amount) external returns (uint256) {
         transferFrom_(from, to, amount);
         return OK;
     }

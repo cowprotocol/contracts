@@ -2,15 +2,16 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../libraries/GPv2Order.sol";
-import "../libraries/GPv2Trade.sol";
-import "../mixins/GPv2Signing.sol";
+import "src/contracts/libraries/GPv2Order.sol";
+import "src/contracts/libraries/GPv2Trade.sol";
+import "src/contracts/mixins/GPv2Signing.sol";
 
 contract GPv2SigningTestInterface is GPv2Signing {
-    function recoverOrderFromTradeTest(
-        IERC20[] calldata tokens,
-        GPv2Trade.Data calldata trade
-    ) external view returns (RecoveredOrder memory recoveredOrder) {
+    function recoverOrderFromTradeTest(IERC20[] calldata tokens, GPv2Trade.Data calldata trade)
+        external
+        view
+        returns (RecoveredOrder memory recoveredOrder)
+    {
         recoveredOrder = allocateRecoveredOrder();
         recoverOrderFromTrade(recoveredOrder, tokens, trade);
     }

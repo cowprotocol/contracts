@@ -2,7 +2,7 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../libraries/GPv2Interaction.sol";
+import "src/contracts/libraries/GPv2Interaction.sol";
 
 contract GPv2InteractionTestInterface {
     // solhint-disable-next-line no-empty-blocks
@@ -12,9 +12,7 @@ contract GPv2InteractionTestInterface {
         GPv2Interaction.execute(interaction);
     }
 
-    function selectorTest(
-        GPv2Interaction.Data calldata interaction
-    ) external pure returns (bytes4) {
+    function selectorTest(GPv2Interaction.Data calldata interaction) external pure returns (bytes4) {
         return GPv2Interaction.selector(interaction);
     }
 }

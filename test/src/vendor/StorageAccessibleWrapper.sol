@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.7.6 <0.9.0;
 
-import "../../mixins/StorageAccessible.sol";
+import "src/contracts/mixins/StorageAccessible.sol";
 
 contract StorageAccessibleWrapper is StorageAccessible {
     struct FooBar {
@@ -71,23 +71,16 @@ contract ExternalStorageReader {
         revert();
     }
 
-    function invokeDoRevertViaStorageAccessible(StorageAccessible target)
-        public
-    {
-        target.simulateDelegatecall(
-            address(this),
-            abi.encodeWithSignature("doRevert()")
-        );
+    function invokeDoRevertViaStorageAccessible(StorageAccessible target) public {
+        target.simulateDelegatecall(address(this), abi.encodeWithSignature("doRevert()"));
     }
 
-    function invokeStaticDelegatecall(
-        ViewStorageAccessible target,
-        bytes calldata encodedCall
-    ) public view returns (uint256) {
-        uint256 result = abi.decode(
-            target.simulateDelegatecall(address(this), encodedCall),
-            (uint256)
-        );
+    function invokeStaticDelegatecall(ViewStorageAccessible target, bytes calldata encodedCall)
+        public
+        view
+        returns (uint256)
+    {
+        uint256 result = abi.decode(target.simulateDelegatecall(address(this), encodedCall), (uint256));
         return result;
     }
 }

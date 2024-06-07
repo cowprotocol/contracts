@@ -2,7 +2,7 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../libraries/GPv2Order.sol";
+import "src/contracts/libraries/GPv2Order.sol";
 
 contract GPv2OrderTestInterface {
     using GPv2Order for GPv2Order.Data;
@@ -12,26 +12,24 @@ contract GPv2OrderTestInterface {
         return GPv2Order.TYPE_HASH;
     }
 
-    function hashTest(
-        GPv2Order.Data memory order,
-        bytes32 domainSeparator
-    ) external pure returns (bytes32 orderDigest) {
+    function hashTest(GPv2Order.Data memory order, bytes32 domainSeparator)
+        external
+        pure
+        returns (bytes32 orderDigest)
+    {
         orderDigest = order.hash(domainSeparator);
     }
 
-    function packOrderUidParamsTest(
-        uint256 bufferLength,
-        bytes32 orderDigest,
-        address owner,
-        uint32 validTo
-    ) external pure returns (bytes memory orderUid) {
+    function packOrderUidParamsTest(uint256 bufferLength, bytes32 orderDigest, address owner, uint32 validTo)
+        external
+        pure
+        returns (bytes memory orderUid)
+    {
         orderUid = new bytes(bufferLength);
         orderUid.packOrderUidParams(orderDigest, owner, validTo);
     }
 
-    function extractOrderUidParamsTest(
-        bytes calldata orderUid
-    )
+    function extractOrderUidParamsTest(bytes calldata orderUid)
         external
         pure
         returns (bytes32 orderDigest, address owner, uint32 validTo)

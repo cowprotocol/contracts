@@ -2,20 +2,19 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../libraries/GPv2Order.sol";
-import "../libraries/GPv2Trade.sol";
+import "src/contracts/libraries/GPv2Order.sol";
+import "src/contracts/libraries/GPv2Trade.sol";
 
 contract GPv2TradeTestInterface {
-    function extractOrderTest(
-        IERC20[] calldata tokens,
-        GPv2Trade.Data calldata trade
-    ) external pure returns (GPv2Order.Data memory order) {
+    function extractOrderTest(IERC20[] calldata tokens, GPv2Trade.Data calldata trade)
+        external
+        pure
+        returns (GPv2Order.Data memory order)
+    {
         GPv2Trade.extractOrder(trade, tokens, order);
     }
 
-    function extractFlagsTest(
-        uint256 flags
-    )
+    function extractFlagsTest(uint256 flags)
         external
         pure
         returns (
