@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '**.sol'
+  push:
+    branches:
+      - main
+    paths:
+      - '**.sol'
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  lint:
+    strategy:
+      fail-fast: true
+
+    name: Foundry project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Check Forge fmt
+        run: forge fmt --check
+        id: format

@@ -7,3 +7,10 @@ libs = ["node_modules", "lib"]
 via_ir = false
 optimizer = true
 optimizer_runs = 1000000
+
+[fmt]
+ignore = [
+  # We don't want to change the formatting of our main contracts until the
+  # migration to Foundry is concluded.
+  "src/contracts/**/*"
+]
