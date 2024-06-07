@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {GPv2SettlementHelper} from "./GPv2SettlementHelper.sol";
 import {SettlementEncoder} from "test/helpers/SettlementEncoder.sol";
 import {TokenRegistry} from "test/helpers/TokenRegistry.sol";
 
+import {Helper} from "./Helper.sol";
+
 // solhint-disable func-name-mixedcase
-contract SettleTest is GPv2SettlementHelper {
+contract Settle is Helper {
     SettlementEncoder internal encoder;
 
     function setUp() public override {

@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {GPv2SettlementHelper} from "./GPv2SettlementHelper.sol";
 import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 
+import {Helper} from "./Helper.sol";
+
 // solhint-disable func-name-mixedcase
-contract ReceiveTest is GPv2SettlementHelper {
+contract Receive is Helper {
     using GPv2Order for bytes;
 
     function test_allows_receiving_ether_directly_in_settlement_contract() public {

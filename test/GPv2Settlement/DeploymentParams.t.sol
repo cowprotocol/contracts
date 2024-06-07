@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {GPv2SettlementHelper} from "./GPv2SettlementHelper.sol";
 import {GPv2VaultRelayer} from "src/contracts/GPv2VaultRelayer.sol";
 import {Bytecode} from "test/libraries/Bytecode.sol";
 
+import {Helper} from "./Helper.sol";
+
 // solhint-disable func-name-mixedcase
-contract DeploymentParamsTest is GPv2SettlementHelper {
+contract DeploymentParams is Helper {
     using Bytecode for address;
     using Bytecode for bytes;
 
