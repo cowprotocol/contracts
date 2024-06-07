@@ -2,7 +2,7 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../libraries/GPv2Transfer.sol";
+import "src/contracts/libraries/GPv2Transfer.sol";
 
 contract GPv2TransferTestInterface {
     function fastTransferFromAccountTest(

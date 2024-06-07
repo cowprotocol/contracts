@@ -2,10 +2,10 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../GPv2Settlement.sol";
-import "../libraries/GPv2Interaction.sol";
-import "../libraries/GPv2Trade.sol";
-import "../libraries/GPv2Transfer.sol";
+import "src/contracts/GPv2Settlement.sol";
+import "src/contracts/libraries/GPv2Interaction.sol";
+import "src/contracts/libraries/GPv2Trade.sol";
+import "src/contracts/libraries/GPv2Transfer.sol";
 
 contract GPv2SettlementTestInterface is GPv2Settlement {
     constructor(

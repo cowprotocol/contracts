@@ -2,8 +2,8 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../libraries/GPv2Order.sol";
-import "../libraries/GPv2Trade.sol";
+import "src/contracts/libraries/GPv2Order.sol";
+import "src/contracts/libraries/GPv2Trade.sol";
 
 contract GPv2TradeTestInterface {
     function extractOrderTest(

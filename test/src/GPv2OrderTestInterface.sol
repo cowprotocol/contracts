@@ -2,7 +2,7 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../libraries/GPv2Order.sol";
+import "src/contracts/libraries/GPv2Order.sol";
 
 contract GPv2OrderTestInterface {
     using GPv2Order for GPv2Order.Data;

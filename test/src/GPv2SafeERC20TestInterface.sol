@@ -2,8 +2,8 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../interfaces/IERC20.sol";
-import "../libraries/GPv2SafeERC20.sol";
+import "src/contracts/interfaces/IERC20.sol";
+import "src/contracts/libraries/GPv2SafeERC20.sol";
 
 contract GPv2SafeERC20TestInterface {
     using GPv2SafeERC20 for IERC20;
