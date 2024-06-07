@@ -7,7 +7,6 @@ import {TokenRegistry} from "test/helpers/TokenRegistry.sol";
 
 // solhint-disable func-name-mixedcase
 contract SettleTest is GPv2SettlementHelper {
-
     SettlementEncoder internal encoder;
 
     function setUp() public override {
@@ -18,16 +17,8 @@ contract SettleTest is GPv2SettlementHelper {
     function test_rejects_transactions_from_non_solvers() public {
         SettlementEncoder.EncodedSettlement memory encoded = encoder.toEncodedSettlement();
         vm.expectRevert("GPv2: not a solver");
-        settlement.settle(
-            encoded.tokens,
-            encoded.clearingPrices,
-            encoded.trades,
-            encoded.interactions
-        );
+        settlement.settle(encoded.tokens, encoded.clearingPrices, encoded.trades, encoded.interactions);
     }
 
-    function test_reentrancy_protection() public {
-        
-    }
-
+    function test_reentrancy_protection() public {}
 }

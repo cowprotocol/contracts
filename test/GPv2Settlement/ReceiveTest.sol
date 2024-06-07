@@ -11,9 +11,8 @@ contract ReceiveTest is GPv2SettlementHelper {
     function test_allows_receiving_ether_directly_in_settlement_contract() public {
         uint256 balance = address(settlement).balance;
         assertEq(balance, 0);
-        (bool success, ) = address(settlement).call{value: 1 ether}("");
+        (bool success,) = address(settlement).call{value: 1 ether}("");
         assertTrue(success);
         assertEq(address(settlement).balance, 1 ether);
     }
-
 }

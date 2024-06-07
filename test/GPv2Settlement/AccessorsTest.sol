@@ -10,12 +10,7 @@ contract DeploymentParamsTest is GPv2SettlementHelper {
 
     function test_filledAmount_is_zero_for_untouched_order() public view {
         bytes memory orderUid = new bytes(GPv2Order.UID_LENGTH);
-        orderUid.packOrderUidParams(
-            bytes32(0),
-            address(0),
-            type(uint32).max
-        );
+        orderUid.packOrderUidParams(bytes32(0), address(0), type(uint32).max);
         assertEq(settlement.filledAmount(orderUid), 0);
     }
-
 }
