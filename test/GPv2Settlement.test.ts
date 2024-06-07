@@ -76,39 +76,8 @@ describe("GPv2Settlement", () => {
     testDomain = domain(chainId, settlement.address);
   });
 
-  describe("filledAmount", () => {
-    it("is zero for an untouched order", async () => {
-      const orderDigest = ethers.constants.HashZero;
-      const owner = ethers.constants.AddressZero;
-      const validTo = 2 ** 32 - 1;
-
-      expect(
-        await settlement.filledAmount(
-          packOrderUidParams({ orderDigest, owner, validTo }),
-        ),
-      ).to.equal(ethers.constants.Zero);
-    });
-  });
-
-  describe("receive", () => {
-    it("allows receiving Ether directly in the settlement contract", async () => {
-      await expect(
-        traders[0].sendTransaction({
-          to: settlement.address,
-          value: ethers.utils.parseEther("1.0"),
-        }),
-      ).to.not.be.reverted;
-    });
-  });
-
   describe("settle", () => {
     const empty = new SettlementEncoder(testDomain).encodedSettlement({});
-
-    it("rejects transactions from non-solvers", async () => {
-      await expect(settlement.settle(...empty)).to.be.revertedWith(
-        "GPv2: not a solver",
-      );
-    });
 
     describe("Reentrancy Protection", () => {
       for (const { name, params } of [

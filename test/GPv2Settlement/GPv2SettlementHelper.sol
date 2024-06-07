@@ -14,8 +14,12 @@ abstract contract GPv2SettlementHelper is Test {
     IVault internal vault;
 
     GPv2SettlementHarness internal settlement;
+    bytes32 internal domainSeparator;
 
-    function setUp() public {
+    Vm.Wallet internal solver;
+    Vm.Wallet internal trader;
+
+    function setUp() public virtual {
         // Configure addresses
         address deployer = makeAddr("deployer");
         address owner = makeAddr("owner");
@@ -34,6 +38,13 @@ abstract contract GPv2SettlementHelper is Test {
 
         // Reset the prank
         vm.stopPrank();
+
+        // Set the domain separator
+        domainSeparator = settlement.domainSeparator();
+
+        // Create wallets
+        solver = vm.createWallet("solver");
+        trader = vm.createWallet("trader");
     }
 
     function deployBalancerVault() private returns (IVault vault_) {
