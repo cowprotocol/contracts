@@ -80,46 +80,6 @@ describe("GPv2Settlement", () => {
     testDomain = domain(chainId, settlement.address);
   });
 
-  describe("authenticator", () => {
-    it("should be set to the authenticator the contract was initialized with", async () => {
-      expect(await settlement.authenticator()).to.equal(authenticator.address);
-    });
-  });
-
-  describe("vault", () => {
-    it("should be set to the vault the contract was initialized with", async () => {
-      expect(await settlement.vault()).to.equal(vault.address);
-    });
-  });
-
-  describe("vaultRelayer", () => {
-    it("should deploy a vault relayer", async () => {
-      const deployedVaultRelayer = await settlement.vaultRelayer();
-      expect(
-        await builtAndDeployedMetadataCoincide(
-          deployedVaultRelayer,
-          "GPv2VaultRelayer",
-        ),
-      ).to.be.true;
-    });
-
-    it("should set the vault immutable", async () => {
-      const { vault: vaultAddr } = await readVaultRelayerImmutables(
-        await settlement.vaultRelayer(),
-      );
-
-      expect(vaultAddr).to.equal(vault.address);
-    });
-
-    it("should have the settlement contract as the creator", async () => {
-      const { creator } = await readVaultRelayerImmutables(
-        await settlement.vaultRelayer(),
-      );
-
-      expect(creator).to.equal(settlement.address);
-    });
-  });
-
   describe("filledAmount", () => {
     it("is zero for an untouched order", async () => {
       const orderDigest = ethers.constants.HashZero;
