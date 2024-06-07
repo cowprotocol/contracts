@@ -26,4 +26,3 @@ contract Helper is Test {
         executor = new Harness();
     }
 }
-
