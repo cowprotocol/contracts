@@ -50,15 +50,7 @@ library Bytecode {
         }
     }
 
-    function bytecodeMetadataMatches(bytes memory deployedBytecode, bytes memory compiledBytecode)
-        internal
-        pure
-        returns (bool)
-    {
-        return keccak256(bytecodeMetadata(deployedBytecode)) == keccak256(bytecodeMetadata(compiledBytecode));
-    }
-
-    function bytecodeMetadata(bytes memory bytecode) internal pure returns (bytes memory metadata) {
+    function toMetadata(bytes memory bytecode) internal pure returns (bytes memory metadata) {
         // The metadata is contained at the last 53 bytes of the deployed bytecode
         metadata = bytesSlice(bytecode, bytecode.length - 53, 53);
     }
