@@ -7,7 +7,7 @@ import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
 import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
-import {GPv2SigningHarness} from "test/GPv2Signing/GPv2SigningHarness.sol";
+import {Harness} from "test/GPv2Signing/Helper.sol";
 
 type Owner is address;
 
@@ -127,7 +127,7 @@ library Sign {
         (,,,, signingScheme) = encodedFlags.extractFlags();
     }
 
-    function toOwner(GPv2SigningHarness exposed, GPv2Order.Data memory order, Sign.Signature memory signature)
+    function toOwner(Harness exposed, GPv2Order.Data memory order, Sign.Signature memory signature)
         internal
         view
         returns (Owner)
