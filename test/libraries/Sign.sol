@@ -5,9 +5,7 @@ import {Vm} from "forge-std/Test.sol";
 
 import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
-import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
-
-import {Harness} from "test/GPv2Signing/Helper.sol";
+import {GPv2Signing, EIP1271Verifier} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Bytes} from "./Bytes.sol";
 
@@ -34,7 +32,7 @@ library Sign {
     }
 
     /// @dev Encode and sign the order using the provided signing scheme (EIP-712 or EthSign)
-    function toSignature(
+    function sign(
         Vm vm,
         Vm.Wallet memory owner,
         GPv2Order.Data memory order,
@@ -60,8 +58,8 @@ library Sign {
     }
 
     /// @dev Encode the data used to verify a pre-signed signature
-    function toSignature(PreSignSignature preSign) internal pure returns (Signature memory) {
-        return Signature(GPv2Signing.Scheme.PreSign, abi.encodePacked(preSign));
+    function preSign(address owner) internal pure returns (Signature memory) {
+        return Signature(GPv2Signing.Scheme.PreSign, abi.encodePacked(owner));
     }
 
     /// @dev Decode the data used to verify a pre-signed signature
@@ -79,9 +77,9 @@ library Sign {
     }
 
     /// @dev Encodes the necessary data required to verify an EIP-1271 signature
-    function toSignature(Eip1271Signature memory eip1271Signature) internal pure returns (Signature memory) {
+    function sign(EIP1271Verifier verifier, bytes memory signature) internal pure returns (Signature memory) {
         return Signature(
-            GPv2Signing.Scheme.Eip1271, abi.encodePacked(eip1271Signature.verifier, eip1271Signature.signature)
+            GPv2Signing.Scheme.Eip1271, abi.encodePacked(verifier, signature)
         );
     }
 
