@@ -22,7 +22,6 @@ library Sign {
 
     // Copied from GPv2Signing.sol
     uint256 internal constant PRE_SIGNED = uint256(keccak256("GPv2Signing.Scheme.PreSign"));
-    error InvalidSignatureScheme();
 
     struct Signature {
         /// @dev The signing scheme used in this signature
@@ -53,7 +52,9 @@ library Sign {
         } else if (scheme == GPv2Signing.Scheme.EthSign) {
             (v, r, s) = vm.sign(owner, toEthSignedMessageHash(hash));
         } else {
-            revert InvalidSignatureScheme();
+            revert(
+                "Cannot create a signature for the specified signature scheme, only ECDSA-based schemes are supported"
+            );
         }
 
         signature.data = abi.encodePacked(r, s, v);
@@ -68,7 +69,7 @@ library Sign {
     /// @dev Decode the data used to verify a pre-signed signature
     function toPreSignSignature(Signature memory encodedSignature) internal pure returns (PreSignSignature) {
         if (encodedSignature.scheme != GPv2Signing.Scheme.PreSign) {
-            revert InvalidSignatureScheme();
+            revert("Cannot create a signature for the specified signature scheme, only PreSign is supported");
         }
 
         return PreSignSignature.wrap(abi.decode(encodedSignature.data, (address)));
@@ -84,7 +85,7 @@ library Sign {
     /// @dev Decodes the data used to verify an EIP-1271 signature
     function toEip1271Signature(Signature memory encodedSignature) internal pure returns (Eip1271Signature memory) {
         if (encodedSignature.scheme != GPv2Signing.Scheme.Eip1271) {
-            revert InvalidSignatureScheme();
+            revert("Cannot create a signature for the specified signature scheme, only EIP-1271 is supported");
         }
 
         address verifier;
