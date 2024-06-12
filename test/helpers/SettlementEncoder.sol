@@ -94,7 +94,7 @@ contract SettlementEncoder {
         trades.push(order.toTrade(tokenRegistry.addresses(), signature, executedAmount));
     }
 
-    function signEncodeOrder(
+    function signEncodeTrade(
         Vm vm,
         Vm.Wallet memory owner,
         GPv2Order.Data memory order,
