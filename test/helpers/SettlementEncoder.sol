@@ -134,7 +134,7 @@ contract SettlementEncoder {
         }
     }
 
-    function toEncodedSettlement() public view returns (EncodedSettlement memory) {
+    function encode() public view returns (EncodedSettlement memory) {
         return EncodedSettlement({
             tokens: tokens(),
             clearingPrices: tokenRegistry.clearingPrices(),
@@ -143,7 +143,7 @@ contract SettlementEncoder {
         });
     }
 
-    function toEncodedSettlement(GPv2Interaction.Data[] memory setupInteractions)
+    function encode(GPv2Interaction.Data[] memory setupInteractions)
         public
         pure
         returns (EncodedSettlement memory)

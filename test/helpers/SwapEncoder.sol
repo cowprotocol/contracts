@@ -62,7 +62,7 @@ contract SwapEncoder {
         encodeTrade(order, signature, executedAmount);
     }
 
-    function encodeSwap() public view returns (EncodedSwap memory) {
+    function encode() public view returns (EncodedSwap memory) {
         return EncodedSwap(steps, tokenRegistry.addresses(), trade);
     }
 
