@@ -89,12 +89,12 @@ library Sign {
 
         address verifier;
         uint256 length = encodedSignature.data.length - 20;
-        bytes memory signature = encodedSignature.data.slice(20, length);
+        bytes memory signatureData = encodedSignature.data;
+        bytes memory signature = signatureData.slice(20, length);
 
         // solhint-disable-next-line no-inline-assembly
         assembly ("memory-safe") {
-            let ptr := add(encodedSignature, 0x40)
-            verifier := shr(96, mload(add(ptr, 0x20)))
+            verifier := shr(96, mload(add(signatureData, 0x20)))
         }
 
         return Eip1271Signature(verifier, signature);

@@ -80,7 +80,7 @@ contract SettlementEncoder {
         }
 
         for (uint256 i = 0; i < r.length; i++) {
-            postInteractions[interactions_[uint256(POST)].length + i] = r[i];
+            postInteractions[interactions_[POST].length + i] = r[i];
         }
 
         return [
