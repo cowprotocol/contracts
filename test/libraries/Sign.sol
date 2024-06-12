@@ -78,9 +78,7 @@ library Sign {
 
     /// @dev Encodes the necessary data required to verify an EIP-1271 signature
     function sign(EIP1271Verifier verifier, bytes memory signature) internal pure returns (Signature memory) {
-        return Signature(
-            GPv2Signing.Scheme.Eip1271, abi.encodePacked(verifier, signature)
-        );
+        return Signature(GPv2Signing.Scheme.Eip1271, abi.encodePacked(verifier, signature));
     }
 
     /// @dev Decodes the data used to verify an EIP-1271 signature
