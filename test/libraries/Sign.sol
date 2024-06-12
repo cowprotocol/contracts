@@ -104,13 +104,11 @@ library Sign {
     function toUint256(GPv2Signing.Scheme signingScheme) internal pure returns (uint256 encodedFlags) {
         // GPv2Signing.Scheme.EIP712 = 0 (default)
         if (signingScheme == GPv2Signing.Scheme.EthSign) {
-            encodedFlags |= 0x20;
+            encodedFlags |= 1 << 5;
         } else if (signingScheme == GPv2Signing.Scheme.Eip1271) {
-            encodedFlags |= 0x40;
+            encodedFlags |= 2 << 5;
         } else if (signingScheme == GPv2Signing.Scheme.PreSign) {
-            encodedFlags |= 0x60;
-        } else if (signingScheme != GPv2Signing.Scheme.Eip712) {
-            revert InvalidSignatureScheme();
+            encodedFlags |= 3 << 5;
         }
     }
 

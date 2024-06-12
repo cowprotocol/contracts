@@ -20,28 +20,28 @@ library Order {
     function toUint256(Flags memory flags) internal pure returns (uint256 encodedFlags) {
         // GPv2Order.KIND_SELL = 0 (default)
         if (flags.kind == GPv2Order.KIND_BUY) {
-            encodedFlags |= 0x01;
+            encodedFlags |= 1 << 0;
         } else if (flags.kind != GPv2Order.KIND_SELL) {
             revert("Invalid order kind");
         }
 
         // Partially fillable = 0 (default) - ie. fill-or-kill
         if (flags.partiallyFillable) {
-            encodedFlags |= 0x02;
+            encodedFlags |= 1 << 1;
         }
 
-        // ERC20 sellTokenBalance = 0 (default)
+        // ERC20 sellTokenBalance = 0 (default; 1 << 2 has the same effect)
         if (flags.sellTokenBalance == GPv2Order.BALANCE_EXTERNAL) {
-            encodedFlags |= 0x08;
+            encodedFlags |= 2 << 2;
         } else if (flags.sellTokenBalance == GPv2Order.BALANCE_INTERNAL) {
-            encodedFlags |= 0x0c;
+            encodedFlags |= 3 << 2;
         } else if (flags.sellTokenBalance != GPv2Order.BALANCE_ERC20) {
             revert("Invalid sell token balance");
         }
 
         // ERC20 buyTokenBalance = 0 (default)
         if (flags.buyTokenBalance == GPv2Order.BALANCE_INTERNAL) {
-            encodedFlags |= 0x10;
+            encodedFlags |= 1 << 4;
         } else if (flags.buyTokenBalance != GPv2Order.BALANCE_ERC20) {
             revert("Invalid buy token balance");
         }
