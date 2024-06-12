@@ -70,7 +70,12 @@ library Sign {
             revert("Cannot create a signature for the specified signature scheme, only PreSign is supported");
         }
 
-        return PreSignSignature.wrap(abi.decode(encodedSignature.data, (address)));
+        address owner;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            owner := shr(96, mload(add(encodedSignature, 0x20)))
+        }
+        return PreSignSignature.wrap(owner);
     }
 
     /// @dev Encodes the necessary data required to verify an EIP-1271 signature
