@@ -114,14 +114,6 @@ library Sign {
         (,,,, signingScheme) = encodedFlags.extractFlags();
     }
 
-    function recoverOwner(Harness exposed, GPv2Order.Data memory order, Sign.Signature memory signature)
-        internal
-        view
-        returns (address owner)
-    {
-        (, owner) = exposed.exposed_recoverOrderSigner(order, signature.scheme, signature.data);
-    }
-
     /// @dev Internal helper function for EthSign signatures (non-EIP-712)
     function toEthSignedMessageHash(bytes32 hash) internal pure returns (bytes32 ethSignDigest) {
         ethSignDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
