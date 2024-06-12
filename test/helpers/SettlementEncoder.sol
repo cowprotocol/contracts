@@ -101,7 +101,7 @@ contract SettlementEncoder {
         GPv2Signing.Scheme signingScheme,
         uint256 executedAmount
     ) public {
-        Sign.Signature memory signature = vm.toSignature(owner, order, signingScheme, settlement.domainSeparator());
+        Sign.Signature memory signature = vm.sign(owner, order, signingScheme, settlement.domainSeparator());
         encodeTrade(order, signature, executedAmount);
     }
 
