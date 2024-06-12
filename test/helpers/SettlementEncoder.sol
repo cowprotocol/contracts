@@ -68,15 +68,19 @@ contract SettlementEncoder {
 
     function interactions() public view returns (GPv2Interaction.Data[][3] memory) {
         GPv2Interaction.Data[] memory r = encodeOrderRefunds();
-        GPv2Interaction.Data[] memory postInteractions =
-            new GPv2Interaction.Data[](interactions_[uint256(InteractionStage.POST)].length + r.length);
 
-        for (uint256 i = 0; i < interactions_[uint256(InteractionStage.POST)].length; i++) {
-            postInteractions[i] = interactions_[uint256(InteractionStage.POST)][i];
+        // All the order refunds are encoded in the POST interactions so we take some liberty and
+        // use a short variable to represent the POST stage.
+        uint256 POST = uint256(InteractionStage.POST);
+        GPv2Interaction.Data[] memory postInteractions =
+            new GPv2Interaction.Data[](interactions_[POST].length + r.length);
+
+        for (uint256 i = 0; i < interactions_[POST].length; i++) {
+            postInteractions[i] = interactions_[POST][i];
         }
 
         for (uint256 i = 0; i < r.length; i++) {
-            postInteractions[interactions_[uint256(InteractionStage.POST)].length + i] = r[i];
+            postInteractions[interactions_[uint256(POST)].length + i] = r[i];
         }
 
         return [
@@ -86,10 +90,7 @@ contract SettlementEncoder {
         ];
     }
 
-    uint256 public constant ZERO_EXECUTED_AMOUNT = uint256(keccak256("ZERO_EXECUTED_AMOUNT"));
-
     function encodeTrade(GPv2Order.Data memory order, Sign.Signature memory signature, uint256 executedAmount) public {
-        executedAmount = executedAmount == 0 ? ZERO_EXECUTED_AMOUNT : executedAmount;
         trades.push(order.toTrade(tokenRegistry.addresses(), signature, executedAmount));
     }
 
@@ -153,10 +154,6 @@ contract SettlementEncoder {
     }
 
     function encodeOrderRefunds() private view returns (GPv2Interaction.Data[] memory _refunds) {
-        if (refunds.filledAmounts.length + refunds.preSignatures.length == 0) {
-            return new GPv2Interaction.Data[](0);
-        }
-
         uint256 numInteractions =
             (refunds.filledAmounts.length > 0 ? 1 : 0) + (refunds.preSignatures.length > 0 ? 1 : 0);
         _refunds = new GPv2Interaction.Data[](numInteractions);

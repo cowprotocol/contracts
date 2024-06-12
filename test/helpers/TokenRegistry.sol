@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
+import {Test} from "forge-std/Test.sol";
+
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 
-contract TokenRegistry {
+contract TokenRegistry is Test {
     IERC20[] public tokens;
     mapping(IERC20 => uint256) public tokenIndices;
     mapping(IERC20 => uint256) public prices;
@@ -12,7 +14,7 @@ contract TokenRegistry {
 
     constructor() {
         /// @dev Add a dummy token to make the array 1-indexed
-        tokens.push(IERC20(address(0)));
+        tokens.push(IERC20(makeAddr("TokenRegistry: invalid token placeholder")));
     }
 
     /// @dev Retrieve the token index for the specified token address. If the token
