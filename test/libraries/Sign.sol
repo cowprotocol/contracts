@@ -11,8 +11,6 @@ import {Harness} from "test/GPv2Signing/Helper.sol";
 
 import {Bytes} from "./Bytes.sol";
 
-type Owner is address;
-
 type PreSignSignature is address;
 
 library Sign {
@@ -116,13 +114,12 @@ library Sign {
         (,,,, signingScheme) = encodedFlags.extractFlags();
     }
 
-    function toOwner(Harness exposed, GPv2Order.Data memory order, Sign.Signature memory signature)
+    function recoverOwner(Harness exposed, GPv2Order.Data memory order, Sign.Signature memory signature)
         internal
         view
-        returns (Owner)
+        returns (address owner)
     {
-        (, address owner) = exposed.exposed_recoverOrderSigner(order, signature.scheme, signature.data);
-        return Owner.wrap(owner);
+        (, owner) = exposed.exposed_recoverOrderSigner(order, signature.scheme, signature.data);
     }
 
     /// @dev Internal helper function for EthSign signatures (non-EIP-712)
