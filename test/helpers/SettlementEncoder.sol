@@ -143,11 +143,7 @@ contract SettlementEncoder {
         });
     }
 
-    function encode(GPv2Interaction.Data[] memory setupInteractions)
-        public
-        pure
-        returns (EncodedSettlement memory)
-    {
+    function encode(GPv2Interaction.Data[] memory setupInteractions) public pure returns (EncodedSettlement memory) {
         return EncodedSettlement({
             tokens: new IERC20[](0),
             clearingPrices: new uint256[](0),
