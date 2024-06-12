@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import "forge-std/Test.sol";
+import {Vm} from "forge-std/Test.sol";
 
 import {GPv2Order, IERC20} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
@@ -17,7 +17,7 @@ import {TokenRegistry} from "./TokenRegistry.sol";
 contract SettlementEncoder {
     using GPv2Order for GPv2Order.Data;
     using Trade for GPv2Order.Data;
-    using Sign for Vm.Wallet;
+    using Sign for Vm;
 
     /// The stage an interaction should be executed in
     enum InteractionStage {
@@ -94,12 +94,13 @@ contract SettlementEncoder {
     }
 
     function signEncodeOrder(
+        Vm vm,
         GPv2Order.Data memory order,
         Vm.Wallet memory owner,
         GPv2Signing.Scheme signingScheme,
         uint256 executedAmount
     ) public {
-        Sign.Signature memory signature = owner.toSignature(signingScheme, settlement.domainSeparator(), order);
+        Sign.Signature memory signature = vm.toSignature(owner, order, signingScheme, settlement.domainSeparator());
         encodeTrade(order, signature, executedAmount);
     }
 

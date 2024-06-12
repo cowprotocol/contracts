@@ -22,9 +22,6 @@ library Sign {
 
     // Copied from GPv2Signing.sol
     uint256 internal constant PRE_SIGNED = uint256(keccak256("GPv2Signing.Scheme.PreSign"));
-    // solhint-disable-next-line const-name-snakecase
-    Vm internal constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
     error InvalidSignatureScheme();
 
     struct Signature {
@@ -41,6 +38,7 @@ library Sign {
 
     /// @dev Encode and sign the order using the provided signing scheme (EIP-712 or EthSign)
     function toSignature(
+        Vm vm,
         Vm.Wallet memory owner,
         GPv2Signing.Scheme scheme,
         bytes32 domainSeparator,
