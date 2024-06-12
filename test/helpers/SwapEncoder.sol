@@ -3,12 +3,7 @@ pragma solidity ^0.8.26;
 
 import {Vm} from "forge-std/Test.sol";
 
-import {IERC20} from "src/contracts/interfaces/IERC20.sol";
-import {IVault} from "src/contracts/interfaces/IVault.sol";
-import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
-import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
-import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
-import {GPv2Settlement} from "src/contracts/GPv2Settlement.sol";
+import {IERC20, IVault, GPv2Order, GPv2Trade, GPv2Signing, GPv2Settlement} from "src/contracts/GPv2Settlement.sol";
 
 import {Sign} from "../libraries/Sign.sol";
 import {Trade} from "../libraries/Trade.sol";
