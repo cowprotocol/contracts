@@ -15,13 +15,9 @@ import {
 import {Sign} from "test/libraries/Sign.sol";
 import {Trade} from "test/libraries/Trade.sol";
 
-import {TokenRegistry} from "./TokenRegistry.sol";
+import {Encoder} from "./Encoder.sol";
 
-abstract contract Settlement is TokenRegistry {
-    using GPv2Order for GPv2Order.Data;
-    using Trade for GPv2Order.Data;
-    using Sign for Vm;
-
+contract Settlement is Encoder {
     /// The stage an interaction should be executed in
     enum InteractionStage {
         PRE,
@@ -52,7 +48,6 @@ abstract contract Settlement is TokenRegistry {
         GPv2Interaction.Data[][3] interactions;
     }
 
-    GPv2Trade.Data[] public trades;
     GPv2Interaction.Data[][3] private interactions_;
     OrderRefunds private refunds;
 
@@ -78,21 +73,6 @@ abstract contract Settlement is TokenRegistry {
             interactions_[uint256(InteractionStage.INTRA)],
             postInteractions
         ];
-    }
-
-    function encodeTrade(GPv2Order.Data memory order, Sign.Signature memory signature, uint256 executedAmount) public {
-        trades.push(order.toTrade(tokens(), signature, executedAmount));
-    }
-
-    function signEncodeTrade(
-        Vm vm,
-        Vm.Wallet memory owner,
-        GPv2Order.Data memory order,
-        GPv2Signing.Scheme signingScheme,
-        uint256 executedAmount
-    ) public {
-        Sign.Signature memory signature = vm.sign(owner, order, signingScheme, settlement.domainSeparator());
-        encodeTrade(order, signature, executedAmount);
     }
 
     function addInteraction(GPv2Interaction.Data memory interaction, InteractionStage stage) public {
@@ -121,7 +101,7 @@ abstract contract Settlement is TokenRegistry {
         }
     }
 
-    function encode() public view returns (EncodedSettlement memory) {
+    function encode() public returns (EncodedSettlement memory) {
         return EncodedSettlement({
             tokens: tokens(),
             clearingPrices: clearingPrices(),
@@ -130,7 +110,7 @@ abstract contract Settlement is TokenRegistry {
         });
     }
 
-    function encode(GPv2Interaction.Data[] memory setupInteractions) public pure returns (EncodedSettlement memory) {
+    function encode(GPv2Interaction.Data[] memory setupInteractions) public returns (EncodedSettlement memory) {
         return EncodedSettlement({
             tokens: new IERC20[](0),
             clearingPrices: new uint256[](0),

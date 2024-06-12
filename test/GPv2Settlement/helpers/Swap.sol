@@ -8,11 +8,10 @@ import {IERC20, IVault, GPv2Order, GPv2Trade, GPv2Signing, GPv2Settlement} from 
 import {Sign} from "test/libraries/Sign.sol";
 import {Trade} from "test/libraries/Trade.sol";
 
-import {TokenRegistry} from "./TokenRegistry.sol";
+import {Encoder} from "./Encoder.sol";
 
-abstract contract Swap is TokenRegistry {
+contract Swap is Encoder {
     using Trade for GPv2Order.Data;
-    using Sign for Vm;
 
     struct VaultSwap {
         bytes32 poolId;
@@ -29,7 +28,6 @@ abstract contract Swap is TokenRegistry {
     }
 
     IVault.BatchSwapStep[] public steps;
-    GPv2Trade.Data public trade;
 
     function encodeSwapSteps(VaultSwap[] memory _swap) public {
         for (uint256 i = 0; i < _swap.length; i++) {
@@ -37,26 +35,20 @@ abstract contract Swap is TokenRegistry {
         }
     }
 
-    function encodeTrade(GPv2Order.Data memory order, Sign.Signature memory signature, uint256 limitAmount) public {
-        if (limitAmount == 0) {
-            limitAmount = order.kind == GPv2Order.KIND_SELL ? order.buyAmount : order.sellAmount;
+    function encodeTrade(GPv2Order.Data memory order, Sign.Signature memory signature, uint256 executedAmount)
+        public
+        virtual
+        override
+    {
+        if (executedAmount == 0) {
+            executedAmount = order.kind == GPv2Order.KIND_SELL ? order.buyAmount : order.sellAmount;
         }
-        trade = order.toTrade(tokens(), signature, limitAmount);
+        trades.push(order.toTrade(tokens(), signature, executedAmount));
     }
 
-    function signEncodeTrade(
-        Vm vm,
-        Vm.Wallet memory owner,
-        GPv2Order.Data memory order,
-        GPv2Signing.Scheme signingScheme,
-        uint256 executedAmount
-    ) public {
-        Sign.Signature memory signature = vm.sign(owner, order, signingScheme, settlement.domainSeparator());
-        encodeTrade(order, signature, executedAmount);
-    }
-
-    function encode() public view returns (EncodedSwap memory) {
-        return EncodedSwap(steps, tokens(), trade);
+    function encodeSwap() public returns (EncodedSwap memory) {
+        require(trades.length == 1, "Only one trade is supported");
+        return EncodedSwap(steps, tokens(), trades[0]);
     }
 
     function toSwapStep(VaultSwap memory _swap) private returns (IVault.BatchSwapStep memory step) {

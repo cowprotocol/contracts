@@ -1,26 +1,32 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
+import {Test} from "forge-std/Test.sol";
+
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 
-import {Helper} from "../Helper.sol";
+import {Base} from "../Helper.sol";
 
-contract TokenRegistry is Helper {
+abstract contract TokenRegistry is Base {
     IERC20[] public _tokenRegistryTokens;
     mapping(IERC20 => uint256) public _tokenRegistryIndices;
     mapping(IERC20 => uint256) public prices;
 
+    // equal to address(uint160(uint256(keccak256("TokenRegistry: invalid token placeholder"))
+    IERC20 private constant PLACE_HOLDER = IERC20(0x17c380062AB855626A6Ab34f687945Bd3066F7D8);
+
     error ArrayLengthMismatch();
 
-    function setUp() virtual public override {
-        super.setUp();
-        /// @dev Add a dummy token to make the array 1-indexed
-        _tokenRegistryTokens.push(IERC20(makeAddr("TokenRegistry: invalid token placeholder")));
+    modifier requirePlaceholder() {
+        if (_tokenRegistryTokens.length == 0) {
+            _tokenRegistryTokens.push(PLACE_HOLDER);
+        }
+        _;
     }
 
     /// @dev Retrieve the token index for the specified token address. If the token
     /// is not already in the registry, it will be added.
-    function indexOf(IERC20 token) internal returns (uint256 i) {
+    function indexOf(IERC20 token) internal requirePlaceholder returns (uint256 i) {
         i = _tokenRegistryIndices[token];
         if (i == 0) {
             i = _tokenRegistryTokens.length;
@@ -30,7 +36,7 @@ contract TokenRegistry is Helper {
     }
 
     /// @dev Set the price for the specified token
-    function setPrices(IERC20[] calldata _tokens, uint256[] calldata _prices) internal {
+    function setPrices(IERC20[] calldata _tokens, uint256[] calldata _prices) internal requirePlaceholder {
         if (_tokens.length != _prices.length) {
             revert ArrayLengthMismatch();
         }
@@ -43,7 +49,7 @@ contract TokenRegistry is Helper {
     }
 
     /// @dev Gets the array of token addresses in the registry
-    function tokens() internal view returns (IERC20[] memory) {
+    function tokens() internal requirePlaceholder returns (IERC20[] memory) {
         // Skip the dummy token
         if (_tokenRegistryTokens.length == 1) {
             return new IERC20[](0);
@@ -57,7 +63,7 @@ contract TokenRegistry is Helper {
     }
 
     /// @dev Returns a clearing price vector for the current settlement tokens price mapping
-    function clearingPrices() internal view returns (uint256[] memory) {
+    function clearingPrices() internal requirePlaceholder returns (uint256[] memory) {
         // Skip the dummy token
         if (_tokenRegistryTokens.length == 1) {
             return new uint256[](0);

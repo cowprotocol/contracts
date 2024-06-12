@@ -16,26 +16,31 @@ import {
 import {IVault, GPv2Authentication} from "src/contracts/GPv2Settlement.sol";
 import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 
-abstract contract Helper is Test {
+abstract contract Base is Test {
+    Harness internal settlement;
+    bytes32 internal domainSeparator;
+
+    function setUp() public virtual {}
+}
+
+abstract contract Helper is Base {
     using stdJson for string;
 
     GPv2Authentication internal authenticator;
     IVault internal vault;
-
-    Harness internal settlement;
-    bytes32 internal domainSeparator;
+    GPv2AllowListAuthentication internal allowList;
 
     Vm.Wallet internal solver;
     Vm.Wallet internal trader;
 
-    function setUp() public virtual {
+    function setUp() public virtual override {
         // Configure addresses
         address deployer = makeAddr("deployer");
         address owner = makeAddr("owner");
         vm.startPrank(deployer);
 
         // Deploy the allowlist manager
-        GPv2AllowListAuthentication allowList = new GPv2AllowListAuthentication();
+        allowList = new GPv2AllowListAuthentication();
         allowList.initializeManager(owner);
         authenticator = allowList;
 
@@ -66,7 +71,6 @@ abstract contract Helper is Test {
             vault_ := create(0, add(bytecode, 0x20), mload(bytecode))
         }
     }
-
 }
 
 contract Harness is GPv2Settlement {
