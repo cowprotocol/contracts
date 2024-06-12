@@ -17,7 +17,7 @@ import {Trade} from "test/libraries/Trade.sol";
 
 import {TokenRegistry} from "./TokenRegistry.sol";
 
-contract SettlementEncoder {
+abstract contract Settlement is TokenRegistry {
     using GPv2Order for GPv2Order.Data;
     using Trade for GPv2Order.Data;
     using Sign for Vm;
@@ -52,22 +52,9 @@ contract SettlementEncoder {
         GPv2Interaction.Data[][3] interactions;
     }
 
-    error InvalidOrderUidLength();
-
-    GPv2Settlement internal settlement;
-    TokenRegistry internal tokenRegistry;
     GPv2Trade.Data[] public trades;
     GPv2Interaction.Data[][3] private interactions_;
     OrderRefunds private refunds;
-
-    constructor(GPv2Settlement _settlement, TokenRegistry _tokenRegistry) {
-        settlement = _settlement;
-        tokenRegistry = (_tokenRegistry == TokenRegistry(address(0)) ? new TokenRegistry() : _tokenRegistry);
-    }
-
-    function tokens() public view returns (IERC20[] memory) {
-        return tokenRegistry.addresses();
-    }
 
     function interactions() public view returns (GPv2Interaction.Data[][3] memory) {
         GPv2Interaction.Data[] memory r = encodeOrderRefunds();
@@ -94,7 +81,7 @@ contract SettlementEncoder {
     }
 
     function encodeTrade(GPv2Order.Data memory order, Sign.Signature memory signature, uint256 executedAmount) public {
-        trades.push(order.toTrade(tokenRegistry.addresses(), signature, executedAmount));
+        trades.push(order.toTrade(tokens(), signature, executedAmount));
     }
 
     function signEncodeTrade(
@@ -117,7 +104,7 @@ contract SettlementEncoder {
             for (uint256 i = 0; i < orderRefunds.filledAmounts.length; i++) {
                 bytes memory filledAmount = orderRefunds.filledAmounts[i];
                 if (filledAmount.length != GPv2Order.UID_LENGTH) {
-                    revert InvalidOrderUidLength();
+                    revert("Invalid order uid length");
                 }
                 refunds.filledAmounts.push(filledAmount);
             }
@@ -127,7 +114,7 @@ contract SettlementEncoder {
             for (uint256 i = 0; i < orderRefunds.preSignatures.length; i++) {
                 bytes memory preSignature = orderRefunds.preSignatures[i];
                 if (preSignature.length != GPv2Order.UID_LENGTH) {
-                    revert InvalidOrderUidLength();
+                    revert("Invalid order uid length");
                 }
                 refunds.preSignatures.push(preSignature);
             }
@@ -137,7 +124,7 @@ contract SettlementEncoder {
     function encode() public view returns (EncodedSettlement memory) {
         return EncodedSettlement({
             tokens: tokens(),
-            clearingPrices: tokenRegistry.clearingPrices(),
+            clearingPrices: clearingPrices(),
             trades: trades,
             interactions: interactions()
         });
@@ -173,5 +160,13 @@ contract SettlementEncoder {
             value: 0,
             callData: abi.encodeWithSelector(fn, orderUids)
         });
+    }
+
+    function settle(EncodedSettlement memory _settlement) internal {
+        settlement.settle(_settlement.tokens, _settlement.clearingPrices, _settlement.trades, _settlement.interactions);
+    }
+
+    function settle(GPv2Settlement settler, EncodedSettlement memory _settlement) internal {
+        settler.settle(_settlement.tokens, _settlement.clearingPrices, _settlement.trades, _settlement.interactions);
     }
 }
