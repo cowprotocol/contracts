@@ -51,7 +51,7 @@ contract SettlementEncoder {
 
     error InvalidOrderUidLength();
 
-    GPv2Settlement public settlement;
+    GPv2Settlement internal settlement;
     TokenRegistry internal tokenRegistry;
     GPv2Trade.Data[] public trades;
     GPv2Interaction.Data[][3] private interactions_;
