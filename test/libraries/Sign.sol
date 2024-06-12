@@ -39,9 +39,9 @@ library Sign {
     function toSignature(
         Vm vm,
         Vm.Wallet memory owner,
+        GPv2Order.Data memory order,
         GPv2Signing.Scheme scheme,
-        bytes32 domainSeparator,
-        GPv2Order.Data memory order
+        bytes32 domainSeparator
     ) internal returns (Signature memory signature) {
         bytes32 hash = order.hash(domainSeparator);
         bytes32 r;

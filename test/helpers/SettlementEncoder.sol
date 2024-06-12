@@ -95,8 +95,8 @@ contract SettlementEncoder {
 
     function signEncodeOrder(
         Vm vm,
-        GPv2Order.Data memory order,
         Vm.Wallet memory owner,
+        GPv2Order.Data memory order,
         GPv2Signing.Scheme signingScheme,
         uint256 executedAmount
     ) public {
