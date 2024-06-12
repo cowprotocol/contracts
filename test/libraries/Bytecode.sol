@@ -2,13 +2,10 @@
 pragma solidity ^0.8.26;
 
 import {Vm} from "forge-std/Test.sol";
+import {Bytes} from "./Bytes.sol";
 
 library Bytecode {
-    // solhint-disable-next-line const-name-snakecase
-    Vm internal constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
-    error SliceOutOfBounds();
-    error NoImmutablesFound();
+    using Bytes for bytes;
 
     struct ImmutableReference {
         uint256 length;
@@ -16,7 +13,7 @@ library Bytecode {
     }
 
     /// @dev Return all the immutables from a deployed contract
-    function deployedImmutables(address which, string memory contractName)
+    function deployedImmutables(Vm vm, string memory contractName, address which)
         internal
         view
         returns (bytes[] memory immutables)
@@ -33,40 +30,17 @@ library Bytecode {
             ImmutableReference[] memory jsonImmutables = abi.decode(j, (ImmutableReference[]));
 
             if (jsonImmutables.length == 0) {
-                revert NoImmutablesFound();
+                revert("Every immutable is expected to have at least a reference entry");
             }
 
             // Only interested in the first occurence of the ith immutable reference
             ImmutableReference memory r = jsonImmutables[0];
-            bytes memory data = new bytes(r.length);
-            // solhint-disable-next-line no-inline-assembly
-            assembly ("memory-safe") {
-                let size := mload(data)
-                let offset := add(data, 0x20)
-                extcodecopy(which, offset, mload(add(r, 0x20)), size)
-            }
-
-            immutables[i] = data;
+            immutables[i] = which.code.slice(r.start, r.length);
         }
     }
 
     function toMetadata(bytes memory bytecode) internal pure returns (bytes memory metadata) {
         // The metadata is contained at the last 53 bytes of the deployed bytecode
-        metadata = bytesSlice(bytecode, bytecode.length - 53, 53);
-    }
-
-    function bytesSlice(bytes memory data, uint256 start, uint256 length) internal pure returns (bytes memory slice) {
-        if (data.length < start + length) {
-            revert SliceOutOfBounds();
-        }
-
-        slice = new bytes(length);
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            // Copy the data from the source to the destination
-            let src := add(add(data, 0x20), start)
-            let dst := add(slice, 0x20)
-            mcopy(dst, src, length)
-        }
+        metadata = bytecode.slice(bytecode.length - 53, 53);
     }
 }

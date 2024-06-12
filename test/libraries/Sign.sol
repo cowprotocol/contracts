@@ -9,6 +9,8 @@ import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Harness} from "test/GPv2Signing/Helper.sol";
 
+import {Bytes} from "./Bytes.sol";
+
 type Owner is address;
 
 type PreSignSignature is address;
@@ -16,6 +18,7 @@ type PreSignSignature is address;
 library Sign {
     using GPv2Order for GPv2Order.Data;
     using GPv2Trade for uint256;
+    using Bytes for bytes;
 
     // Copied from GPv2Signing.sol
     uint256 internal constant PRE_SIGNED = uint256(keccak256("GPv2Signing.Scheme.PreSign"));
@@ -87,24 +90,13 @@ library Sign {
         }
 
         address verifier;
-        bytes memory signature;
+        uint256 length = encodedSignature.data.length - 20;
+        bytes memory signature = encodedSignature.data.slice(20, length);
+
         // solhint-disable-next-line no-inline-assembly
         assembly ("memory-safe") {
-            let dPtr := add(encodedSignature, 0x40)
-            verifier := shr(96, mload(add(dPtr, 0x20)))
-
-            // Calculate the length of the signature
-            let signatureLength := sub(mload(dPtr), 0x14)
-
-            // Allocate memory for the signature
-            signature := mload(0x40)
-            mstore(signature, signatureLength)
-            mstore(0x40, add(signature, add(signatureLength, 0x20)))
-
-            // Copy the signature to the allocated memory
-            let src := add(dPtr, 0x34)
-            let dest := add(signature, 0x20)
-            mcopy(dest, src, signatureLength)
+            let ptr := add(encodedSignature, 0x40)
+            verifier := shr(96, mload(add(ptr, 0x20)))
         }
 
         return Eip1271Signature(verifier, signature);
