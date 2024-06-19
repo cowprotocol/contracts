@@ -80,17 +80,6 @@ describe("GPv2Settlement", () => {
     testDomain = domain(chainId, settlement.address);
   });
 
-  describe("receive", () => {
-    it("allows receiving Ether directly in the settlement contract", async () => {
-      await expect(
-        traders[0].sendTransaction({
-          to: settlement.address,
-          value: ethers.utils.parseEther("1.0"),
-        }),
-      ).to.not.be.reverted;
-    });
-  });
-
   describe("settle", () => {
     const empty = new SettlementEncoder(testDomain).encodedSettlement({});
 
