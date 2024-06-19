@@ -17,6 +17,14 @@ library Order {
         bool partiallyFillable;
     }
 
+    /// @dev Return an empty sell order
+    function emptySell() internal pure returns (GPv2Order.Data memory order) {
+        order.kind = GPv2Order.KIND_SELL;
+        order.sellTokenBalance = GPv2Order.BALANCE_ERC20;
+        order.buyTokenBalance = GPv2Order.BALANCE_ERC20;
+    }
+
+    /// @dev Given a `flags` struct, encode it into a uint256 for a GPv2Trade
     function toUint256(Flags memory flags) internal pure returns (uint256 encodedFlags) {
         // GPv2Order.KIND_SELL = 0 (default)
         if (flags.kind == GPv2Order.KIND_BUY) {
@@ -47,6 +55,7 @@ library Order {
         }
     }
 
+    /// @dev Given a GPv2Trade encoded flags, decode them into a `Flags` struct
     function toFlags(uint256 encodedFlags) internal pure returns (Flags memory flags) {
         (flags.kind, flags.partiallyFillable, flags.sellTokenBalance, flags.buyTokenBalance,) =
             encodedFlags.extractFlags();

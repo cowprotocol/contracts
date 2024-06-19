@@ -17,6 +17,7 @@ library Sign {
     // Copied from GPv2Signing.sol
     uint256 internal constant PRE_SIGNED = uint256(keccak256("GPv2Signing.Scheme.PreSign"));
 
+    /// @dev A struct combining the signing scheme and the scheme's specific-encoded data
     struct Signature {
         /// @dev The signing scheme used in this signature
         GPv2Signing.Scheme scheme;
@@ -24,9 +25,15 @@ library Sign {
         bytes data;
     }
 
+    /// @dev An EIP-1271 signature's components
     struct Eip1271Signature {
         address verifier;
         bytes signature;
+    }
+
+    /// @dev Return an empty (and invalid) EIP-712 signature
+    function emptyEIP712() internal pure returns (Signature memory) {
+        return Signature({scheme: GPv2Signing.Scheme.Eip712, data: new bytes(65)});
     }
 
     /// @dev Encode and sign the order using the provided signing scheme (EIP-712 or EthSign)
@@ -98,6 +105,8 @@ library Sign {
         return Eip1271Signature(verifier, signature);
     }
 
+    /// @dev Given a `scheme`, encode it into a uint256 for a GPv2Trade. This makes use of solidity's
+    ///      enum type asserting the uint value is contained within the enum's range.
     function toUint256(GPv2Signing.Scheme signingScheme) internal pure returns (uint256 encodedFlags) {
         // GPv2Signing.Scheme.EIP712 = 0 (default)
         if (signingScheme == GPv2Signing.Scheme.EthSign) {
@@ -109,6 +118,7 @@ library Sign {
         }
     }
 
+    /// @dev Given a GPv2Trade encoded flags, decode them into a `GPv2Signing.Scheme`
     function toSigningScheme(uint256 encodedFlags) internal pure returns (GPv2Signing.Scheme signingScheme) {
         (,,,, signingScheme) = encodedFlags.extractFlags();
     }

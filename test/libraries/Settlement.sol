@@ -2,8 +2,9 @@
 pragma solidity ^0.8.26;
 
 import {GPv2Settlement} from "src/contracts/GPv2Settlement.sol";
-import {SettlementEncoder} from "../helpers/SettlementEncoder.sol";
-import {SwapEncoder} from "../helpers/SwapEncoder.sol";
+import {Harness} from "test/GPv2Settlement/Helper.sol";
+import {SettlementEncoder} from "./encoders/SettlementEncoder.sol";
+import {SwapEncoder} from "./encoders/SwapEncoder.sol";
 
 library Settlement {
     function settle(GPv2Settlement settler, SettlementEncoder.EncodedSettlement memory settlement) internal {

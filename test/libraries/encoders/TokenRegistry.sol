@@ -1,0 +1,96 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+pragma solidity ^0.8.26;
+
+import {IERC20} from "src/contracts/interfaces/IERC20.sol";
+
+library TokenRegistry {
+    struct State {
+        IERC20[] tokens;
+        mapping(IERC20 => uint256) tokenIndices;
+        mapping(IERC20 => uint256) prices;
+    }
+
+    bytes32 internal constant STATE_STORAGE_SLOT = keccak256("TokenRegistry.storage");
+
+    /// @dev Ensure the token array is hydrated with a dummy token
+    modifier hydrateArray(State storage state) {
+        if (state.tokens.length == 0) {
+            state.tokens.push(IERC20(address(uint160(uint256(keccak256("TokenRegistry: invalid token placeholder"))))));
+        }
+        _;
+    }
+
+    /// @dev Make a new token registry derived from the specified registry ID
+    function makeTokenRegistry(address registryId) internal pure returns (State storage state) {
+        state = tokenRegistry(keccak256(abi.encodePacked(STATE_STORAGE_SLOT, registryId)));
+    }
+
+    /// @dev Retrieve the token registry for the specified slot
+    function tokenRegistry(bytes32 slot) internal pure returns (State storage state) {
+        assembly {
+            state.slot := slot
+        }
+    }
+
+    /// @dev Retrieve the slot for the token registry
+    function tokenRegistrySlot(State storage state) internal pure returns (bytes32 slot) {
+        assembly {
+            slot := state.slot
+        }
+    }
+
+    /// @dev Retrieve the token index for the specified token address. If the token
+    /// is not already in the registry, it will be added.
+    function indexOf(State storage state, IERC20 token) internal hydrateArray(state) returns (uint256 i) {
+        i = state.tokenIndices[token];
+        if (i == 0) {
+            i = state.tokens.length;
+            state.tokens.push(token);
+            state.tokenIndices[token] = i;
+        }
+    }
+
+    /// @dev Set the price for the specified token
+    function setPrices(State storage state, IERC20[] memory _tokens, uint256[] memory _prices)
+        internal
+        hydrateArray(state)
+    {
+        if (_tokens.length != _prices.length) {
+            revert("Array length mismatch");
+        }
+
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            IERC20 token = _tokens[i];
+            indexOf(state, token);
+            state.prices[token] = _prices[i];
+        }
+    }
+
+    /// @dev Gets the array of tokens in the registry
+    function getTokens(State storage state) internal hydrateArray(state) returns (IERC20[] memory) {
+        // Skip the dummy token
+        if (state.tokens.length == 1) {
+            return new IERC20[](0);
+        }
+
+        IERC20[] memory tokens_ = new IERC20[](state.tokens.length - 1);
+        for (uint256 i = 1; i < state.tokens.length; i++) {
+            tokens_[i - 1] = state.tokens[i];
+        }
+        return tokens_;
+    }
+
+    /// @dev Returns a clearing price vector for the current settlement tokens price mapping
+    function clearingPrices(State storage state) internal hydrateArray(state) returns (uint256[] memory) {
+        // Skip the dummy token
+        if (state.tokens.length == 1) {
+            return new uint256[](0);
+        }
+
+        uint256[] memory prices = new uint256[](state.tokens.length - 1);
+        for (uint256 i = 1; i < state.tokens.length; i++) {
+            prices[i - 1] = state.prices[state.tokens[i]];
+        }
+        return prices;
+    }
+}
