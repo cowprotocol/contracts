@@ -12,7 +12,6 @@ import { artifacts, ethers, waffle } from "hardhat";
 
 import {
   Interaction,
-  InteractionStage,
   Order,
   OrderBalance,
   OrderFlags,
@@ -31,10 +30,6 @@ import {
 } from "../src/ts";
 
 import { SwapKind, UserBalanceOpKind } from "./balancer";
-import {
-  builtAndDeployedMetadataCoincide,
-  readVaultRelayerImmutables,
-} from "./bytecode";
 import { ceilDiv } from "./testHelpers";
 
 function fillBytes(count: number, byte: number): string {
