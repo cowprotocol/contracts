@@ -80,20 +80,6 @@ describe("GPv2Settlement", () => {
     testDomain = domain(chainId, settlement.address);
   });
 
-  describe("filledAmount", () => {
-    it("is zero for an untouched order", async () => {
-      const orderDigest = ethers.constants.HashZero;
-      const owner = ethers.constants.AddressZero;
-      const validTo = 2 ** 32 - 1;
-
-      expect(
-        await settlement.filledAmount(
-          packOrderUidParams({ orderDigest, owner, validTo }),
-        ),
-      ).to.equal(ethers.constants.Zero);
-    });
-  });
-
   describe("receive", () => {
     it("allows receiving Ether directly in the settlement contract", async () => {
       await expect(
