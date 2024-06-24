@@ -19,7 +19,7 @@ contract RemoveSolver is Helper {
         authenticator.removeSolver(solver);
     }
 
-    function test_reverts_when_unauthorized_address_adds_a_solver() public {
+    function test_reverts_when_unauthorized_address_removes_a_solver() public {
         vm.prank(makeAddr("any address"));
         vm.expectRevert("GPv2: caller not manager");
         authenticator.removeSolver(solver);
