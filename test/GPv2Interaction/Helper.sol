@@ -2,17 +2,25 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "src/contracts/libraries/GPv2Interaction.sol";
+import {Test} from "forge-std/Test.sol";
 
-contract GPv2InteractionTestInterface {
-    // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
+import {GPv2Interaction} from "src/contracts/libraries/GPv2Interaction.sol";
 
+contract Harness {
     function executeTest(GPv2Interaction.Data calldata interaction) external {
         GPv2Interaction.execute(interaction);
     }
 
     function selectorTest(GPv2Interaction.Data calldata interaction) external pure returns (bytes4) {
         return GPv2Interaction.selector(interaction);
+    }
+}
+
+contract Helper is Test {
+    Harness executor;
+    address recipient = makeAddr("TestHelper: recipient");
+
+    function setUp() public {
+        executor = new Harness();
     }
 }
