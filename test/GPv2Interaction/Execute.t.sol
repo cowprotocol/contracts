@@ -28,8 +28,10 @@ contract Transfer is Helper {
 
         vm.deal(address(executor), value);
 
+        assertEq(address(executor).balance, value);
         vm.expectCall(target, value, callData);
         executor.executeTest(GPv2Interaction.Data({target: target, value: value, callData: callData}));
+        assertEq(address(executor).balance, 0);
     }
 
     function test_should_send_Ether_to_EOAs() public {
