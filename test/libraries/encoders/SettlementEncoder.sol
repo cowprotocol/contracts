@@ -205,15 +205,13 @@ library SettlementEncoder {
 
         uint256 i = 0;
         if (state.refunds.filledAmounts.length > 0) {
-            refunds_[i++] = refundFnEncoder(
-                settlement, GPv2Settlement.freeFilledAmountStorage, state.refunds.filledAmounts
-            );
+            refunds_[i++] =
+                refundFnEncoder(settlement, GPv2Settlement.freeFilledAmountStorage, state.refunds.filledAmounts);
         }
 
         if (state.refunds.preSignatures.length > 0) {
-            refunds_[i] = refundFnEncoder(
-                settlement, GPv2Settlement.freePreSignatureStorage, state.refunds.preSignatures
-            );
+            refunds_[i] =
+                refundFnEncoder(settlement, GPv2Settlement.freePreSignatureStorage, state.refunds.preSignatures);
         }
     }
 
