@@ -206,23 +206,23 @@ library SettlementEncoder {
         uint256 i = 0;
         if (state.refunds.filledAmounts.length > 0) {
             refunds_[i++] = refundFnEncoder(
-                settlement, GPv2Settlement.freeFilledAmountStorage.selector, state.refunds.filledAmounts
+                settlement, GPv2Settlement.freeFilledAmountStorage, state.refunds.filledAmounts
             );
         }
 
         if (state.refunds.preSignatures.length > 0) {
             refunds_[i] = refundFnEncoder(
-                settlement, GPv2Settlement.freePreSignatureStorage.selector, state.refunds.preSignatures
+                settlement, GPv2Settlement.freePreSignatureStorage, state.refunds.preSignatures
             );
         }
     }
 
     /// @dev Encode a refund function call
-    function refundFnEncoder(address settlement, bytes4 fn, bytes[] memory orderUids)
+    function refundFnEncoder(address settlement, function(bytes[] calldata) fn, bytes[] memory orderUids)
         private
         pure
         returns (GPv2Interaction.Data memory)
     {
-        return GPv2Interaction.Data({target: settlement, value: 0, callData: abi.encodeWithSelector(fn, orderUids)});
+        return GPv2Interaction.Data({target: settlement, value: 0, callData: abi.encodeCall(fn, (orderUids))});
     }
 }
