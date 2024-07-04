@@ -31,11 +31,6 @@ library Sign {
         bytes signature;
     }
 
-    /// @dev Return an empty (and invalid) EIP-712 signature
-    function emptyEIP712() internal pure returns (Signature memory) {
-        return Signature({scheme: GPv2Signing.Scheme.Eip712, data: new bytes(65)});
-    }
-
     /// @dev Encode and sign the order using the provided signing scheme (EIP-712 or EthSign)
     function sign(
         Vm vm,

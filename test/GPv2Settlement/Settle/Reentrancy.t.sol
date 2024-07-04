@@ -6,7 +6,7 @@ import {IERC20, GPv2Order, GPv2Interaction, GPv2Settlement} from "src/contracts/
 import {Harness, Helper} from "../Helper.sol";
 
 import {Settlement} from "test/libraries/Settlement.sol";
-import {Sign} from "test/libraries/Sign.sol";
+import {GPv2Signing, Sign} from "test/libraries/Sign.sol";
 import {Trade} from "test/libraries/Trade.sol";
 import {Order} from "test/libraries/Order.sol";
 
@@ -42,7 +42,7 @@ contract Reentrancy is Helper {
         settlement.settle(encoder.encode(interactions));
     }
 
-    function settle_reentrancy_calldata() internal returns (bytes memory) {
+    function settle_reentrancy_calldata() internal pure returns (bytes memory) {
         SettlementEncoder.EncodedSettlement memory empty;
         return abi.encodeWithSelector(
             GPv2Settlement.settle.selector, empty.tokens, empty.clearingPrices, empty.trades, empty.interactions
@@ -51,7 +51,9 @@ contract Reentrancy is Helper {
 
     function swap_reentrancy_calldata() internal returns (bytes memory) {
         swapEncoder.addToken(IERC20(address(0)));
-        swapEncoder.encodeTrade(Order.emptySell(), Sign.emptyEIP712(), 0);
+        Sign.Signature memory empty = Sign.Signature({scheme: GPv2Signing.Scheme.Eip712, data: new bytes(65)});
+
+        swapEncoder.encodeTrade(Order.emptySell(), empty, 0);
         SwapEncoder.EncodedSwap memory malicious = swapEncoder.encode();
 
         return abi.encodeWithSelector(GPv2Settlement.swap.selector, malicious.swaps, malicious.tokens, malicious.trade);
