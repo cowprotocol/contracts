@@ -12,8 +12,6 @@ import {
     GPv2Transfer,
     IERC20
 } from "src/contracts/GPv2Settlement.sol";
-
-import {IVault, GPv2Authentication} from "src/contracts/GPv2Settlement.sol";
 import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
