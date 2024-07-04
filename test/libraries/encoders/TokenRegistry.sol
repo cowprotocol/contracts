@@ -12,10 +12,7 @@ library TokenRegistry {
 
     bytes32 internal constant STATE_STORAGE_SLOT = keccak256("TokenRegistry.storage");
 
-    /// @dev We want to make sure that the token registry never allocates
-    /// the first `tokens` entry to a valid token.  This is because in the
-    /// inverse token mapping in storage we can't distinguish the cases
-    /// "mapping has no entry" and "mapping has entry zero".
+    /// @dev Ensure the token array is hydrated with a dummy token
     modifier hydrateArray(State storage state) {
         if (state.tokens.length == 0) {
             state.tokens.push(IERC20(address(uint160(uint256(keccak256("TokenRegistry: invalid token placeholder"))))));
@@ -23,7 +20,7 @@ library TokenRegistry {
         _;
     }
 
-    /// @dev Allocates a new token registry for the specified registry ID
+    /// @dev Make a new token registry derived from the specified registry ID
     function makeTokenRegistry(address registryId) internal pure returns (State storage state) {
         state = tokenRegistry(keccak256(abi.encodePacked(STATE_STORAGE_SLOT, registryId)));
     }
@@ -72,6 +69,10 @@ library TokenRegistry {
     /// @dev Gets the array of tokens in the registry
     function getTokens(State storage state) internal hydrateArray(state) returns (IERC20[] memory) {
         // Skip the dummy token
+        if (state.tokens.length == 1) {
+            return new IERC20[](0);
+        }
+
         IERC20[] memory tokens_ = new IERC20[](state.tokens.length - 1);
         for (uint256 i = 1; i < state.tokens.length; i++) {
             tokens_[i - 1] = state.tokens[i];
