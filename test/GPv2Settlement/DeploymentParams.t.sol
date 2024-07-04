@@ -19,7 +19,7 @@ contract DeploymentParams is Helper {
         assertEq(address(vault), address(settlement.vault()));
     }
 
-    function test_settlement_deployment_deploys_a_vault() public view {
+    function test_settlement_deployment_deploys_a_vault_relayer() public view {
         GPv2VaultRelayer relayer = GPv2VaultRelayer(settlement.vaultRelayer());
         bytes memory deployedBytecode = address(relayer).code;
         assertEq(deployedBytecode.toMetadata(), type(GPv2VaultRelayer).creationCode.toMetadata());

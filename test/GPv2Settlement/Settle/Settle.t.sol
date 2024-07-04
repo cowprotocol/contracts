@@ -15,10 +15,6 @@ contract Settle is Helper {
     using Settlement for Harness;
     using SettlementEncoder for SettlementEncoder.State;
 
-    function setUp() public override {
-        super.setUp();
-    }
-
     function test_allowlist_rejects_transactions_from_non_solvers() public {
         vm.expectRevert("GPv2: not a solver");
         settlement.settle(encoder.encode(settlement));
@@ -77,9 +73,5 @@ contract Settle is Helper {
             );
             assertTrue(revertsAsExpected, "incorrect interaction array length did not revert");
         }
-    }
-
-    function empty_interaction() internal pure returns (GPv2Interaction.Data memory) {
-        return GPv2Interaction.Data({target: address(0), value: 0, callData: ""});
     }
 }
