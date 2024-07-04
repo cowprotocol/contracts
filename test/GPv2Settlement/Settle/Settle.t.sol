@@ -69,6 +69,7 @@ contract Settle is Helper {
             GPv2Interaction.Data[][] memory interactions = new GPv2Interaction.Data[][](i * 2);
             assertTrue(interactions.length != 3, "incorrect interaction array length test setup");
             vm.expectRevert();
+            // test requires malformed interactions array, therefore use encodeWithSelector
             (bool revertsAsExpected,) = address(settlement).call(
                 abi.encodeWithSelector(
                     GPv2Settlement.settle.selector, new bytes32[](0), new uint256[](0), new bytes[](0), interactions

@@ -44,9 +44,7 @@ contract Reentrancy is Helper {
 
     function settle_reentrancy_calldata() internal pure returns (bytes memory) {
         SettlementEncoder.EncodedSettlement memory empty;
-        return abi.encodeWithSelector(
-            GPv2Settlement.settle.selector, empty.tokens, empty.clearingPrices, empty.trades, empty.interactions
-        );
+        return abi.encodeCall(GPv2Settlement.settle, (empty.tokens, empty.clearingPrices, empty.trades, empty.interactions));
     }
 
     function swap_reentrancy_calldata() internal returns (bytes memory) {
@@ -56,6 +54,6 @@ contract Reentrancy is Helper {
         swapEncoder.encodeTrade(Order.emptySell(), empty, 0);
         SwapEncoder.EncodedSwap memory malicious = swapEncoder.encode();
 
-        return abi.encodeWithSelector(GPv2Settlement.swap.selector, malicious.swaps, malicious.tokens, malicious.trade);
+        return abi.encodeCall(GPv2Settlement.swap, (malicious.swaps, malicious.tokens, malicious.trade));
     }
 }
