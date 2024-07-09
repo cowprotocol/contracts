@@ -7,14 +7,13 @@ import {IERC20, IVault, GPv2Order, GPv2Trade, GPv2Signing} from "src/contracts/G
 
 import {Sign} from "../Sign.sol";
 import {Trade} from "../Trade.sol";
-import {TokenRegistry} from "./TokenRegistry.sol";
+import {Registry, TokenRegistry} from "./TokenRegistry.sol";
 
 library SwapEncoder {
     using Trade for GPv2Order.Data;
     using Sign for Vm;
     using TokenRegistry for TokenRegistry.State;
-    using TokenRegistry for address;
-    using TokenRegistry for bytes32;
+    using TokenRegistry for Registry;
 
     struct Swap {
         bytes32 poolId;
@@ -31,7 +30,7 @@ library SwapEncoder {
     }
 
     struct State {
-        bytes32 tokenRegistrySlot;
+        Registry tokenRegistry;
         IVault.BatchSwapStep[] steps;
         GPv2Trade.Data trade;
     }
@@ -45,23 +44,23 @@ library SwapEncoder {
             state.slot := slot
         }
 
-        setTokenRegistry(state, encoder);
+        setTokenRegistry(state, Registry.wrap(keccak256(abi.encode(slot))));
     }
 
     /// @dev Allow to set a custom token registry
-    function setTokenRegistry(State storage state, address registry) internal {
-        state.tokenRegistrySlot = registry.makeTokenRegistry().tokenRegistrySlot();
+    function setTokenRegistry(State storage state, Registry registry) internal {
+        state.tokenRegistry = registry;
     }
 
     /// @dev Retrieve all the tokens in the token registry
     function tokens(State storage state) internal returns (IERC20[] memory) {
-        TokenRegistry.State storage tokenRegistry = state.tokenRegistrySlot.tokenRegistry();
+        TokenRegistry.State storage tokenRegistry = state.tokenRegistry.tokenRegistry();
         return tokenRegistry.getTokens();
     }
 
     /// @dev Add a token to the token registry
     function addToken(State storage state, IERC20 token) internal {
-        state.tokenRegistrySlot.tokenRegistry().indexOf(token);
+        state.tokenRegistry.tokenRegistry().indexOf(token);
     }
 
     /// @dev Encode a swap step
@@ -117,7 +116,7 @@ library SwapEncoder {
 
     /// @dev Convert a Swap struct into a BatchSwapStep struct
     function toSwapStep(State storage state, Swap memory swap) private returns (IVault.BatchSwapStep memory step) {
-        TokenRegistry.State storage tokenRegistry = state.tokenRegistrySlot.tokenRegistry();
+        TokenRegistry.State storage tokenRegistry = state.tokenRegistry.tokenRegistry();
         step.poolId = swap.poolId;
         step.assetInIndex = tokenRegistry.indexOf(swap.assetIn);
         step.assetOutIndex = tokenRegistry.indexOf(swap.assetOut);

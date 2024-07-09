@@ -3,6 +3,8 @@ pragma solidity ^0.8.26;
 
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 
+type Registry is bytes32;
+
 library TokenRegistry {
     struct State {
         IERC20[] tokens;
@@ -24,21 +26,10 @@ library TokenRegistry {
     }
 
     /// @dev Allocates a new token registry for the specified registry ID
-    function makeTokenRegistry(address registryId) internal pure returns (State storage state) {
-        state = tokenRegistry(keccak256(abi.encodePacked(STATE_STORAGE_SLOT, registryId)));
-    }
-
-    /// @dev Retrieve the token registry for the specified slot
-    function tokenRegistry(bytes32 slot) internal pure returns (State storage state) {
+    function tokenRegistry(Registry id) internal pure returns (State storage state) {
+        bytes32 slot = keccak256(abi.encodePacked(STATE_STORAGE_SLOT, id));
         assembly {
             state.slot := slot
-        }
-    }
-
-    /// @dev Retrieve the slot for the token registry
-    function tokenRegistrySlot(State storage state) internal pure returns (bytes32 slot) {
-        assembly {
-            slot := state.slot
         }
     }
 
