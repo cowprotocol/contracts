@@ -126,7 +126,9 @@ library SettlementEncoder {
         Sign.Signature memory signature,
         uint256 executedAmount
     ) internal {
-        state.trades.push(order.toTrade(tokens(state), signature, executedAmount));
+        (uint256 sellTokenIndex, uint256 buyTokenIndex) =
+            TokenRegistry.tokenIndices(state.tokenRegistry.tokenRegistry(), order);
+        state.trades.push(order.toTrade(sellTokenIndex, buyTokenIndex, signature, executedAmount));
     }
 
     /// @dev Sign and encode a trade

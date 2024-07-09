@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {IERC20} from "src/contracts/interfaces/IERC20.sol";
+import {IERC20, GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 
 type Registry is bytes32;
 
@@ -82,5 +82,14 @@ library TokenRegistry {
             prices[i - 1] = state.prices[state.tokens[i]];
         }
         return prices;
+    }
+
+    /// @dev Returns the token indices for the specified order
+    function tokenIndices(State storage state, GPv2Order.Data memory order)
+        internal
+        hydrateArray(state)
+        returns (uint256, uint256)
+    {
+        return (indexOf(state, order.sellToken), indexOf(state, order.buyToken));
     }
 }

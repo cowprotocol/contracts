@@ -13,7 +13,6 @@ library Trade {
     using Sign for uint256;
 
     error TokenIndexOutOfBounds();
-    error TokenNotFound();
 
     /// Trade flags
     struct Flags {
@@ -36,13 +35,14 @@ library Trade {
     /// @dev Given a signature, executed amount and tokens, encode them into a GPv2Trade
     function toTrade(
         GPv2Order.Data memory order,
-        IERC20[] memory tokens,
+        uint256 sellTokenIndex,
+        uint256 buyTokenIndex,
         Sign.Signature memory signature,
         uint256 executedAmount
     ) internal pure returns (GPv2Trade.Data memory trade) {
         trade = GPv2Trade.Data({
-            sellTokenIndex: findTokenIndex(order.sellToken, tokens),
-            buyTokenIndex: findTokenIndex(order.buyToken, tokens),
+            sellTokenIndex: sellTokenIndex,
+            buyTokenIndex: buyTokenIndex,
             receiver: order.receiver,
             sellAmount: order.sellAmount,
             buyAmount: order.buyAmount,
@@ -91,15 +91,5 @@ library Trade {
             buyTokenBalance: flags.buyTokenBalance,
             partiallyFillable: flags.partiallyFillable
         });
-    }
-
-    /// @dev Given a token and tokens, find the index of the token
-    function findTokenIndex(IERC20 token, IERC20[] memory tokens) private pure returns (uint256) {
-        for (uint256 i = 0; i < tokens.length; i++) {
-            if (tokens[i] == token) {
-                return i;
-            }
-        }
-        revert TokenNotFound();
     }
 }

@@ -80,7 +80,9 @@ library SwapEncoder {
         if (limitAmount == 0) {
             limitAmount = order.kind == GPv2Order.KIND_SELL ? order.buyAmount : order.sellAmount;
         }
-        GPv2Trade.Data memory trade_ = order.toTrade(tokens(state), signature, limitAmount);
+        (uint256 sellTokenIndex, uint256 buyTokenIndex) =
+            TokenRegistry.tokenIndices(state.tokenRegistry.tokenRegistry(), order);
+        GPv2Trade.Data memory trade_ = order.toTrade(sellTokenIndex, buyTokenIndex, signature, limitAmount);
 
         state.trade.sellTokenIndex = trade_.sellTokenIndex;
         state.trade.buyTokenIndex = trade_.buyTokenIndex;
