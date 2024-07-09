@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
+import {IERC20, GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
 
 library Order {
@@ -19,7 +19,16 @@ library Order {
 
     /// @dev Return an empty sell order
     function emptySell() internal pure returns (GPv2Order.Data memory order) {
+        order.sellToken = IERC20(address(0));
+        order.buyToken = IERC20(address(0));
+        order.receiver = address(0);
+        order.sellAmount = 0;
+        order.buyAmount = 0;
+        order.validTo = 0;
+        order.appData = bytes32(0);
+        order.feeAmount = 0;
         order.kind = GPv2Order.KIND_SELL;
+        order.partiallyFillable = false; // fill-or-kill
         order.sellTokenBalance = GPv2Order.BALANCE_ERC20;
         order.buyTokenBalance = GPv2Order.BALANCE_ERC20;
     }

@@ -15,15 +15,14 @@ import {
 import {Sign} from "../Sign.sol";
 import {Trade} from "../Trade.sol";
 
-import {TokenRegistry} from "./TokenRegistry.sol";
+import {Registry, TokenRegistry} from "./TokenRegistry.sol";
 
 library SettlementEncoder {
     using GPv2Order for GPv2Order.Data;
     using Trade for GPv2Order.Data;
     using Sign for Vm;
     using TokenRegistry for TokenRegistry.State;
-    using TokenRegistry for address;
-    using TokenRegistry for bytes32;
+    using TokenRegistry for Registry;
 
     /// The stage an interaction should be executed in
     enum InteractionStage {
@@ -57,7 +56,7 @@ library SettlementEncoder {
 
     /// State for the settlement encoder (a stateful library)
     struct State {
-        bytes32 tokenRegistrySlot;
+        Registry tokenRegistry;
         GPv2Trade.Data[] trades;
         GPv2Interaction.Data[][3] interactions;
         OrderRefunds refunds;
@@ -72,22 +71,22 @@ library SettlementEncoder {
             state.slot := slot
         }
 
-        setTokenRegistry(state, encoder);
+        setTokenRegistry(state, Registry.wrap(keccak256(abi.encode(slot))));
     }
 
     /// @dev Allow an arbitrary token registry to be set
-    function setTokenRegistry(State storage state, address registry) internal {
-        state.tokenRegistrySlot = registry.makeTokenRegistry().tokenRegistrySlot();
+    function setTokenRegistry(State storage state, Registry registry) internal {
+        state.tokenRegistry = registry;
     }
 
     /// @dev Add a token to the token registry
     function addToken(State storage state, IERC20 token) internal {
-        state.tokenRegistrySlot.tokenRegistry().indexOf(token);
+        state.tokenRegistry.tokenRegistry().indexOf(token);
     }
 
     /// @dev Retrieve all the tokens in the token registry
     function tokens(State storage state) internal returns (IERC20[] memory) {
-        TokenRegistry.State storage tokenRegistry = state.tokenRegistrySlot.tokenRegistry();
+        TokenRegistry.State storage tokenRegistry = state.tokenRegistry.tokenRegistry();
         return tokenRegistry.getTokens();
     }
 
@@ -127,7 +126,9 @@ library SettlementEncoder {
         Sign.Signature memory signature,
         uint256 executedAmount
     ) internal {
-        state.trades.push(order.toTrade(tokens(state), signature, executedAmount));
+        (uint256 sellTokenIndex, uint256 buyTokenIndex) =
+            TokenRegistry.tokenIndices(state.tokenRegistry.tokenRegistry(), order);
+        state.trades.push(order.toTrade(sellTokenIndex, buyTokenIndex, signature, executedAmount));
     }
 
     /// @dev Sign and encode a trade
@@ -178,7 +179,7 @@ library SettlementEncoder {
     function encode(State storage state, GPv2Settlement settlement) internal returns (EncodedSettlement memory) {
         return EncodedSettlement({
             tokens: tokens(state),
-            clearingPrices: state.tokenRegistrySlot.tokenRegistry().clearingPrices(),
+            clearingPrices: state.tokenRegistry.tokenRegistry().clearingPrices(),
             trades: state.trades,
             interactions: interactions(state, address(settlement))
         });
