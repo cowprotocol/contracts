@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
+import {IERC20, GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
 
 library Order {
