@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-
-pragma solidity >=0.7.6 <0.9.0;
-pragma abicoder v2;
+pragma solidity ^0.8.0;
 
 import {Test} from "forge-std/Test.sol";
-import {StorageAccessibleWrapper, ExternalStorageReader} from "test/src/vendor/StorageAccessibleWrapper.sol";
+
 import {ViewStorageAccessible} from "src/contracts/mixins/StorageAccessible.sol";
+
+import {StorageAccessibleWrapper, ExternalStorageReader} from "./StorageAccessibleWrapper.sol";
 
 contract StorageAccessibleTest is Test {
     StorageAccessibleWrapper instance;
