@@ -37,9 +37,15 @@ library SwapEncoder {
 
     bytes32 internal constant STATE_STORAGE_SLOT = keccak256("SwapEncoder.storage");
 
-    /// @dev Make a new swap encoder derived from the specified encoder ID
-    function makeSwapEncoder(address encoder) internal returns (State storage state) {
-        bytes32 slot = keccak256(abi.encodePacked(STATE_STORAGE_SLOT, encoder));
+    /// @dev Make a new swap encoder, bumping the nonce
+    function makeSwapEncoder() internal returns (State storage state) {
+        uint256 nonce;
+        bytes32 nonceSlot = STATE_STORAGE_SLOT;
+        assembly {
+            nonce := sload(nonceSlot)
+            sstore(nonceSlot, add(nonce, 1))
+        }
+        bytes32 slot = keccak256(abi.encodePacked(STATE_STORAGE_SLOT, nonce));
         assembly {
             state.slot := slot
         }
@@ -60,7 +66,7 @@ library SwapEncoder {
 
     /// @dev Add a token to the token registry
     function addToken(State storage state, IERC20 token) internal {
-        state.tokenRegistry.tokenRegistry().indexOf(token);
+        state.tokenRegistry.tokenRegistry().pushIfNotPresentIndexOf(token);
     }
 
     /// @dev Encode a swap step
@@ -120,8 +126,8 @@ library SwapEncoder {
     function toSwapStep(State storage state, Swap memory swap) private returns (IVault.BatchSwapStep memory step) {
         TokenRegistry.State storage tokenRegistry = state.tokenRegistry.tokenRegistry();
         step.poolId = swap.poolId;
-        step.assetInIndex = tokenRegistry.indexOf(swap.assetIn);
-        step.assetOutIndex = tokenRegistry.indexOf(swap.assetOut);
+        step.assetInIndex = tokenRegistry.pushIfNotPresentIndexOf(swap.assetIn);
+        step.assetOutIndex = tokenRegistry.pushIfNotPresentIndexOf(swap.assetOut);
         step.amount = swap.amount;
         step.userData = swap.userData;
     }
