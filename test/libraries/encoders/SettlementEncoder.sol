@@ -87,7 +87,7 @@ library SettlementEncoder {
 
     /// @dev Add a token to the token registry
     function addToken(State storage state, IERC20 token) internal {
-        state.tokenRegistry.tokenRegistry().indexOf(token);
+        state.tokenRegistry.tokenRegistry().pushIfNotPresentIndexOf(token);
     }
 
     /// @dev Retrieve all the tokens in the token registry

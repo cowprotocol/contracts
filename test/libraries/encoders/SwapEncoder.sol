@@ -66,7 +66,7 @@ library SwapEncoder {
 
     /// @dev Add a token to the token registry
     function addToken(State storage state, IERC20 token) internal {
-        state.tokenRegistry.tokenRegistry().indexOf(token);
+        state.tokenRegistry.tokenRegistry().pushIfNotPresentIndexOf(token);
     }
 
     /// @dev Encode a swap step
@@ -126,8 +126,8 @@ library SwapEncoder {
     function toSwapStep(State storage state, Swap memory swap) private returns (IVault.BatchSwapStep memory step) {
         TokenRegistry.State storage tokenRegistry = state.tokenRegistry.tokenRegistry();
         step.poolId = swap.poolId;
-        step.assetInIndex = tokenRegistry.indexOf(swap.assetIn);
-        step.assetOutIndex = tokenRegistry.indexOf(swap.assetOut);
+        step.assetInIndex = tokenRegistry.pushIfNotPresentIndexOf(swap.assetIn);
+        step.assetOutIndex = tokenRegistry.pushIfNotPresentIndexOf(swap.assetOut);
         step.amount = swap.amount;
         step.userData = swap.userData;
     }

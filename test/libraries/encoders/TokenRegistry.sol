@@ -35,7 +35,11 @@ library TokenRegistry {
 
     /// @dev Retrieve the token index for the specified token address. If the token
     /// is not already in the registry, it will be added.
-    function indexOf(State storage state, IERC20 token) internal hydrateArray(state) returns (uint256 i) {
+    function pushIfNotPresentIndexOf(State storage state, IERC20 token)
+        internal
+        hydrateArray(state)
+        returns (uint256 i)
+    {
         i = state.tokenIndices[token];
         if (i == 0) {
             i = state.tokens.length;
@@ -55,7 +59,7 @@ library TokenRegistry {
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             IERC20 token = _tokens[i];
-            indexOf(state, token);
+            pushIfNotPresentIndexOf(state, token);
             state.prices[token] = _prices[i];
         }
     }
@@ -90,6 +94,6 @@ library TokenRegistry {
         hydrateArray(state)
         returns (uint256, uint256)
     {
-        return (indexOf(state, order.sellToken), indexOf(state, order.buyToken));
+        return (pushIfNotPresentIndexOf(state, order.sellToken), pushIfNotPresentIndexOf(state, order.buyToken));
     }
 }
