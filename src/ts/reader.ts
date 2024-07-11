@@ -26,24 +26,6 @@ async function readStorage(
 }
 
 /**
- * A class for attaching the storage reader contract to a solver allow list for
- * providing additional storage reading methods.
- */
-export class AllowListReader {
-  constructor(
-    public readonly allowList: Contract,
-    public readonly reader: Contract,
-  ) {}
-
-  /**
-   * Returns true if all the specified addresses are allowed solvers.
-   */
-  public areSolvers(solvers: BytesLike[]): Promise<string> {
-    return readStorage(this.allowList, this.reader, "areSolvers", [solvers]);
-  }
-}
-
-/**
  * A class for attaching the storage reader contract to the GPv2Settlement contract
  * for providing additional storage reading methods.
  */
