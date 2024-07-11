@@ -37,9 +37,15 @@ library SwapEncoder {
 
     bytes32 internal constant STATE_STORAGE_SLOT = keccak256("SwapEncoder.storage");
 
-    /// @dev Make a new swap encoder derived from the specified encoder ID
-    function makeSwapEncoder(address encoder) internal returns (State storage state) {
-        bytes32 slot = keccak256(abi.encodePacked(STATE_STORAGE_SLOT, encoder));
+    /// @dev Make a new swap encoder, bumping the nonce
+    function makeSwapEncoder() internal returns (State storage state) {
+        uint256 nonce;
+        bytes32 nonceSlot = STATE_STORAGE_SLOT;
+        assembly {
+            nonce := sload(nonceSlot)
+            sstore(nonceSlot, add(nonce, 1))
+        }
+        bytes32 slot = keccak256(abi.encodePacked(STATE_STORAGE_SLOT, nonce));
         assembly {
             state.slot := slot
         }
