@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {IERC20} from "src/contracts/interfaces/IERC20.sol";
-import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
-import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
-import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
+import {IERC20, GPv2Order, GPv2Trade, GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 import {Sign} from "./Sign.sol";
 import {Order} from "./Order.sol";
 
@@ -16,7 +13,6 @@ library Trade {
     using Sign for uint256;
 
     error TokenIndexOutOfBounds();
-    error TokenNotFound();
 
     /// Trade flags
     struct Flags {
@@ -24,25 +20,29 @@ library Trade {
         GPv2Signing.Scheme signingScheme;
     }
 
+    /// @dev Given a `flags` struct, encode it into a uint256 for a GPv2Trade
     function toUint256(Flags memory flags) internal pure returns (uint256 encodedFlags) {
         encodedFlags |= flags.flags.toUint256();
         encodedFlags |= flags.signingScheme.toUint256();
     }
 
+    /// @dev Given a GPv2Trade encoded flags, decode them into a `Flags` struct
     function toFlags(uint256 encodedFlags) internal pure returns (Flags memory flags) {
         flags.flags = encodedFlags.toFlags();
         flags.signingScheme = encodedFlags.toSigningScheme();
     }
 
+    /// @dev Given a signature, executed amount and tokens, encode them into a GPv2Trade
     function toTrade(
         GPv2Order.Data memory order,
-        IERC20[] memory tokens,
+        uint256 sellTokenIndex,
+        uint256 buyTokenIndex,
         Sign.Signature memory signature,
         uint256 executedAmount
     ) internal pure returns (GPv2Trade.Data memory trade) {
         trade = GPv2Trade.Data({
-            sellTokenIndex: findTokenIndex(order.sellToken, tokens),
-            buyTokenIndex: findTokenIndex(order.buyToken, tokens),
+            sellTokenIndex: sellTokenIndex,
+            buyTokenIndex: buyTokenIndex,
             receiver: order.receiver,
             sellAmount: order.sellAmount,
             buyAmount: order.buyAmount,
@@ -65,6 +65,7 @@ library Trade {
         });
     }
 
+    /// @dev Given a trade and tokens, encode them into a GPv2Order
     function toOrder(GPv2Trade.Data memory trade, IERC20[] memory tokens)
         internal
         pure
@@ -90,14 +91,5 @@ library Trade {
             buyTokenBalance: flags.buyTokenBalance,
             partiallyFillable: flags.partiallyFillable
         });
-    }
-
-    function findTokenIndex(IERC20 token, IERC20[] memory tokens) private pure returns (uint256) {
-        for (uint256 i = 0; i < tokens.length; i++) {
-            if (tokens[i] == token) {
-                return i;
-            }
-        }
-        revert TokenNotFound();
     }
 }
