@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {Vm} from "forge-std/Test.sol";
+import {Vm, console} from "forge-std/Test.sol";
 
 import {Harness, Helper} from "../Helper.sol";
 
@@ -48,6 +48,9 @@ contract Settle is Helper {
         // Assert that the correct number of logs were recorded
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 4);
+        assertEq(entries[0].data, abi.encodePacked(bytes32(bytes20(address(0))), bytes32(bytes8(uint8(SettlementEncoder.InteractionStage.PRE)))));
+        assertEq(entries[1].data, abi.encodePacked(bytes32(bytes20(address(0))), bytes32(bytes8(uint8(SettlementEncoder.InteractionStage.INTRA)))));
+        assertEq(entries[2].data, abi.encodePacked(bytes32(bytes20(address(0))), bytes32(bytes8(uint8(SettlementEncoder.InteractionStage.POST)))));
     }
 
     function add_indexed_interaction_helper(
