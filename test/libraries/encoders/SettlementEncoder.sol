@@ -64,7 +64,7 @@ library SettlementEncoder {
 
     bytes32 internal constant STATE_STORAGE_SLOT = keccak256("SettlementEncoder.storage");
 
-/// @dev Make a new settlement encoder derived from the specified encoder address
+    /// @dev Make a new settlement encoder, bumping the nonce
     function makeSettlementEncoder() internal returns (State storage state) {
         uint256 nonce;
         bytes32 nonceSlot = STATE_STORAGE_SLOT;
