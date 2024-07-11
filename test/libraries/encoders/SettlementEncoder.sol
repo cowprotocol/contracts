@@ -64,9 +64,15 @@ library SettlementEncoder {
 
     bytes32 internal constant STATE_STORAGE_SLOT = keccak256("SettlementEncoder.storage");
 
-    /// @dev Make a new settlement encoder derived from the specified encoder address
-    function makeSettlementEncoder(address encoder) internal returns (State storage state) {
-        bytes32 slot = keccak256(abi.encodePacked(STATE_STORAGE_SLOT, encoder));
+/// @dev Make a new settlement encoder derived from the specified encoder address
+    function makeSettlementEncoder() internal returns (State storage state) {
+        uint256 nonce;
+        bytes32 nonceSlot = STATE_STORAGE_SLOT;
+        assembly {
+            nonce := sload(nonceSlot)
+            sstore(nonceSlot, add(nonce, 1))
+        }
+        bytes32 slot = keccak256(abi.encodePacked(STATE_STORAGE_SLOT, nonce));
         assembly {
             state.slot := slot
         }
