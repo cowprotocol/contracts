@@ -1,28 +1,24 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {Vm, console} from "forge-std/Test.sol";
-
 import {Harness, Helper} from "../Helper.sol";
 
 import {GPv2Settlement, GPv2Interaction} from "src/contracts/GPv2Settlement.sol";
 
-import {Settlement} from "test/libraries/Settlement.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 
 // solhint-disable func-name-mixedcase
 contract Settle is Helper {
-    using Settlement for Harness;
     using SettlementEncoder for SettlementEncoder.State;
 
     function test_allowlist_rejects_transactions_from_non_solvers() public {
         vm.expectRevert("GPv2: not a solver");
-        settlement.settle(encoder.encode(settlement));
+        settle(encoder.encode(settlement));
     }
 
     function test_allowlist_accepts_transactions_from_solvers() public {
         vm.prank(solver);
-        settlement.settle(encoder.encode(settlement));
+        settle(encoder.encode(settlement));
     }
 
     function test_emits_a_settlement_event() public {

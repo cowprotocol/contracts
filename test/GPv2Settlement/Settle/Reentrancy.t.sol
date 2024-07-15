@@ -3,9 +3,8 @@ pragma solidity ^0.8.26;
 
 import {IERC20, GPv2Order, GPv2Interaction, GPv2Settlement} from "src/contracts/GPv2Settlement.sol";
 
-import {Harness, Helper} from "../Helper.sol";
+import {Helper} from "../Helper.sol";
 
-import {Settlement} from "test/libraries/Settlement.sol";
 import {GPv2Signing, Sign} from "test/libraries/Sign.sol";
 import {Trade} from "test/libraries/Trade.sol";
 import {Order} from "test/libraries/Order.sol";
@@ -15,7 +14,6 @@ import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 
 // solhint-disable func-name-mixedcase
 contract Reentrancy is Helper {
-    using Settlement for Harness;
     using Trade for GPv2Order.Data;
     using SettlementEncoder for SettlementEncoder.State;
     using SwapEncoder for SwapEncoder.State;
@@ -39,7 +37,7 @@ contract Reentrancy is Helper {
 
         vm.prank(who);
         vm.expectRevert("ReentrancyGuard: reentrant call");
-        settlement.settle(encoder.encode(interactions));
+        settle(encoder.encode(interactions));
     }
 
     function settle_reentrancy_calldata() internal pure returns (bytes memory) {

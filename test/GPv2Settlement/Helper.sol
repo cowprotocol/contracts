@@ -61,8 +61,8 @@ abstract contract Helper is Test {
         allowList.addSolver(solver);
 
         // Configure default encoders
-        encoder = SettlementEncoder.makeSettlementEncoder(makeAddr("encoder"));
-        swapEncoder = SwapEncoder.makeSwapEncoder(makeAddr("swapEncoder"));
+        encoder = SettlementEncoder.makeSettlementEncoder();
+        swapEncoder = SwapEncoder.makeSwapEncoder();
 
         // Set the domain separator
         domainSeparator = settlement.domainSeparator();
@@ -80,6 +80,14 @@ abstract contract Helper is Test {
         assembly ("memory-safe") {
             vault_ := create(0, add(bytecode, 0x20), mload(bytecode))
         }
+    }
+
+    function settle(SettlementEncoder.EncodedSettlement memory _settlement) internal {
+        settlement.settle(_settlement.tokens, _settlement.clearingPrices, _settlement.trades, _settlement.interactions);
+    }
+
+    function swap(SwapEncoder.EncodedSwap memory _swap) internal {
+        settlement.swap(_swap.swaps, _swap.tokens, _swap.trade);
     }
 }
 
