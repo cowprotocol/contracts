@@ -18,24 +18,32 @@ contract Reentrancy is Helper {
     using SettlementEncoder for SettlementEncoder.State;
     using SwapEncoder for SwapEncoder.State;
 
-    function test_revert_rejects_reentrancy_attempts_via_interactions() public {
-        reject_reentrancy_attempts_via_interactions(owner, settle_reentrancy_calldata());
-        reject_reentrancy_attempts_via_interactions(owner, swap_reentrancy_calldata());
+    function test_settle_rejects_reentrancy_attempts_via_interactions() public {
+        reject_reentrancy_attempts_via_interactions(settle_reentrancy_calldata(), false);
     }
 
-    function test_revert_rejects_reentrancy_attempts_even_as_a_registered_solver() public {
-        reject_reentrancy_attempts_via_interactions(address(settlement), settle_reentrancy_calldata());
-        reject_reentrancy_attempts_via_interactions(address(settlement), swap_reentrancy_calldata());
+    function test_settle_rejects_reentrancy_attempts_via_interactions_as_a_registered_solver() public {
+        reject_reentrancy_attempts_via_interactions(settle_reentrancy_calldata(), true);
     }
 
-    function reject_reentrancy_attempts_via_interactions(address who, bytes memory data) internal {
-        vm.prank(owner);
-        allowList.addSolver(who);
+    function test_swap_rejects_reentrancy_attempts_via_interactions() public {
+        reject_reentrancy_attempts_via_interactions(swap_reentrancy_calldata(), false);
+    }
+
+    function test_swap_rejects_reentrancy_attempts_via_interactions_as_a_registered_solver() public {
+        reject_reentrancy_attempts_via_interactions(swap_reentrancy_calldata(), true);
+    }
+
+    function reject_reentrancy_attempts_via_interactions(bytes memory data, bool settlementContractIsSolver) internal {
+        if (settlementContractIsSolver) {
+            vm.prank(owner);
+            allowList.addSolver(address(settlement));
+        }
 
         GPv2Interaction.Data[] memory interactions = new GPv2Interaction.Data[](1);
         interactions[0] = GPv2Interaction.Data({target: address(settlement), value: 0, callData: data});
 
-        vm.prank(who);
+        vm.prank(solver);
         vm.expectRevert("ReentrancyGuard: reentrant call");
         settle(encoder.encode(interactions));
     }
