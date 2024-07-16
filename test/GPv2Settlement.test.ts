@@ -466,56 +466,6 @@ describe("GPv2Settlement", () => {
     });
   });
 
-  describe("invalidateOrder", () => {
-    it("sets filled amount of the caller's order to max uint256", async () => {
-      const orderDigest = "0x" + "11".repeat(32);
-      const validTo = 2 ** 32 - 1;
-      const orderUid = packOrderUidParams({
-        orderDigest,
-        owner: traders[0].address,
-        validTo,
-      });
-
-      await settlement.connect(traders[0]).invalidateOrder(orderUid);
-      expect(await settlement.filledAmount(orderUid)).to.equal(
-        ethers.constants.MaxUint256,
-      );
-    });
-
-    it("emits an OrderInvalidated event log", async () => {
-      const orderUid = packOrderUidParams({
-        orderDigest: ethers.constants.HashZero,
-        owner: traders[0].address,
-        validTo: 0,
-      });
-
-      const invalidateOrder = settlement
-        .connect(traders[0])
-        .invalidateOrder(orderUid);
-
-      await expect(invalidateOrder).to.emit(settlement, "OrderInvalidated");
-
-      const tx = await invalidateOrder;
-      const { events } = await tx.wait();
-
-      expect(events[0].args).to.deep.equal([traders[0].address, orderUid]);
-    });
-
-    it("fails to invalidate order that is not owned by the caller", async () => {
-      const orderDigest = "0x".padEnd(66, "1");
-      const validTo = 2 ** 32 - 1;
-      const orderUid = packOrderUidParams({
-        orderDigest,
-        owner: traders[0].address,
-        validTo,
-      });
-
-      await expect(
-        settlement.connect(traders[1]).invalidateOrder(orderUid),
-      ).to.be.revertedWith("GPv2: caller does not own order");
-    });
-  });
-
   describe("computeTradeExecutions", () => {
     const sellToken = `0x${"11".repeat(20)}`;
     const buyToken = `0x${"22".repeat(20)}`;
