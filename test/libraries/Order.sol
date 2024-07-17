@@ -76,6 +76,16 @@ library Order {
         pure
         returns (bytes memory orderUid)
     {
-        orderUid.packOrderUidParams(order.hash(domainSeparator), owner, order.validTo);
+        computeOrderUid(order.hash(domainSeparator), owner, order.validTo);
+    }
+
+    /// @dev Computes the order UID for its base components
+    function computeOrderUid(bytes32 orderHash, address owner, uint32 validTo)
+        internal
+        pure
+        returns (bytes memory orderUid)
+    {
+        orderUid = new bytes(GPv2Order.UID_LENGTH);
+        orderUid.packOrderUidParams(orderHash, owner, validTo);
     }
 }
