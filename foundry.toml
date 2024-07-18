@@ -9,6 +9,12 @@ optimizer = true
 optimizer_runs = 1000000
 evm_version = "cancun"
 
+deny_warnings = true
+ignored_warnings_from = [
+  "src/contracts/test/SmartSellOrder.sol",
+  "test/src/SmartSellOrder.sol"
+]
+
 fs_permissions = [
   { access = "read", path = "./balancer"},
   { access = "read", path = "./networks.json"},
