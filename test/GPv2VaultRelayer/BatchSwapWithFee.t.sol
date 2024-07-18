@@ -100,9 +100,6 @@ contract BatchSwapWithFee is BatchSwapWithFeeHelper {
             GPv2Transfer.Data({account: trader, token: token, amount: 1 ether, balance: GPv2Order.BALANCE_ERC20});
 
         vm.mockCall(address(vault), abi.encodePacked(IVault.batchSwap.selector), abi.encode(deltas));
-        // Note: vault relayer checks that the token is a contract. "fe" causes
-        // a revert on any function that isn't mocked.
-        vm.etch(address(token), hex"fe");
         vm.mockCall(address(token), abi.encodePacked(IERC20.transferFrom.selector), abi.encode(true));
 
         SwapWithFees memory swapWithFees = defaultSwapWithFees();
