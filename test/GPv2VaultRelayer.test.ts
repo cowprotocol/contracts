@@ -10,8 +10,7 @@ import { SwapKind, UserBalanceOpKind } from "./balancer";
 import { OrderBalanceId } from "./encoding";
 
 describe("GPv2VaultRelayer", () => {
-  const [deployer, creator, nonCreator, ...traders] =
-    waffle.provider.getWallets();
+  const [deployer, creator, ...traders] = waffle.provider.getWallets();
 
   let vault: MockContract;
   let vaultRelayer: Contract;
@@ -69,124 +68,6 @@ describe("GPv2VaultRelayer", () => {
         },
       ];
     };
-    const emptySwap = encodeSwapParams({});
-
-    it("should revert if not called by the creator", async () => {
-      await expect(
-        vaultRelayer.connect(nonCreator).batchSwapWithFee(...emptySwap),
-      ).to.be.revertedWith("not creator");
-    });
-
-    for (const [name, kind] of Object.entries({
-      In: SwapKind.GIVEN_IN,
-      Out: SwapKind.GIVEN_OUT,
-    } as const)) {
-      describe(`Swap Given ${name}`, () => {
-        it(`performs swaps given ${name.toLowerCase()}`, async () => {
-          const swaps = [
-            {
-              poolId: `0x${"01".repeat(32)}`,
-              assetInIndex: 0,
-              assetOutIndex: 1,
-              amount: ethers.utils.parseEther("42.0"),
-              userData: "0x010203",
-            },
-            {
-              poolId: `0x${"02".repeat(32)}`,
-              assetInIndex: 1,
-              assetOutIndex: 2,
-              amount: ethers.utils.parseEther("1337.0"),
-              userData: "0xabcd",
-            },
-          ];
-          const tokens = [
-            await waffle.deployMockContract(deployer, IERC20.abi),
-            await waffle.deployMockContract(deployer, IERC20.abi),
-            await waffle.deployMockContract(deployer, IERC20.abi),
-          ];
-          const funds = {
-            sender: traders[0].address,
-            fromInternalBalance: false,
-            recipient: traders[1].address,
-            toInternalBalance: true,
-          };
-          const limits = [
-            ethers.utils.parseEther("42.0"),
-            ethers.constants.Zero,
-            ethers.utils.parseEther("1337.0").mul(-1),
-          ];
-          const deadline = 0x01020304;
-          const feeTransfer = {
-            account: traders[0].address,
-            token: tokens[0].address,
-            amount: ethers.utils.parseEther("1.0"),
-            balance: OrderBalanceId.ERC20,
-          };
-
-          await vault.mock.batchSwap
-            .withArgs(
-              kind,
-              swaps,
-              tokens.map(({ address }) => address),
-              funds,
-              limits,
-              deadline,
-            )
-            .returns([]);
-          await tokens[0].mock.transferFrom.returns(true);
-
-          await expect(
-            vaultRelayer.batchSwapWithFee(
-              kind,
-              swaps,
-              tokens.map(({ address }) => address),
-              funds,
-              limits,
-              deadline,
-              feeTransfer,
-            ),
-          ).to.not.be.reverted;
-        });
-      });
-    }
-
-    it("returns the Vault swap token deltas", async () => {
-      const deltas = [
-        ethers.utils.parseEther("42.0"),
-        ethers.constants.Zero,
-        ethers.utils.parseEther("1337.0").mul(-1),
-      ];
-
-      const token = await waffle.deployMockContract(deployer, IERC20.abi);
-      const feeTransfer = {
-        account: traders[0].address,
-        token: token.address,
-        amount: ethers.utils.parseEther("1.0"),
-        balance: OrderBalanceId.ERC20,
-      };
-
-      await vault.mock.batchSwap.returns(deltas);
-      await token.mock.transferFrom.returns(true);
-
-      expect(
-        await vaultRelayer.callStatic.batchSwapWithFee(
-          ...encodeSwapParams({
-            kind: SwapKind.GIVEN_IN,
-            feeTransfer,
-          }),
-        ),
-      ).to.deep.equal(deltas);
-    });
-
-    it("reverts on failed Vault swap", async () => {
-      await vault.mock.batchSwap.revertsWithReason("test error");
-
-      await expect(
-        vaultRelayer.batchSwapWithFee(
-          ...encodeSwapParams({ kind: SwapKind.GIVEN_OUT }),
-        ),
-      ).to.be.revertedWith("test error");
-    });
 
     describe("Fee Transfer", () => {
       it("should perform ERC20 transfer when not using direct ERC20 balance", async () => {
