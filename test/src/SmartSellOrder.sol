@@ -1,5 +1,3 @@
-// TODO when removing this file: remove paths from list of ignored warnings.
-
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
@@ -61,7 +59,6 @@ contract SmartSellOrder is EIP1271Verifier {
         if (balance != 0) {
             sellToken.safeTransfer(owner, balance);
         }
-        selfdestruct(payable(owner));
     }
 
     function isValidSignature(bytes32 hash, bytes memory signature)
