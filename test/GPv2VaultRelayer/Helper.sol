@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import {Test} from "forge-std/Test.sol";
 
-import {GPv2VaultRelayer, IVault} from "src/contracts/GPv2VaultRelayer.sol";
+import {GPv2VaultRelayer, IVault, IERC20, GPv2Order, GPv2Transfer} from "src/contracts/GPv2VaultRelayer.sol";
 
 contract Helper is Test {
     address payable internal creator = payable(makeAddr("GPv2VaultRelayer.Helper creator"));
