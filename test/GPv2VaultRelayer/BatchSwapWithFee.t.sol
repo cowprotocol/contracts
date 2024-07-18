@@ -5,52 +5,9 @@ import {
     GPv2VaultRelayer, GPv2Transfer, IERC20, IVault, GPv2Transfer, GPv2Order
 } from "src/contracts/GPv2VaultRelayer.sol";
 
-import {Helper} from "./Helper.sol";
+import {BatchSwapWithFeeHelper} from "./Helper.sol";
 
-contract BatchSwapWithFee is Helper {
-    // All input parameters to `batchSwapWithFee`
-    struct SwapWithFees {
-        IVault.SwapKind kind;
-        IVault.BatchSwapStep[] swaps;
-        IERC20[] tokens;
-        IVault.FundManagement funds;
-        int256[] limits;
-        uint256 deadline;
-        GPv2Transfer.Data feeTransfer;
-    }
-
-    function defaultSwapWithFees() private pure returns (SwapWithFees memory) {
-        return SwapWithFees({
-            kind: IVault.SwapKind.GIVEN_IN,
-            swaps: new IVault.BatchSwapStep[](0),
-            tokens: new IERC20[](0),
-            funds: IVault.FundManagement({
-                sender: address(0),
-                fromInternalBalance: true,
-                recipient: payable(address(0)),
-                toInternalBalance: true
-            }),
-            limits: new int256[](0),
-            deadline: 0,
-            feeTransfer: GPv2Transfer.Data({
-                account: address(0),
-                token: IERC20(address(0)),
-                amount: 0,
-                balance: GPv2Order.BALANCE_ERC20
-            })
-        });
-    }
-
-    // Wrapper function to call `batchSwapWithFee` with structured data
-    function batchSwapWithFee(GPv2VaultRelayer vaultRelayer, SwapWithFees memory swap)
-        private
-        returns (int256[] memory)
-    {
-        return vaultRelayer.batchSwapWithFee(
-            swap.kind, swap.swaps, swap.tokens, swap.funds, swap.limits, swap.deadline, swap.feeTransfer
-        );
-    }
-
+contract BatchSwapWithFee is BatchSwapWithFeeHelper {
     function test_should_revert_if_not_called_by_the_creator() public {
         vm.prank(makeAddr("not the creator"));
         vm.expectRevert("GPv2: not creator");
