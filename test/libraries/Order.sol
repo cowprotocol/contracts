@@ -74,9 +74,9 @@ library Order {
     function computeOrderUid(GPv2Order.Data memory order, bytes32 domainSeparator, address owner)
         internal
         pure
-        returns (bytes memory orderUid)
+        returns (bytes memory)
     {
-        computeOrderUid(order.hash(domainSeparator), owner, order.validTo);
+        return computeOrderUid(order.hash(domainSeparator), owner, order.validTo);
     }
 
     /// @dev Computes the order UID for its base components
