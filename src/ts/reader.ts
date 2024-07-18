@@ -1,4 +1,4 @@
-import { BigNumber, BytesLike, Contract, ethers } from "ethers";
+import { BigNumber, Contract, ethers } from "ethers";
 
 import { InteractionLike, normalizeInteractions } from "./interaction";
 import { Order, OrderBalance } from "./order";
@@ -23,26 +23,6 @@ async function readStorage(
     encodedCall,
   );
   return reader.interface.decodeFunctionResult(method, resultBytes)[0];
-}
-
-/**
- * A class for attaching the storage reader contract to the GPv2Settlement contract
- * for providing additional storage reading methods.
- */
-export class SettlementReader {
-  constructor(
-    public readonly settlement: Contract,
-    public readonly reader: Contract,
-  ) {}
-
-  /**
-   * Read and return filled amounts for a list of orders
-   */
-  public filledAmountsForOrders(orderUids: BytesLike[]): Promise<BigNumber[]> {
-    return readStorage(this.settlement, this.reader, "filledAmountsForOrders", [
-      orderUids,
-    ]);
-  }
 }
 
 /**
