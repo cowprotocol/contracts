@@ -59,7 +59,6 @@ contract SmartSellOrder is EIP1271Verifier {
         if (balance != 0) {
             sellToken.safeTransfer(owner, balance);
         }
-        selfdestruct(payable(owner));
     }
 
     function isValidSignature(bytes32 hash, bytes memory signature)

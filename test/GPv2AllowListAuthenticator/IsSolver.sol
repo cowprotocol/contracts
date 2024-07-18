@@ -12,7 +12,7 @@ contract IsSolver is Helper {
         assertTrue(authenticator.isSolver(solver));
     }
 
-    function test_returns_false_when_given_address_is_not_a_recognized_solver() public {
+    function test_returns_false_when_given_address_is_not_a_recognized_solver() public view {
         assertFalse(authenticator.isSolver(solver));
     }
 
