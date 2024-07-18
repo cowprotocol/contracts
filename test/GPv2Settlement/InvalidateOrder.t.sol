@@ -31,16 +31,10 @@ contract InvalidateOrder is Helper {
         orderUid.packOrderUidParams(orderDigest, trader.addr, validTo);
 
         vm.prank(trader.addr);
-        vm.expectEmit(true, true, true, true, address(settlement));
+        vm.expectEmit(address(settlement));
         emit GPv2Settlement.OrderInvalidated(trader.addr, orderUid);
         vm.recordLogs();
         settlement.invalidateOrder(orderUid);
-
-        Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 1);
-        assertEq(entries[0].topics[0], keccak256("OrderInvalidated(address,bytes)"));
-        assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(trader.addr)))));
-        assertEq(abi.decode(entries[0].data, (bytes)), orderUid);
     }
 
     function test_reverts_when_invalidating_an_order_that_does_not_belong_to_the_caller() public {
