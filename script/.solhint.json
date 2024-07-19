@@ -1,0 +1,11 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "compiler-version": ["warn", "^0.8"],
+    "func-visibility": ["warn", { "ignoreConstructors": true }],
+    "gas-custom-errors": "off",
+    "immutable-vars-naming": "off",
+    "no-console": "off",
+    "no-global-import": "off"
+  }
+}

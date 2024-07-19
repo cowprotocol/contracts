@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity ^0.8;
 
 import "src/contracts/mixins/StorageAccessible.sol";
 
@@ -23,6 +23,7 @@ contract StorageAccessibleWrapper is StorageAccessible {
     mapping(uint256 => uint256) qux;
     FooBar foobar;
 
+    // solhint-disable-next-line no-empty-blocks
     constructor() {}
 
     function setFoo(uint256 foo_) public {

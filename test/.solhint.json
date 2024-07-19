@@ -1,0 +1,16 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "compiler-version": ["warn", "^0.8"],
+    "const-name-snakecase": "off",
+    "func-name-mixedcase": "off",
+    "func-visibility": ["warn", { "ignoreConstructors": true }],
+    "gas-custom-errors": "off",
+    "immutable-vars-naming": "off",
+    "no-global-import": "off",
+    "no-inline-assembly": "off",
+    "one-contract-per-file": "off",
+    "reason-string": "off",
+    "state-visibility": "off"
+  }
+}
