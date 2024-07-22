@@ -29,8 +29,9 @@ contract Settle is Helper {
     }
 
     function test_reverts_if_encoded_interactions_has_incorrect_number_of_stages() public {
-        for (uint256 i = 1; i < 3; i++) {
-            GPv2Interaction.Data[][] memory interactions = new GPv2Interaction.Data[][](i * 2);
+        for (uint256 i = 2; i <= 4; i = i + 2) {
+            GPv2Interaction.Data[][] memory interactions = new GPv2Interaction.Data[][](i);
+
             assertTrue(interactions.length != 3, "incorrect interaction array length test setup");
             vm.expectRevert();
             // test requires malformed interactions array, therefore use encodeWithSelector

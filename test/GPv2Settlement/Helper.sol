@@ -37,9 +37,9 @@ abstract contract Helper is Test {
 
     function setUp() public virtual {
         // Configure addresses
-        deployer = makeAddr("deployer");
-        owner = makeAddr("owner");
-        solver = makeAddr("solver");
+        deployer = makeAddr("GPv2Settlement.Helper: deployer");
+        owner = makeAddr("GPv2Settlement.Helper: owner");
+        solver = makeAddr("GPv2Settlement.Helper: solver");
         vm.startPrank(deployer);
 
         // Deploy the allowlist manager
@@ -68,7 +68,7 @@ abstract contract Helper is Test {
         domainSeparator = settlement.domainSeparator();
 
         // Create wallets
-        trader = vm.createWallet("trader");
+        trader = vm.createWallet("GPv2Settlement.Helper: trader");
     }
 
     function deployBalancerVault() private returns (IVault vault_) {
