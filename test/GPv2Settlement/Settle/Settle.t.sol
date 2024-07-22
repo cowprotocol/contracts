@@ -6,6 +6,7 @@ import {Helper} from "../Helper.sol";
 import {GPv2Settlement, GPv2Interaction} from "src/contracts/GPv2Settlement.sol";
 
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
+import {CallOrderEnforcer} from "./CallOrderEnforcer.sol";
 
 // solhint-disable func-name-mixedcase
 contract Settle is Helper {
@@ -26,6 +27,38 @@ contract Settle is Helper {
         emit GPv2Settlement.Settlement(solver);
         vm.prank(solver);
         settle(encoder.encode(settlement));
+    }
+
+    function test_executes_interaction_stages_in_the_correct_order() public {
+        CallOrderEnforcer callOrderEnforcer = new CallOrderEnforcer();
+        encoder.addInteraction(
+            GPv2Interaction.Data({
+                target: address(callOrderEnforcer),
+                value: 0,
+                callData: abi.encodeCall(CallOrderEnforcer.post, ())
+            }),
+            SettlementEncoder.InteractionStage.POST
+        );
+        encoder.addInteraction(
+            GPv2Interaction.Data({
+                target: address(callOrderEnforcer),
+                value: 0,
+                callData: abi.encodeCall(CallOrderEnforcer.pre, ())
+            }),
+            SettlementEncoder.InteractionStage.PRE
+        );
+        encoder.addInteraction(
+            GPv2Interaction.Data({
+                target: address(callOrderEnforcer),
+                value: 0,
+                callData: abi.encodeCall(CallOrderEnforcer.intra, ())
+            }),
+            SettlementEncoder.InteractionStage.INTRA
+        );
+
+        vm.prank(solver);
+        settle(encoder.encode(settlement));
+        assertEq(uint256(callOrderEnforcer.lastCall()), uint256(CallOrderEnforcer.Called.Post));
     }
 
     function test_reverts_if_encoded_interactions_has_incorrect_number_of_stages() public {
