@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.8.26;
+pragma solidity ^0.8;
 
 library Bytes {
     function slice(bytes memory d, uint256 offset, uint256 length) internal pure returns (bytes memory) {

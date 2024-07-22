@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.8.26;
+pragma solidity ^0.8;
 
 import {Vm} from "forge-std/Test.sol";
 
@@ -106,6 +106,7 @@ library SettlementEncoder {
 
         // All the order refunds are encoded in the POST interactions so we take some liberty and
         // use a short variable to represent the POST stage.
+        // solhint-disable-next-line var-name-mixedcase
         uint256 POST = uint256(InteractionStage.POST);
         GPv2Interaction.Data[] memory postInteractions =
             new GPv2Interaction.Data[](state.interactions[POST].length + r.length);

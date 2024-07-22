@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable-next-line compiler-version
 pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";

@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.8.0;
+pragma solidity ^0.8;
 
 import {Helper} from "./Helper.sol";
 
 import {GPv2Interaction} from "src/contracts/libraries/GPv2Interaction.sol";
 
+// Intentionally empty contract.
+// solhint-disable-next-line no-empty-blocks
 contract NonPayable {}
 
 contract Transfer is Helper {

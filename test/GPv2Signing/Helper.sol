@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.8.26;
+pragma solidity ^0.8;
 
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
