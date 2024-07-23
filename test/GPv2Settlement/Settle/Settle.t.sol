@@ -6,7 +6,6 @@ import {Helper} from "../Helper.sol";
 import {GPv2Settlement, GPv2Interaction} from "src/contracts/GPv2Settlement.sol";
 
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
-import {CallOrderEnforcer} from "./CallOrderEnforcer.sol";
 
 // solhint-disable func-name-mixedcase
 contract Settle is Helper {
@@ -75,5 +74,33 @@ contract Settle is Helper {
             );
             assertTrue(revertsAsExpected, "incorrect interaction array length did not revert");
         }
+    }
+}
+
+/// Contract that exposes three functions that must be called in the expected
+/// order. The last called function is stored in the state as `lastCall`.
+contract CallOrderEnforcer {
+    enum Called {
+        None,
+        Pre,
+        Intra,
+        Post
+    }
+
+    Called public lastCall = Called.None;
+
+    function pre() public {
+        require(lastCall == Called.None, "called `pre` but there should have been no other calls before");
+        lastCall = Called.Pre;
+    }
+
+    function intra() public {
+        require(lastCall == Called.Pre, "called `intra` but previous call wasn't `pre`");
+        lastCall = Called.Intra;
+    }
+
+    function post() public {
+        require(lastCall == Called.Intra, "called `post` but previous call wasn't `intra`");
+        lastCall = Called.Post;
     }
 }
