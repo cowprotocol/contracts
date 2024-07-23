@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 
 import {ViewStorageAccessible} from "src/contracts/mixins/StorageAccessible.sol";
 
-import {StorageAccessibleWrapper, ExternalStorageReader} from "./StorageAccessibleWrapper.sol";
+import {ExternalStorageReader, StorageAccessibleWrapper} from "./StorageAccessibleWrapper.sol";
 
 contract StorageAccessibleTest is Test {
     StorageAccessibleWrapper instance;

@@ -18,6 +18,7 @@ fs_permissions = [
 ]
 
 [fmt]
+sort_imports = true
 ignore = [
   # We don't want to change the formatting of our main contracts until the
   # migration to Foundry is concluded.

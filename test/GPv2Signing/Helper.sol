@@ -2,9 +2,9 @@
 pragma solidity ^0.8;
 
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
-import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
+import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
 // solhint-disable func-name-mixedcase
 contract Harness is GPv2Signing {
