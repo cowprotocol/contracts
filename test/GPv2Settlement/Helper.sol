@@ -20,6 +20,7 @@ import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
 // solhint-disable func-name-mixedcase
 abstract contract Helper is Test {
     using stdJson for string;
+    using SettlementEncoder for SettlementEncoder.State;
 
     address internal deployer;
     address internal owner;
@@ -88,6 +89,15 @@ abstract contract Helper is Test {
 
     function swap(SwapEncoder.EncodedSwap memory _swap) internal {
         settlement.swap(_swap.swaps, _swap.tokens, _swap.trade);
+    }
+
+    function emptySettlement() internal pure returns (SettlementEncoder.EncodedSettlement memory) {
+        return SettlementEncoder.EncodedSettlement({
+            tokens: new IERC20[](0),
+            clearingPrices: new uint256[](0),
+            trades: new GPv2Trade.Data[](0),
+            interactions: [new GPv2Interaction.Data[](0), new GPv2Interaction.Data[](0), new GPv2Interaction.Data[](0)]
+        });
     }
 }
 

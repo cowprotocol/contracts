@@ -13,7 +13,7 @@ contract Settle is Helper {
 
     function test_allowlist_rejects_transactions_from_non_solvers() public {
         vm.expectRevert("GPv2: not a solver");
-        settle(encoder.encode(settlement));
+        settle(emptySettlement());
     }
 
     function test_allowlist_accepts_transactions_from_solvers() public {
