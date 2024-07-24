@@ -5,7 +5,6 @@ import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 
 import {GPv2Settlement, Helper} from "./Helper.sol";
 
-//solhint-disable func-name-mixedcase
 contract InvalidateOrder is Helper {
     using GPv2Order for bytes;
 
