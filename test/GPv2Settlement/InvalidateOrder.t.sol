@@ -37,10 +37,11 @@ contract InvalidateOrder is Helper {
 
     function test_reverts_when_invalidating_an_order_that_does_not_belong_to_the_caller() public {
         bytes32 orderDigest = keccak256("some order");
+        address notTrader = makeAddr("InvalidateOrder: not-trader");
         uint32 validTo = type(uint32).max;
 
         bytes memory orderUid = new bytes(GPv2Order.UID_LENGTH);
-        orderUid.packOrderUidParams(orderDigest, makeAddr("not-trader"), validTo);
+        orderUid.packOrderUidParams(orderDigest, notTrader, validTo);
 
         vm.expectRevert("GPv2: caller does not own order");
         settlement.invalidateOrder(orderUid);
