@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.8.0;
+pragma solidity ^0.8;
 
 import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 
-import {Helper, GPv2AllowListAuthenticationHarness} from "./Helper.sol";
+import {GPv2AllowListAuthenticationHarness, Helper} from "./Helper.sol";
 
 contract InitializeManager is Helper {
     function test_should_initialize_the_manager() public view {

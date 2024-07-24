@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import {Helper} from "../Helper.sol";
 
-import {GPv2Settlement, GPv2Interaction} from "src/contracts/GPv2Settlement.sol";
+import {GPv2Interaction, GPv2Settlement} from "src/contracts/GPv2Settlement.sol";
 
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 
@@ -13,7 +13,7 @@ contract Settle is Helper {
 
     function test_allowlist_rejects_transactions_from_non_solvers() public {
         vm.expectRevert("GPv2: not a solver");
-        settle(encoder.encode(settlement));
+        settle(emptySettlement());
     }
 
     function test_allowlist_accepts_transactions_from_solvers() public {
@@ -28,18 +28,63 @@ contract Settle is Helper {
         settle(encoder.encode(settlement));
     }
 
-    function test_reverts_if_encoded_interactions_has_incorrect_number_of_stages() public {
-        for (uint256 i = 1; i < 3; i++) {
-            GPv2Interaction.Data[][] memory interactions = new GPv2Interaction.Data[][](i * 2);
-            assertTrue(interactions.length != 3, "incorrect interaction array length test setup");
-            vm.expectRevert();
-            // test requires malformed interactions array, therefore use encodeWithSelector
-            (bool revertsAsExpected,) = address(settlement).call(
-                abi.encodeWithSelector(
-                    GPv2Settlement.settle.selector, new bytes32[](0), new uint256[](0), new bytes[](0), interactions
-                )
-            );
-            assertTrue(revertsAsExpected, "incorrect interaction array length did not revert");
-        }
+    function test_executes_interaction_stages_in_the_correct_order() public {
+        CallOrderEnforcer callOrderEnforcer = new CallOrderEnforcer();
+        encoder.addInteraction(
+            GPv2Interaction.Data({
+                target: address(callOrderEnforcer),
+                value: 0,
+                callData: abi.encodeCall(CallOrderEnforcer.post, ())
+            }),
+            SettlementEncoder.InteractionStage.POST
+        );
+        encoder.addInteraction(
+            GPv2Interaction.Data({
+                target: address(callOrderEnforcer),
+                value: 0,
+                callData: abi.encodeCall(CallOrderEnforcer.pre, ())
+            }),
+            SettlementEncoder.InteractionStage.PRE
+        );
+        encoder.addInteraction(
+            GPv2Interaction.Data({
+                target: address(callOrderEnforcer),
+                value: 0,
+                callData: abi.encodeCall(CallOrderEnforcer.intra, ())
+            }),
+            SettlementEncoder.InteractionStage.INTRA
+        );
+
+        vm.prank(solver);
+        settle(encoder.encode(settlement));
+        assertEq(uint256(callOrderEnforcer.lastCall()), uint256(CallOrderEnforcer.Called.Post));
+    }
+}
+
+/// Contract that exposes three functions that must be called in the expected
+/// order. The last called function is stored in the state as `lastCall`.
+contract CallOrderEnforcer {
+    enum Called {
+        None,
+        Pre,
+        Intra,
+        Post
+    }
+
+    Called public lastCall = Called.None;
+
+    function pre() public {
+        require(lastCall == Called.None, "called `pre` but there should have been no other calls before");
+        lastCall = Called.Pre;
+    }
+
+    function intra() public {
+        require(lastCall == Called.Pre, "called `intra` but previous call wasn't `pre`");
+        lastCall = Called.Intra;
+    }
+
+    function post() public {
+        require(lastCall == Called.Intra, "called `post` but previous call wasn't `intra`");
+        lastCall = Called.Post;
     }
 }

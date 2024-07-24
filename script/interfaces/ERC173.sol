@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0
-pragma solidity >=0.7.6 <0.9.0;
+pragma solidity ^0.8;
 
 // Copied from:
 // <https://eips.ethereum.org/EIPS/eip-173#specification>

@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {Test, stdJson, Vm} from "forge-std/Test.sol";
+import {Test, Vm, stdJson} from "forge-std/Test.sol";
 
+import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 import {
-    IVault,
     GPv2Authentication,
+    GPv2Interaction,
     GPv2Settlement,
     GPv2Trade,
-    GPv2Interaction,
     GPv2Transfer,
-    IERC20
+    IERC20,
+    IVault
 } from "src/contracts/GPv2Settlement.sol";
-import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
@@ -20,6 +20,7 @@ import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
 // solhint-disable func-name-mixedcase
 abstract contract Helper is Test {
     using stdJson for string;
+    using SettlementEncoder for SettlementEncoder.State;
 
     address internal deployer;
     address internal owner;
@@ -37,9 +38,9 @@ abstract contract Helper is Test {
 
     function setUp() public virtual {
         // Configure addresses
-        deployer = makeAddr("deployer");
-        owner = makeAddr("owner");
-        solver = makeAddr("solver");
+        deployer = makeAddr("GPv2Settlement.Helper: deployer");
+        owner = makeAddr("GPv2Settlement.Helper: owner");
+        solver = makeAddr("GPv2Settlement.Helper: solver");
         vm.startPrank(deployer);
 
         // Deploy the allowlist manager
@@ -68,7 +69,7 @@ abstract contract Helper is Test {
         domainSeparator = settlement.domainSeparator();
 
         // Create wallets
-        trader = vm.createWallet("trader");
+        trader = vm.createWallet("GPv2Settlement.Helper: trader");
     }
 
     function deployBalancerVault() private returns (IVault vault_) {
@@ -88,6 +89,15 @@ abstract contract Helper is Test {
 
     function swap(SwapEncoder.EncodedSwap memory _swap) internal {
         settlement.swap(_swap.swaps, _swap.tokens, _swap.trade);
+    }
+
+    function emptySettlement() internal pure returns (SettlementEncoder.EncodedSettlement memory) {
+        return SettlementEncoder.EncodedSettlement({
+            tokens: new IERC20[](0),
+            clearingPrices: new uint256[](0),
+            trades: new GPv2Trade.Data[](0),
+            interactions: [new GPv2Interaction.Data[](0), new GPv2Interaction.Data[](0), new GPv2Interaction.Data[](0)]
+        });
     }
 }
 

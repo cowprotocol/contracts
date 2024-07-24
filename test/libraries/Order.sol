@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.8.26;
+pragma solidity ^0.8;
 
-import {IERC20, GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
+import {GPv2Order, IERC20} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
 
 library Order {
@@ -74,8 +74,18 @@ library Order {
     function computeOrderUid(GPv2Order.Data memory order, bytes32 domainSeparator, address owner)
         internal
         pure
+        returns (bytes memory)
+    {
+        return computeOrderUid(order.hash(domainSeparator), owner, order.validTo);
+    }
+
+    /// @dev Computes the order UID for its base components
+    function computeOrderUid(bytes32 orderHash, address owner, uint32 validTo)
+        internal
+        pure
         returns (bytes memory orderUid)
     {
-        orderUid.packOrderUidParams(order.hash(domainSeparator), owner, order.validTo);
+        orderUid = new bytes(GPv2Order.UID_LENGTH);
+        orderUid.packOrderUidParams(orderHash, owner, validTo);
     }
 }
