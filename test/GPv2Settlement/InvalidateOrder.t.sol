@@ -5,7 +5,7 @@ import {Vm} from "forge-std/Test.sol";
 
 import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 
-import {Helper, GPv2Settlement} from "./Helper.sol";
+import {GPv2Settlement, Helper} from "./Helper.sol";
 
 //solhint-disable func-name-mixedcase
 contract InvalidateOrder is Helper {

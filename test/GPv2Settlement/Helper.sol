@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import {Test, stdJson, Vm} from "forge-std/Test.sol";
+import {Test, Vm, stdJson} from "forge-std/Test.sol";
 
+import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 import {
-    IVault,
     GPv2Authentication,
+    GPv2Interaction,
     GPv2Settlement,
     GPv2Trade,
-    GPv2Interaction,
     GPv2Transfer,
-    IERC20
+    IERC20,
+    IVault
 } from "src/contracts/GPv2Settlement.sol";
-import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";

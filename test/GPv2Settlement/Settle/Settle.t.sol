@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import {Helper} from "../Helper.sol";
 
-import {GPv2Settlement, GPv2Interaction} from "src/contracts/GPv2Settlement.sol";
+import {GPv2Interaction, GPv2Settlement} from "src/contracts/GPv2Settlement.sol";
 
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 
