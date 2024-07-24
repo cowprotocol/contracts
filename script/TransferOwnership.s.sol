@@ -5,7 +5,7 @@ import {console} from "forge-std/Script.sol";
 
 import {GPv2AllowListAuthentication} from "../src/contracts/GPv2AllowListAuthentication.sol";
 
-import {ERC173, ERC165} from "./interfaces/ERC173.sol";
+import {ERC165, ERC173} from "./interfaces/ERC173.sol";
 import {NetworksJson} from "./lib/NetworksJson.sol";
 
 contract TransferOwnership is NetworksJson {
