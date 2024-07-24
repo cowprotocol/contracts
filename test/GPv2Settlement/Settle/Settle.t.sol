@@ -67,6 +67,7 @@ contract Settle is Helper {
             assertTrue(interactions.length != 3, "incorrect interaction array length test setup");
             vm.expectRevert();
             // test requires malformed interactions array, therefore use encodeWithSelector
+            // solhint-disable-next-line avoid-low-level-calls
             (bool revertsAsExpected,) = address(settlement).call(
                 abi.encodeWithSelector(
                     GPv2Settlement.settle.selector, new bytes32[](0), new uint256[](0), new bytes[](0), interactions
