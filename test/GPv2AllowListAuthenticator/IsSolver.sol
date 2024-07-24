@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.8.0;
+pragma solidity ^0.8;
 
 import {Helper} from "./Helper.sol";
 
@@ -12,7 +12,7 @@ contract IsSolver is Helper {
         assertTrue(authenticator.isSolver(solver));
     }
 
-    function test_returns_false_when_given_address_is_not_a_recognized_solver() public {
+    function test_returns_false_when_given_address_is_not_a_recognized_solver() public view {
         assertFalse(authenticator.isSolver(solver));
     }
 

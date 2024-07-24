@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+// solhint-disable-next-line compiler-version
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
+import "src/contracts/GPv2Settlement.sol";
 import "src/contracts/interfaces/GPv2EIP1271.sol";
 import "src/contracts/interfaces/IERC20.sol";
 import "src/contracts/libraries/GPv2Order.sol";
 import "src/contracts/libraries/GPv2SafeERC20.sol";
 import "src/contracts/libraries/SafeMath.sol";
-import "src/contracts/GPv2Settlement.sol";
 
 /// @title Proof of Concept Smart Order
 /// @author Gnosis Developers
@@ -59,7 +60,6 @@ contract SmartSellOrder is EIP1271Verifier {
         if (balance != 0) {
             sellToken.safeTransfer(owner, balance);
         }
-        selfdestruct(payable(owner));
     }
 
     function isValidSignature(bytes32 hash, bytes memory signature)

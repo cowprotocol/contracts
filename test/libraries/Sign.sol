@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity ^0.8.26;
+pragma solidity ^0.8;
 
 import {Vm} from "forge-std/Test.sol";
 
-import {GPv2Order, GPv2Trade, GPv2Signing, EIP1271Verifier} from "src/contracts/mixins/GPv2Signing.sol";
+import {EIP1271Verifier, GPv2Order, GPv2Signing, GPv2Trade} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Bytes} from "./Bytes.sol";
 

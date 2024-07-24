@@ -1,12 +1,11 @@
 {
   "extends": "solhint:recommended",
-  "plugins": ["prettier"],
   "rules": {
-    "compiler-version": "off",
+    "compiler-version": ["warn", "^0.8"],
     "func-visibility": ["warn", { "ignoreConstructors": true }],
     "gas-custom-errors": "off",
     "immutable-vars-naming": "off",
-    "no-global-import": "off",
-    "prettier/prettier": "error"
+    "no-console": "off",
+    "no-global-import": "off"
   }
 }
