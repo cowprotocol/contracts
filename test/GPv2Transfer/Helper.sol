@@ -3,14 +3,28 @@ pragma solidity ^0.8;
 
 import {Test} from "forge-std/Test.sol";
 
-import {IERC20, IVault} from "src/contracts/libraries/GPv2Transfer.sol";
+import {GPv2Transfer, IERC20, IVault} from "src/contracts/libraries/GPv2Transfer.sol";
 
-import {GPv2TransferTestInterface} from "test/src/GPv2TransferTestInterface.sol";
+contract Harness {
+    function fastTransferFromAccountTest(IVault vault, GPv2Transfer.Data calldata transfer, address recipient)
+        external
+    {
+        GPv2Transfer.fastTransferFromAccount(vault, transfer, recipient);
+    }
 
-// Todo once `test/GPv2Transfer.test.ts` is removed, the code in the file
-// `test/src/GPv2TransferTestInterface.sol` should be copied here.
-// solhint-disable-next-line no-empty-blocks
-contract Harness is GPv2TransferTestInterface {}
+    function transferFromAccountsTest(IVault vault, GPv2Transfer.Data[] calldata transfers, address recipient)
+        external
+    {
+        GPv2Transfer.transferFromAccounts(vault, transfers, recipient);
+    }
+
+    function transferToAccountsTest(IVault vault, GPv2Transfer.Data[] memory transfers) external {
+        GPv2Transfer.transferToAccounts(vault, transfers);
+    }
+
+    // solhint-disable-next-line no-empty-blocks
+    receive() external payable {}
+}
 
 contract Helper is Test {
     Harness internal executor;
