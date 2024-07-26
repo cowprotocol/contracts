@@ -94,6 +94,8 @@ library TokenRegistry {
         hydrateArray(state)
         returns (uint256, uint256)
     {
-        return (pushIfNotPresentIndexOf(state, order.sellToken), pushIfNotPresentIndexOf(state, order.buyToken));
+        uint256 sellTokenIndex = pushIfNotPresentIndexOf(state, order.sellToken);
+        uint256 buyTokenIndex = pushIfNotPresentIndexOf(state, order.buyToken);
+        return (sellTokenIndex - 1, buyTokenIndex - 1);
     }
 }
