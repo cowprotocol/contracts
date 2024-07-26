@@ -1,12 +1,11 @@
 import IERC20 from "@openzeppelin/contracts/build/contracts/IERC20.json";
 import { expect } from "chai";
 import { MockContract } from "ethereum-waffle";
-import { BigNumberish, Contract, ContractReceipt } from "ethers";
+import { Contract, ContractReceipt } from "ethers";
 import { artifacts, ethers, waffle } from "hardhat";
 
 import {
   Interaction,
-  Order,
   OrderBalance,
   OrderFlags,
   OrderKind,
@@ -24,7 +23,6 @@ import {
 } from "../src/ts";
 
 import { SwapKind, UserBalanceOpKind } from "./balancer";
-import { ceilDiv } from "./testHelpers";
 
 function fillBytes(count: number, byte: number): string {
   return ethers.utils.hexlify([...Array(count)].map(() => byte));
