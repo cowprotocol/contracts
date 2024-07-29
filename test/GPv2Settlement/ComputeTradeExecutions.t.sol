@@ -99,6 +99,9 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
     }
 
     function test_revert_if_the_order_is_expired() public {
+        // set an explicit block timestamp as otherwise order.validTo will
+        // not be distinguishable from a default initialised uint32 (0) due
+        // block.timestamp being equal to 1 here in the test environment
         vm.warp(42);
 
         GPv2Order.Data memory order = defaultOrder();
