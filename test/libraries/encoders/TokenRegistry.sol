@@ -48,7 +48,7 @@ library TokenRegistry {
         }
     }
 
-    /// @dev Set the price for the specified token
+    /// @dev Set the price for the specified tokens
     function setPrices(State storage state, IERC20[] memory _tokens, uint256[] memory _prices)
         internal
         hydrateArray(state)
@@ -62,6 +62,12 @@ library TokenRegistry {
             pushIfNotPresentIndexOf(state, token);
             state.prices[token] = _prices[i];
         }
+    }
+
+    /// @dev Set the price for specified token
+    function setPrice(State storage state, IERC20 token, uint256 price) internal hydrateArray(state) {
+        pushIfNotPresentIndexOf(state, token);
+        state.prices[token] = price;
     }
 
     /// @dev Gets the array of tokens in the registry

@@ -49,13 +49,9 @@ abstract contract BaseComputeTradeExecutions is Helper {
     }
 
     function setTokenPrices(uint256 _sellPrice, uint256 _buyPrice) internal {
-        IERC20[] memory tokens = new IERC20[](2);
-        tokens[0] = sellToken;
-        tokens[1] = buyToken;
-        uint256[] memory prices = new uint256[](2);
-        prices[0] = _sellPrice;
-        prices[1] = _buyPrice;
-        encoder.tokenRegistry.tokenRegistry().setPrices(tokens, prices);
+        TokenRegistry.State storage tokenRegistry = encoder.tokenRegistry.tokenRegistry();
+        tokenRegistry.setPrice(sellToken, _sellPrice);
+        tokenRegistry.setPrice(buyToken, _buyPrice);
     }
 
     function computeSettlementForOrder(GPv2Order.Data memory order)
