@@ -98,13 +98,13 @@ contract TransferFromAccounts is Helper {
         executor.transferFromAccountsTest(vault, transfers, recipient);
     }
 
-    function reverts_when_mistakenly_trying_to_transfer_Ether(bytes32 balance) private {
+    function reverts_when_mistakenly_trying_to_transfer_Ether(bytes32 balanceLocation) private {
         GPv2Transfer.Data[] memory transfers = new GPv2Transfer.Data[](1);
         transfers[0] = GPv2Transfer.Data({
             account: trader,
             token: IERC20(GPv2Transfer.BUY_ETH_ADDRESS),
             amount: amount,
-            balance: balance
+            balance: balanceLocation
         });
         vm.expectRevert("GPv2: cannot transfer native ETH");
         executor.transferFromAccountsTest(vault, transfers, recipient);
