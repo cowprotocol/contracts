@@ -17,8 +17,8 @@ abstract contract BaseComputeTradeExecutions is Helper {
     using TokenRegistry for Registry;
     using SettlementEncoder for SettlementEncoder.State;
 
-    IERC20 private sellToken;
-    IERC20 private buyToken;
+    IERC20 internal sellToken;
+    IERC20 internal buyToken;
 
     uint256 internal executedAmount = 10 ether;
     uint256 internal sellPrice = 1;
@@ -48,17 +48,12 @@ abstract contract BaseComputeTradeExecutions is Helper {
         });
     }
 
-    function setTokenPrices(uint256 _sellPrice, uint256 _buyPrice) internal {
-        TokenRegistry.State storage tokenRegistry = encoder.tokenRegistry.tokenRegistry();
-        tokenRegistry.setPrice(sellToken, _sellPrice);
-        tokenRegistry.setPrice(buyToken, _buyPrice);
-    }
-
     function computeSettlementForOrder(GPv2Order.Data memory order)
         internal
         returns (uint256 executedSellAmount, uint256 executedBuyAmount)
     {
-        setTokenPrices(sellPrice, buyPrice);
+        encoder.tokenRegistry.tokenRegistry().setPrice(sellToken, sellPrice);
+        encoder.tokenRegistry.tokenRegistry().setPrice(buyToken, buyPrice);
         encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, executedAmount);
 
         SettlementEncoder.EncodedSettlement memory encoded = encoder.encode(settlement);
@@ -75,6 +70,8 @@ abstract contract BaseComputeTradeExecutions is Helper {
 }
 
 contract ComputeTradeExecutions is BaseComputeTradeExecutions {
+    using TokenRegistry for TokenRegistry.State;
+    using TokenRegistry for Registry;
     using SettlementEncoder for SettlementEncoder.State;
     using Order for GPv2Order.Data;
 
@@ -91,7 +88,8 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
             encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 0.7734 ether);
         }
 
-        setTokenPrices(sellPrice, buyPrice);
+        encoder.tokenRegistry.tokenRegistry().setPrice(sellToken, sellPrice);
+        encoder.tokenRegistry.tokenRegistry().setPrice(buyToken, buyPrice);
         SettlementEncoder.EncodedSettlement memory encoded = encoder.encode(settlement);
         (GPv2Transfer.Data[] memory inTransfer, GPv2Transfer.Data[] memory outTransfer) =
             settlement.computeTradeExecutionsTest(encoded.tokens, encoded.clearingPrices, encoded.trades);
@@ -145,7 +143,8 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
         order.appData = keccak256("another-order");
         encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 100 ether);
 
-        setTokenPrices(sellPrice, buyPrice);
+        encoder.tokenRegistry.tokenRegistry().setPrice(sellToken, sellPrice);
+        encoder.tokenRegistry.tokenRegistry().setPrice(buyToken, buyPrice);
         SettlementEncoder.EncodedSettlement memory encoded = encoder.encode(settlement);
         (GPv2Transfer.Data[] memory inTransfers,) =
             settlement.computeTradeExecutionsTest(encoded.tokens, encoded.clearingPrices, encoded.trades);
@@ -157,11 +156,9 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
         GPv2Order.Data memory order = partialOrder();
         order.kind = GPv2Order.KIND_SELL;
         encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 0);
-        setTokenPrices(sellPrice, buyPrice);
+        encoder.tokenRegistry.tokenRegistry().setPrice(sellToken, sellPrice);
+        encoder.tokenRegistry.tokenRegistry().setPrice(buyToken, buyPrice);
         SettlementEncoder.EncodedSettlement memory encoded = encoder.encode(settlement);
-
-        sellPrice = encoded.clearingPrices[encoded.trades[0].sellTokenIndex];
-        buyPrice = encoded.clearingPrices[encoded.trades[0].buyTokenIndex];
 
         uint256 executedSellAmount = order.sellAmount + order.feeAmount;
         uint256 executedBuyAmount = order.sellAmount * sellPrice / buyPrice;
