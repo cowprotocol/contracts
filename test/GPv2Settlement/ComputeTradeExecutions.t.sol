@@ -27,8 +27,8 @@ abstract contract BaseComputeTradeExecutions is Helper {
     function setUp() public virtual override {
         super.setUp();
 
-        sellToken = IERC20(makeAddr("BaseComputeTradeExecutions: sellToken"));
-        buyToken = IERC20(makeAddr("BaseComputeTradeExecutions: buyToken"));
+        sellToken = IERC20(makeAddr("GPv2Settlement.BaseComputeTradeExecutions: sellToken"));
+        buyToken = IERC20(makeAddr("GPv2Settlement.BaseComputeTradeExecutions: buyToken"));
     }
 
     function partialOrder() internal view returns (GPv2Order.Data memory) {
