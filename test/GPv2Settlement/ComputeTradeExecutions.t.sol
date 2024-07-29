@@ -31,7 +31,7 @@ abstract contract BaseComputeTradeExecutions is Helper {
         buyToken = IERC20(makeAddr("GPv2Settlement.BaseComputeTradeExecutions: buyToken"));
     }
 
-    function partialOrder() internal view returns (GPv2Order.Data memory) {
+    function defaultOrder() internal view returns (GPv2Order.Data memory) {
         return GPv2Order.Data({
             sellToken: sellToken,
             buyToken: buyToken,
@@ -82,7 +82,7 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
     function test_should_compute_in_out_transfers_for_multiple_trades() public {
         uint256 tradeCount = 10;
         for (uint256 i = 0; i < tradeCount; i++) {
-            GPv2Order.Data memory order = partialOrder();
+            GPv2Order.Data memory order = defaultOrder();
             order.kind = GPv2Order.KIND_BUY;
             order.partiallyFillable = true;
             encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 0.7734 ether);
@@ -101,7 +101,7 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
     function test_revert_if_the_order_is_expired() public {
         vm.warp(42);
 
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.validTo = uint32(block.timestamp - 1);
         order.kind = GPv2Order.KIND_SELL;
 
@@ -113,7 +113,7 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
         sellPrice = 1;
         buyPrice = 1000;
 
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.sellAmount = 100 ether;
         order.buyAmount = 1 ether;
         order.kind = GPv2Order.KIND_SELL;
@@ -125,7 +125,7 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
     }
 
     function test_does_not_revert_if_clearing_price_exactly_at_limit_price() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
 
         sellPrice = order.buyAmount;
@@ -135,7 +135,7 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
     }
 
     function test_should_ignore_executed_trade_amount_for_fill_or_kill_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.partiallyFillable = false;
         order.kind = GPv2Order.KIND_BUY;
         encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 10 ether);
@@ -153,7 +153,7 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
     }
 
     function test_should_emit_a_trade_event() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 0);
         encoder.tokenRegistry.tokenRegistry().setPrice(sellToken, sellPrice);
