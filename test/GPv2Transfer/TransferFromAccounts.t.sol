@@ -53,13 +53,22 @@ contract TransferFromAccounts is Helper {
     }
 
     function test_should_transfer_many_external_and_internal_amounts_to_recipient() public {
+        // We generate a large number of transfers and see that they are all
+        // processed as expected. There are three code branches that need to be
+        // considered, that is, the three possible balance locations: ERC20,
+        // EXTERNAL, and INTERNAL, in this order. We alternate balance locations
+        // when generating each trade.
+        uint256 numBalanceLocations = 3;
+        uint256 numVaultBalanceLocations = 2;
         uint256 numTraders = 42;
         GPv2Transfer.Data[] memory transfers = new GPv2Transfer.Data[](numTraders);
-        IVault.UserBalanceOp[] memory expectedVaultOps = new IVault.UserBalanceOp[](numTraders / 3 * 2 + numTraders % 3);
+        IVault.UserBalanceOp[] memory expectedVaultOps = new IVault.UserBalanceOp[](
+            numTraders / numBalanceLocations * numVaultBalanceLocations + numTraders % numBalanceLocations
+        );
         uint256 erc20OpCount = 0;
         for (uint256 i = 0; i < numTraders; i++) {
-            bool isErc20 = i % 3 == 0;
-            bool isExternal = i % 3 == 1;
+            bool isErc20 = i % numBalanceLocations == 0;
+            bool isExternal = i % numBalanceLocations == 1;
             address traderi = makeAddr(string.concat("trader ", vm.toString(i)));
             transfers[i] = GPv2Transfer.Data({
                 account: traderi,
@@ -75,7 +84,8 @@ contract TransferFromAccounts is Helper {
                     address(token), abi.encodeCall(IERC20.transferFrom, (traderi, recipient, amount)), abi.encode(true)
                 );
             } else {
-                expectedVaultOps[i / 3 * 2 + (isExternal ? 0 : 1)] = IVault.UserBalanceOp({
+                expectedVaultOps[i / numBalanceLocations * numVaultBalanceLocations + (isExternal ? 0 : 1)] = IVault
+                    .UserBalanceOp({
                     kind: isExternal
                         ? IVault.UserBalanceOpKind.TRANSFER_EXTERNAL
                         : IVault.UserBalanceOpKind.WITHDRAW_INTERNAL,
