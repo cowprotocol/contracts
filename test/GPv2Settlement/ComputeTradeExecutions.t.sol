@@ -27,8 +27,8 @@ abstract contract BaseComputeTradeExecutions is Helper {
     function setUp() public virtual override {
         super.setUp();
 
-        sellToken = IERC20(makeAddr("ComputeTradeExecutions: sellToken"));
-        buyToken = IERC20(makeAddr("ComputeTradeExecutions: buyToken"));
+        sellToken = IERC20(makeAddr("BaseComputeTradeExecutions: sellToken"));
+        buyToken = IERC20(makeAddr("BaseComputeTradeExecutions: buyToken"));
     }
 
     function partialOrder() internal view returns (GPv2Order.Data memory) {
@@ -83,20 +83,16 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
     using Order for GPv2Order.Data;
 
     function test_should_not_allocate_additional_memory() public {
-        assertTrue(settlement.computeTradeExecutionMemoryTest() == 0);
+        assertEq(settlement.computeTradeExecutionMemoryTest(), 0);
     }
 
     function test_should_compute_in_out_transfers_for_multiple_trades() public {
         uint256 tradeCount = 10;
-        for (uint256 i = 0; i < tradeCount;) {
+        for (uint256 i = 0; i < tradeCount; i++) {
             GPv2Order.Data memory order = partialOrder();
             order.kind = GPv2Order.KIND_BUY;
             order.partiallyFillable = true;
             encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 0.7734 ether);
-
-            unchecked {
-                ++i;
-            }
         }
 
         setTokenPrices(sellPrice, buyPrice);
@@ -146,6 +142,7 @@ contract ComputeTradeExecutions is BaseComputeTradeExecutions {
 
     function test_should_ignore_executed_trade_amount_for_fill_or_kill_orders() public {
         GPv2Order.Data memory order = partialOrder();
+        order.partiallyFillable = false;
         order.kind = GPv2Order.KIND_BUY;
         encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 10 ether);
 
