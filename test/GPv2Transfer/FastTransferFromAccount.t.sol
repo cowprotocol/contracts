@@ -49,12 +49,12 @@ contract FastTransferFromAccount is Helper {
         executor.fastTransferFromAccountTest(vault, transfer, recipient);
     }
 
-    function reverts_when_mistakenly_trying_to_transfer_Ether(bytes32 balance) private {
+    function reverts_when_mistakenly_trying_to_transfer_Ether(bytes32 balanceLocation) private {
         GPv2Transfer.Data memory transfer = GPv2Transfer.Data({
             account: trader,
             token: IERC20(GPv2Transfer.BUY_ETH_ADDRESS),
             amount: amount,
-            balance: balance
+            balance: balanceLocation
         });
         vm.expectRevert("GPv2: cannot transfer native ETH");
         executor.fastTransferFromAccountTest(vault, transfer, recipient);
