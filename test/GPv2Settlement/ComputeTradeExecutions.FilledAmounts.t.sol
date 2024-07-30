@@ -10,7 +10,7 @@ contract OrderFilledAmounts is BaseComputeTradeExecutions {
     using SettlementEncoder for SettlementEncoder.State;
 
     function test_should_fill_full_sell_amount_for_fill_or_kill_sell_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         computeSettlementForOrder(order);
 
@@ -19,7 +19,7 @@ contract OrderFilledAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_fill_full_buy_amount_for_fill_or_kill_buy_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
         computeSettlementForOrder(order);
 
@@ -28,7 +28,7 @@ contract OrderFilledAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_fill_executed_amount_for_partially_filled_sell_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         order.partiallyFillable = true;
         executedAmount = order.sellAmount / 3;
@@ -39,7 +39,7 @@ contract OrderFilledAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_fill_executed_amount_for_partially_filled_buy_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
         order.partiallyFillable = true;
         executedAmount = order.buyAmount / 4;
