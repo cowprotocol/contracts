@@ -8,7 +8,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     using SettlementEncoder for SettlementEncoder.State;
 
     function test_should_compute_amounts_for_fill_or_kill_sell_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
 
         (uint256 executedSellAmount, uint256 executedBuyAmount) = computeSettlementForOrder(order);
@@ -18,7 +18,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_respect_limit_price_for_fill_or_kill_sell_order() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
 
         (, uint256 executedBuyAmount) = computeSettlementForOrder(order);
@@ -26,7 +26,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_compute_amounts_for_fill_or_kill_buy_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
 
         (uint256 executedSellAmount, uint256 executedBuyAmount) = computeSettlementForOrder(order);
@@ -36,7 +36,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_respect_limit_price_for_fill_or_kill_buy_order() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
 
         (uint256 executedSellAmount,) = computeSettlementForOrder(order);
@@ -44,7 +44,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_compute_amounts_for_partially_fillable_sell_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         order.partiallyFillable = true;
 
@@ -55,7 +55,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_respect_limit_price_for_partially_fillable_sell_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         order.partiallyFillable = true;
 
@@ -64,7 +64,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_compute_amounts_for_partially_fillable_buy_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
         order.partiallyFillable = true;
 
@@ -75,7 +75,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_respect_limit_price_for_partially_fillable_buy_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
         order.partiallyFillable = true;
 
@@ -84,7 +84,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_round_executed_buy_amount_in_favour_of_trader_for_partial_fill_sell_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         order.partiallyFillable = true;
         order.sellAmount = 100 ether;
@@ -102,7 +102,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_should_round_executed_sell_amount_in_favour_of_trader_for_partial_fill_buy_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
         order.partiallyFillable = true;
         order.sellAmount = 1 ether;
@@ -119,7 +119,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_revert_if_order_is_executed_for_too_large_amount_sell_order() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         order.partiallyFillable = true;
         executedAmount = order.sellAmount + 1;
@@ -129,7 +129,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_revert_if_order_is_executed_for_too_large_amount_sell_order_partially_filled() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         order.partiallyFillable = true;
 
@@ -151,7 +151,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     }
 
     function test_revert_if_order_is_executed_for_too_large_amount_buy_order() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
         order.partiallyFillable = true;
         executedAmount = order.buyAmount + 1;
