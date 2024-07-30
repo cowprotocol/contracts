@@ -60,9 +60,9 @@ abstract contract BaseComputeTradeExecutions is Helper {
         (GPv2Transfer.Data[] memory inTransfers, GPv2Transfer.Data[] memory outTransfers) =
             settlement.computeTradeExecutionsTest(encoded.tokens, encoded.clearingPrices, encoded.trades);
 
-        // TODO: this is required due some weirdness whereby if `settlement.computeTradeExecutionsTest` reverts,
-        // for some reason it continues executing here and results in a panic with an index out of bounds error.
-        if (inTransfers.length == 1 && outTransfers.length == 1) {
+        // As `vm.expectRevert` may be used prior to this function, `computeTradeExecutionsTest` may revert however
+        // execution within this function will still continue. This is a workaround to prevent the panic.
+        if (inTransfers.length != 0 && outTransfers.length != 0) {
             executedSellAmount = inTransfers[0].amount;
             executedBuyAmount = outTransfers[0].amount;
         }
