@@ -1,11 +1,10 @@
 import IERC20 from "@openzeppelin/contracts/build/contracts/IERC20.json";
 import { expect } from "chai";
 import { MockContract } from "ethereum-waffle";
-import { Contract, ContractReceipt } from "ethers";
+import { Contract } from "ethers";
 import { artifacts, ethers, waffle } from "hardhat";
 
 import {
-  Interaction,
   OrderBalance,
   OrderKind,
   PRE_SIGNED,
@@ -15,7 +14,6 @@ import {
   TypedDataDomain,
   computeOrderUid,
   domain,
-  normalizeInteractions,
   packOrderUidParams,
 } from "../src/ts";
 
@@ -445,162 +443,6 @@ describe("GPv2Settlement", () => {
       await expect(
         settlement.connect(solver).swap(...(await emptySwap())),
       ).to.be.revertedWith("SafeCast: not positive");
-    });
-  });
-
-  describe("executeInteractions", () => {
-    it("executes valid interactions", async () => {
-      const EventEmitter = await ethers.getContractFactory("EventEmitter");
-      const interactionParameters = [
-        {
-          target: await EventEmitter.deploy(),
-          value: ethers.utils.parseEther("0.42"),
-          number: 1,
-        },
-        {
-          target: await EventEmitter.deploy(),
-          value: ethers.utils.parseEther("0.1337"),
-          number: 2,
-        },
-        {
-          target: await EventEmitter.deploy(),
-          value: ethers.constants.Zero,
-          number: 3,
-        },
-      ];
-
-      const uniqueContractAddresses = new Set(
-        interactionParameters.map((params) => params.target.address),
-      );
-      expect(uniqueContractAddresses.size).to.equal(
-        interactionParameters.length,
-      );
-
-      const interactions = interactionParameters.map(
-        ({ target, value, number }) => ({
-          target: target.address,
-          value,
-          callData: target.interface.encodeFunctionData("emitEvent", [number]),
-        }),
-      );
-
-      // Note: make sure to send some Ether to the settlement contract so that
-      // it can execute the interactions with values.
-      await deployer.sendTransaction({
-        to: settlement.address,
-        value: ethers.utils.parseEther("1.0"),
-      });
-
-      const settled = settlement.executeInteractionsTest(interactions);
-      const { events }: ContractReceipt = await (await settled).wait();
-
-      // Note: all contracts were touched.
-      for (const { target } of interactionParameters) {
-        await expect(settled).to.emit(target, "Event");
-      }
-      await expect(settled).to.emit(settlement, "Interaction");
-
-      const emitterEvents = (events || []).filter(
-        ({ address }) => address !== settlement.address,
-      );
-      expect(emitterEvents.length).to.equal(interactionParameters.length);
-
-      // Note: the execution order was respected.
-      for (let i = 0; i < interactionParameters.length; i++) {
-        const params = interactionParameters[i];
-        const args = params.target.interface.decodeEventLog(
-          "Event",
-          emitterEvents[i].data,
-        );
-
-        expect(args.value).to.equal(params.value);
-        expect(args.number).to.equal(params.number);
-      }
-    });
-
-    it("reverts if any of the interactions reverts", async () => {
-      const mockPass = await waffle.deployMockContract(deployer, [
-        "function alwaysPasses()",
-      ]);
-      await mockPass.mock.alwaysPasses.returns();
-      const mockRevert = await waffle.deployMockContract(deployer, [
-        "function alwaysReverts()",
-      ]);
-      await mockRevert.mock.alwaysReverts.revertsWithReason("test error");
-
-      await expect(
-        settlement.executeInteractionsTest(
-          normalizeInteractions([
-            {
-              target: mockPass.address,
-              callData: mockPass.interface.encodeFunctionData("alwaysPasses"),
-            },
-            {
-              target: mockRevert.address,
-              callData:
-                mockRevert.interface.encodeFunctionData("alwaysReverts"),
-            },
-          ]),
-        ),
-      ).to.be.revertedWith("test error");
-    });
-
-    it("should revert when target is vaultRelayer", async () => {
-      const invalidInteraction: Interaction = {
-        target: await settlement.vaultRelayer(),
-        callData: [],
-        value: 0,
-      };
-
-      await expect(
-        settlement.executeInteractionsTest([invalidInteraction]),
-      ).to.be.revertedWith("GPv2: forbidden interaction");
-    });
-
-    it("reverts if the settlement contract does not have sufficient Ether balance", async () => {
-      const value = ethers.utils.parseEther("1000000.0");
-      expect(value.gt(await ethers.provider.getBalance(settlement.address))).to
-        .be.true;
-
-      await expect(
-        settlement.executeInteractionsTest(
-          normalizeInteractions([
-            {
-              target: ethers.constants.AddressZero,
-              value,
-            },
-          ]),
-        ),
-      ).to.be.reverted;
-    });
-
-    it("emits an Interaction event", async () => {
-      const contract = await waffle.deployMockContract(deployer, [
-        "function someFunction(bytes32 parameter)",
-      ]);
-
-      const value = ethers.utils.parseEther("1.0");
-      const parameter = `0x${"ff".repeat(32)}`;
-
-      await deployer.sendTransaction({ to: settlement.address, value });
-      await contract.mock.someFunction.withArgs(parameter).returns();
-
-      const tx = settlement.executeInteractionsTest([
-        {
-          target: contract.address,
-          value,
-          callData: contract.interface.encodeFunctionData("someFunction", [
-            parameter,
-          ]),
-        },
-      ]);
-      await expect(tx)
-        .to.emit(settlement, "Interaction")
-        .withArgs(
-          contract.address,
-          value,
-          contract.interface.getSighash("someFunction"),
-        );
     });
   });
 
