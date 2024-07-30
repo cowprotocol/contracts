@@ -8,7 +8,7 @@ contract OrderExecutedFees is BaseComputeTradeExecutions {
     using SettlementEncoder for SettlementEncoder.State;
 
     function test_should_add_full_fee_for_fill_or_kill_sell_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         order.feeAmount = 10 ether;
 
@@ -17,7 +17,7 @@ contract OrderExecutedFees is BaseComputeTradeExecutions {
     }
 
     function test_should_add_full_fee_for_fill_or_kill_buy_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
         order.feeAmount = 10 ether;
 
@@ -27,7 +27,7 @@ contract OrderExecutedFees is BaseComputeTradeExecutions {
     }
 
     function test_should_add_portion_of_fees_for_partially_filled_sell_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
         order.partiallyFillable = true;
         order.feeAmount = 10 ether;
@@ -39,7 +39,7 @@ contract OrderExecutedFees is BaseComputeTradeExecutions {
     }
 
     function test_should_add_portion_of_fees_for_partially_filled_buy_orders() public {
-        GPv2Order.Data memory order = partialOrder();
+        GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
         order.partiallyFillable = true;
         order.feeAmount = 10 ether;
