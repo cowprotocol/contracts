@@ -70,10 +70,8 @@ library SwapEncoder {
     }
 
     /// @dev Encode a swap step
-    function encodeSwapSteps(State storage state, Swap[] memory swap) internal {
-        for (uint256 i = 0; i < swap.length; i++) {
-            state.steps.push(toSwapStep(state, swap[i]));
-        }
+    function encodeSwapStep(State storage state, Swap memory swap) internal {
+        state.steps.push(toSwapStep(state, swap));
     }
 
     /// @dev Given an order, signature and limitAmount, encode a trade

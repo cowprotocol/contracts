@@ -48,8 +48,9 @@ abstract contract Helper is Test {
         allowList.initializeManager(owner);
         authenticator = allowList;
 
-        // Deploy the vault contract
-        vault = deployBalancerVault();
+        // Mock vault
+        vault = IVault(makeAddr("GPv2Settlement.Helper: vault"));
+        vm.mockCallRevert(address(vault), hex"", "unexpected call to mock vault");
 
         // Deploy the settlement contract
         settlement = new Harness(authenticator, vault);
@@ -70,17 +71,6 @@ abstract contract Helper is Test {
 
         // Create wallets
         trader = vm.createWallet("GPv2Settlement.Helper: trader");
-    }
-
-    function deployBalancerVault() private returns (IVault vault_) {
-        string memory path = string.concat(vm.projectRoot(), "/", "balancer/Vault.json");
-        string memory json = vm.readFile(path);
-        bytes memory bytecode = json.parseRaw(".bytecode");
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly ("memory-safe") {
-            vault_ := create(0, add(bytecode, 0x20), mload(bytecode))
-        }
     }
 
     function settle(SettlementEncoder.EncodedSettlement memory _settlement) internal {
