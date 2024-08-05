@@ -1,4 +1,3 @@
-import IERC20 from "@openzeppelin/contracts/build/contracts/IERC20.json";
 import { expect } from "chai";
 import { MockContract } from "ethereum-waffle";
 import { BigNumberish, Contract, ContractReceipt } from "ethers";
@@ -7,14 +6,11 @@ import { artifacts, ethers, waffle } from "hardhat";
 import {
   Interaction,
   Order,
-  OrderBalance,
   OrderFlags,
   OrderKind,
   PRE_SIGNED,
   SettlementEncoder,
   SigningScheme,
-  SwapEncoder,
-  SwapExecution,
   TradeExecution,
   TypedDataDomain,
   computeOrderUid,
@@ -25,12 +21,8 @@ import {
 
 import { ceilDiv } from "./testHelpers";
 
-function fillBytes(count: number, byte: number): string {
-  return ethers.utils.hexlify([...Array(count)].map(() => byte));
-}
-
 describe("GPv2Settlement", () => {
-  const [deployer, owner, solver, ...traders] = waffle.provider.getWallets();
+  const [deployer, owner, ...traders] = waffle.provider.getWallets();
 
   let authenticator: Contract;
   let vault: MockContract;
@@ -59,159 +51,6 @@ describe("GPv2Settlement", () => {
 
     const { chainId } = await ethers.provider.getNetwork();
     testDomain = domain(chainId, settlement.address);
-  });
-
-  describe("swap", () => {
-    let alwaysSuccessfulTokens: [Contract, Contract];
-
-    before(async () => {
-      alwaysSuccessfulTokens = [
-        await waffle.deployMockContract(deployer, IERC20.abi),
-        await waffle.deployMockContract(deployer, IERC20.abi),
-      ];
-      for (const token of alwaysSuccessfulTokens) {
-        await token.mock.transfer.returns(true);
-        await token.mock.transferFrom.returns(true);
-      }
-    });
-
-    describe("Swap Variants", () => {
-      const sellAmount = ethers.utils.parseEther("4.2");
-      const buyAmount = ethers.utils.parseEther("13.37");
-
-      for (const kind of [OrderKind.SELL, OrderKind.BUY]) {
-        const order = {
-          kind,
-          sellToken: fillBytes(20, 1),
-          buyToken: fillBytes(20, 2),
-          sellAmount,
-          buyAmount,
-          validTo: 0x01020304,
-          appData: 0,
-          feeAmount: ethers.utils.parseEther("1.0"),
-          sellTokenBalance: OrderBalance.INTERNAL,
-          partiallyFillable: true,
-        };
-        const orderUid = () =>
-          computeOrderUid(testDomain, order, traders[0].address);
-        const encodeSwap = (swapExecution?: Partial<SwapExecution>) =>
-          SwapEncoder.encodeSwap(
-            testDomain,
-            [],
-            order,
-            traders[0],
-            SigningScheme.ETHSIGN,
-            swapExecution,
-          );
-
-        it(`executes ${kind} order against swap`, async () => {
-          const [swaps, tokens, trade] = await encodeSwap();
-
-          await vault.mock.batchSwap.returns([sellAmount, buyAmount.mul(-1)]);
-          await vault.mock.manageUserBalance.returns();
-
-          await authenticator.connect(owner).addSolver(solver.address);
-          await expect(settlement.connect(solver).swap(swaps, tokens, trade)).to
-            .not.be.reverted;
-        });
-
-        it(`updates the filled amount to be the full ${kind} amount`, async () => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const filledAmount = (order as any)[`${kind}Amount`];
-
-          await vault.mock.batchSwap.returns([sellAmount, buyAmount.mul(-1)]);
-          await vault.mock.manageUserBalance.returns();
-
-          await authenticator.connect(owner).addSolver(solver.address);
-          await settlement.connect(solver).swap(...(await encodeSwap()));
-
-          expect(await settlement.filledAmount(orderUid())).to.equal(
-            filledAmount,
-          );
-        });
-
-        it(`reverts for cancelled ${kind} orders`, async () => {
-          await vault.mock.batchSwap.returns([0, 0]);
-          await vault.mock.manageUserBalance.returns();
-
-          await settlement.connect(traders[0]).invalidateOrder(orderUid());
-          await authenticator.connect(owner).addSolver(solver.address);
-          await expect(
-            settlement.connect(solver).swap(...(await encodeSwap())),
-          ).to.be.revertedWith("order filled");
-        });
-
-        it(`reverts for partially filled ${kind} orders`, async () => {
-          await vault.mock.batchSwap.returns([0, 0]);
-          await vault.mock.manageUserBalance.returns();
-
-          await settlement.setFilledAmount(orderUid(), 1);
-          await authenticator.connect(owner).addSolver(solver.address);
-          await expect(
-            settlement.connect(solver).swap(...(await encodeSwap())),
-          ).to.be.revertedWith("order filled");
-        });
-
-        it(`reverts when not exactly trading ${kind} amount`, async () => {
-          await vault.mock.batchSwap.returns([
-            sellAmount.sub(1),
-            buyAmount.add(1).mul(-1),
-          ]);
-          await vault.mock.manageUserBalance.returns();
-
-          await authenticator.connect(owner).addSolver(solver.address);
-          await expect(
-            settlement.connect(solver).swap(...(await encodeSwap())),
-          ).to.be.revertedWith(`${kind} amount not respected`);
-        });
-
-        it(`reverts when specified limit amount does not satisfy ${kind} price`, async () => {
-          const [swaps, tokens, trade] = await encodeSwap({
-            // Specify a swap limit amount that is slightly worse than the
-            // order's limit price.
-            limitAmount:
-              kind == OrderKind.SELL
-                ? order.buyAmount.sub(1) // receive slightly less buy token
-                : order.sellAmount.add(1), // pay slightly more sell token
-          });
-
-          await vault.mock.batchSwap.returns([sellAmount, buyAmount.mul(-1)]);
-          await vault.mock.manageUserBalance.returns();
-
-          await authenticator.connect(owner).addSolver(solver.address);
-          await expect(
-            settlement.connect(solver).swap(swaps, tokens, trade),
-          ).to.be.revertedWith(
-            kind == OrderKind.SELL ? "limit too low" : "limit too high",
-          );
-        });
-
-        it(`emits a ${kind} trade event`, async () => {
-          const [executedSellAmount, executedBuyAmount] =
-            kind == OrderKind.SELL
-              ? [order.sellAmount, order.buyAmount.mul(2)]
-              : [order.sellAmount.div(2), order.buyAmount];
-          await vault.mock.batchSwap.returns([
-            executedSellAmount,
-            executedBuyAmount.mul(-1),
-          ]);
-          await vault.mock.manageUserBalance.returns();
-
-          await authenticator.connect(owner).addSolver(solver.address);
-          await expect(settlement.connect(solver).swap(...(await encodeSwap())))
-            .to.emit(settlement, "Trade")
-            .withArgs(
-              traders[0].address,
-              order.sellToken,
-              order.buyToken,
-              executedSellAmount,
-              executedBuyAmount,
-              order.feeAmount,
-              orderUid(),
-            );
-        });
-      }
-    });
   });
 
   describe("computeTradeExecutions", () => {
