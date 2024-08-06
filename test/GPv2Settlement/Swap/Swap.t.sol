@@ -14,8 +14,8 @@ contract Swap is Helper {
 
     IERC20 private alwaysSuccessfulToken1 = IERC20(makeAddr("GPv2Settlement.Swap always successful token 1"));
     IERC20 private alwaysSuccessfulToken2 = IERC20(makeAddr("GPv2Settlement.Swap always successful token 2"));
-    Vm.Wallet private trader1 = vm.createWallet("GPv2Settlement.Swap: trader");
-    Vm.Wallet private trader2 = vm.createWallet("GPv2Settlement.Swap: trader");
+    Vm.Wallet private trader1 = vm.createWallet("GPv2Settlement.Swap: trader1");
+    Vm.Wallet private trader2 = vm.createWallet("GPv2Settlement.Swap: trader2");
 
     function emptySwap() private returns (SwapEncoder.EncodedSwap memory) {
         GPv2Order.Data memory order = Order.emptySell();
