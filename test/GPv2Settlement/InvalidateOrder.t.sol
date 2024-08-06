@@ -5,7 +5,6 @@ import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 
 import {GPv2Settlement, Helper} from "./Helper.sol";
 
-//solhint-disable func-name-mixedcase
 contract InvalidateOrder is Helper {
     using GPv2Order for bytes;
 
@@ -37,10 +36,11 @@ contract InvalidateOrder is Helper {
 
     function test_reverts_when_invalidating_an_order_that_does_not_belong_to_the_caller() public {
         bytes32 orderDigest = keccak256("some order");
+        address notTrader = makeAddr("InvalidateOrder: not-trader");
         uint32 validTo = type(uint32).max;
 
         bytes memory orderUid = new bytes(GPv2Order.UID_LENGTH);
-        orderUid.packOrderUidParams(orderDigest, makeAddr("not-trader"), validTo);
+        orderUid.packOrderUidParams(orderDigest, notTrader, validTo);
 
         vm.expectRevert("GPv2: caller does not own order");
         settlement.invalidateOrder(orderUid);

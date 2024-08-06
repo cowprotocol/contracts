@@ -54,16 +54,22 @@ contract TransferToAccounts is Helper {
     }
 
     function test_should_transfer_many_external_and_internal_amounts_to_recipient() public {
+        // We generate a large number of transfers and see that they are all
+        // processed as expected. There are three code branches that need to be
+        // considered: the two supported balance locations ERC20 and INTERNAL,
+        // as well as transfers involving native ETH. We alternate in this order
+        // the code paths when generating each trade.
+        uint256 numCodeBranches = 3;
         uint256 numTraders = 42;
         GPv2Transfer.Data[] memory transfers = new GPv2Transfer.Data[](numTraders);
         IVault.UserBalanceOp[] memory expectedVaultOps =
-            new IVault.UserBalanceOp[](numTraders / 3 + ((numTraders % 3 == 1) ? 1 : 0));
-        TraderWithBalance[] memory ethTraderStartingBalance = new TraderWithBalance[](numTraders / 3);
+            new IVault.UserBalanceOp[](numTraders / numCodeBranches + ((numTraders % numCodeBranches == 1) ? 1 : 0));
+        TraderWithBalance[] memory ethTraderStartingBalance = new TraderWithBalance[](numTraders / numCodeBranches);
         uint256 erc20OpCount = 0;
         for (uint256 i = 0; i < numTraders; i++) {
-            bool isExternal = i % 3 == 0;
-            bool isInternal = i % 3 == 1;
-            bool isEth = i % 3 == 2;
+            bool isErc20 = i % numCodeBranches == 0;
+            bool isInternal = i % numCodeBranches == 1;
+            bool isEth = i % numCodeBranches == 2;
             address payable traderi = payable(makeAddr(string.concat("trader ", vm.toString(i))));
             transfers[i] = GPv2Transfer.Data({
                 account: traderi,
@@ -71,11 +77,11 @@ contract TransferToAccounts is Helper {
                 amount: amount,
                 balance: isInternal ? GPv2Order.BALANCE_INTERNAL : GPv2Order.BALANCE_ERC20
             });
-            if (isExternal) {
+            if (isErc20) {
                 erc20OpCount += 1;
                 vm.mockCall(address(token), abi.encodeCall(IERC20.transfer, (traderi, amount)), abi.encode(true));
             } else if (isInternal) {
-                expectedVaultOps[i / 3] = IVault.UserBalanceOp({
+                expectedVaultOps[i / numCodeBranches] = IVault.UserBalanceOp({
                     kind: IVault.UserBalanceOpKind.DEPOSIT_INTERNAL,
                     asset: token,
                     amount: amount,
@@ -83,7 +89,9 @@ contract TransferToAccounts is Helper {
                     recipient: traderi
                 });
             } else {
-                ethTraderStartingBalance[i / 3] = TraderWithBalance({trader: traderi, balance: traderi.balance});
+                assert(isEth);
+                ethTraderStartingBalance[i / numCodeBranches] =
+                    TraderWithBalance({trader: traderi, balance: traderi.balance});
             }
         }
 

@@ -1,13 +1,7 @@
 import IERC20 from "@openzeppelin/contracts/build/contracts/IERC20.json";
 import { expect } from "chai";
 import { MockContract } from "ethereum-waffle";
-import {
-  BigNumber,
-  BigNumberish,
-  Contract,
-  ContractReceipt,
-  Event,
-} from "ethers";
+import { BigNumberish, Contract, ContractReceipt } from "ethers";
 import { artifacts, ethers, waffle } from "hardhat";
 
 import {
@@ -34,13 +28,6 @@ import { ceilDiv } from "./testHelpers";
 
 function fillBytes(count: number, byte: number): string {
   return ethers.utils.hexlify([...Array(count)].map(() => byte));
-}
-
-function toNumberLossy(value: BigNumber): number {
-  // NOTE: BigNumber throws an exception when if is outside the range of
-  // representable integers for JavaScript's double precision floating point
-  // numbers. For some tests, that is OK, so perform a lossy conversion.
-  return parseInt(value.toString());
 }
 
 describe("GPv2Settlement", () => {
@@ -483,118 +470,6 @@ describe("GPv2Settlement", () => {
       feeAmount: ethers.constants.Zero,
     };
 
-    it("should compute in/out transfers for multiple trades", async () => {
-      const tradeCount = 10;
-      const encoder = new SettlementEncoder(testDomain);
-      for (let i = 0; i < tradeCount; i++) {
-        await encoder.signEncodeTrade(
-          {
-            ...partialOrder,
-            kind: OrderKind.BUY,
-            partiallyFillable: true,
-          },
-          traders[0],
-          SigningScheme.EIP712,
-          { executedAmount: ethers.utils.parseEther("0.7734") },
-        );
-      }
-
-      const { inTransfers, outTransfers } =
-        await settlement.callStatic.computeTradeExecutionsTest(
-          encoder.tokens,
-          encoder.clearingPrices(prices),
-          encoder.trades,
-        );
-      expect(inTransfers.length).to.equal(tradeCount);
-      expect(outTransfers.length).to.equal(tradeCount);
-    });
-
-    it("should revert if the order expired", async () => {
-      const { timestamp } = await ethers.provider.getBlock("latest");
-      const encoder = new SettlementEncoder(testDomain);
-      await encoder.signEncodeTrade(
-        {
-          ...partialOrder,
-          validTo: timestamp - 1,
-          kind: OrderKind.SELL,
-          partiallyFillable: false,
-        },
-        traders[0],
-        SigningScheme.EIP712,
-      );
-
-      await expect(
-        settlement.computeTradeExecutionsTest(
-          encoder.tokens,
-          encoder.clearingPrices(prices),
-          encoder.trades,
-        ),
-      ).to.be.revertedWith("order expired");
-    });
-
-    it("should revert if the limit price is not respected", async () => {
-      const sellAmount = ethers.utils.parseEther("100.0");
-      const sellPrice = 1;
-      const buyAmount = ethers.utils.parseEther("1.0");
-      const buyPrice = 1000;
-
-      const encoder = new SettlementEncoder(testDomain);
-      await encoder.signEncodeTrade(
-        {
-          ...partialOrder,
-          sellAmount,
-          buyAmount,
-          kind: OrderKind.SELL,
-          partiallyFillable: false,
-        },
-        traders[0],
-        SigningScheme.EIP712,
-      );
-
-      expect(toNumberLossy(sellAmount.mul(sellPrice))).not.to.be.gte(
-        toNumberLossy(buyAmount.mul(buyPrice)),
-      );
-      await expect(
-        settlement.callStatic.computeTradeExecutionsTest(
-          encoder.tokens,
-          encoder.clearingPrices({
-            [sellToken]: sellPrice,
-            [buyToken]: buyPrice,
-          }),
-          encoder.trades,
-        ),
-      ).to.be.revertedWith("limit price not respected");
-    });
-
-    it("should not revert if the clearing price is exactly at the limit price", async () => {
-      const encoder = new SettlementEncoder(testDomain);
-      await encoder.signEncodeTrade(
-        {
-          ...partialOrder,
-          kind: OrderKind.SELL,
-          partiallyFillable: false,
-        },
-        traders[0],
-        SigningScheme.EIP712,
-      );
-
-      const { sellAmount, buyAmount } = partialOrder;
-      const executions = settlement.callStatic.computeTradeExecutionsTest(
-        encoder.tokens,
-        encoder.clearingPrices({
-          [sellToken]: buyAmount,
-          [buyToken]: sellAmount,
-        }),
-        encoder.trades,
-      );
-      await expect(executions).to.not.be.reverted;
-
-      const {
-        outTransfers: [{ amount: executedBuyAmount }],
-      } = await executions;
-      expect(executedBuyAmount).to.deep.equal(buyAmount);
-    });
-
     describe("Order Executed Amounts", () => {
       const { sellAmount, buyAmount } = partialOrder;
       const executedAmount = ethers.utils.parseEther("10.0");
@@ -1031,87 +906,6 @@ describe("GPv2Settlement", () => {
 
         expect(filledAmount).to.deep.equal(executedBuyAmount);
       });
-    });
-
-    it("should ignore the executed trade amount for fill-or-kill orders", async () => {
-      const order = {
-        ...partialOrder,
-        kind: OrderKind.BUY,
-        partiallyFillable: false,
-      };
-
-      const encoder = new SettlementEncoder(testDomain);
-      await encoder.signEncodeTrade(
-        { ...order, appData: 0 },
-        traders[0],
-        SigningScheme.EIP712,
-      );
-      await encoder.signEncodeTrade(
-        { ...order, appData: 1 },
-        traders[0],
-        SigningScheme.EIP712,
-        { executedAmount: ethers.utils.parseEther("1.0") },
-      );
-
-      const {
-        inTransfers: [
-          { amount: executedSellAmount0 },
-          { amount: executedSellAmount1 },
-        ],
-      } = await settlement.callStatic.computeTradeExecutionsTest(
-        encoder.tokens,
-        encoder.clearingPrices(prices),
-        encoder.trades,
-      );
-
-      expect(executedSellAmount0).to.deep.equal(executedSellAmount1);
-    });
-
-    it("should emit a trade event", async () => {
-      const order = {
-        ...partialOrder,
-        kind: OrderKind.SELL,
-        partiallyFillable: false,
-      };
-
-      const encoder = new SettlementEncoder(testDomain);
-      await encoder.signEncodeTrade(order, traders[0], SigningScheme.EIP712);
-
-      const executedSellAmount = order.sellAmount.add(order.feeAmount);
-      const executedBuyAmount = order.sellAmount
-        .mul(prices[sellToken])
-        .div(prices[buyToken]);
-
-      const tx = settlement.computeTradeExecutionsTest(
-        encoder.tokens,
-        encoder.clearingPrices(prices),
-        encoder.trades,
-      );
-      await expect(tx)
-        .to.emit(settlement, "Trade")
-        .withArgs(
-          traders[0].address,
-          order.sellToken,
-          order.buyToken,
-          executedSellAmount,
-          executedBuyAmount,
-          order.feeAmount,
-          computeOrderUid(testDomain, order, traders[0].address),
-        );
-
-      const { events } = await (await tx).wait();
-      const tradeEvents = events.filter(
-        ({ event }: Event) => event === "Trade",
-      );
-      expect(tradeEvents.length).to.equal(1);
-    });
-  });
-
-  describe("computeTradeExecution", () => {
-    it("should not allocate additional memory", async () => {
-      expect(
-        await settlement.callStatic.computeTradeExecutionMemoryTest(),
-      ).to.deep.equal(ethers.constants.Zero);
     });
   });
 
