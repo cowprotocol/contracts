@@ -57,14 +57,14 @@ jobs:
         run: |
           forge --version
           if [ "${{ matrix.profile }}" == "solc-0.7.6" ]; then
-            forge build --sizes --use 0.7.6 --skip 'test/*' --skip 'script/*'
+            FOUNDRY_PROFILE=ci forge build --sizes --use 0.7.6 --skip 'test/*' --skip 'script/*'
           else
-            forge build --sizes
+            FOUNDRY_PROFILE=ci forge build --sizes
           fi
         id: build
 
       - name: Run Forge tests
         if: matrix.profile != 'solc-0.7.6'
         run: |
-          forge test -vvv
+          FOUNDRY_PROFILE=ci forge test -vvv
         id: test
