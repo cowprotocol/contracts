@@ -62,7 +62,7 @@ abstract contract BaseComputeTradeExecutions is Helper {
 
         // As `vm.expectRevert` may be used prior to this function, `computeTradeExecutionsTest` may revert however
         // execution within this function will still continue. This is a workaround to prevent the panic.
-        if (inTransfers.length != 0 && outTransfers.length != 0) {
+        if (inTransfers.length != 0 || outTransfers.length != 0) {
             executedSellAmount = inTransfers[0].amount;
             executedBuyAmount = outTransfers[0].amount;
         }
