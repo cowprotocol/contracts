@@ -12,6 +12,7 @@ contract OrderFilledAmounts is BaseComputeTradeExecutions {
     function test_should_fill_full_sell_amount_for_fill_or_kill_sell_orders() public {
         GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
+        order.partiallyFillable = false;
         computeSettlementForOrder(order);
 
         bytes memory orderUid = order.computeOrderUid(domainSeparator, trader.addr);
@@ -21,6 +22,7 @@ contract OrderFilledAmounts is BaseComputeTradeExecutions {
     function test_should_fill_full_buy_amount_for_fill_or_kill_buy_orders() public {
         GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
+        order.partiallyFillable = false;
         computeSettlementForOrder(order);
 
         bytes memory orderUid = order.computeOrderUid(domainSeparator, trader.addr);
