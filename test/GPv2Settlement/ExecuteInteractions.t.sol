@@ -70,12 +70,15 @@ contract ExecuteInteractions is Helper {
         settlement.executeInteractionsTest(interactions);
     }
 
-    function test_reverts_if_settlement_contract_does_not_have_sufficient_Ether() public view {
+    function test_reverts_if_settlement_contract_does_not_have_sufficient_Ether() public {
         uint256 value = 1_000_000 ether;
         assertGt(value, address(settlement).balance, "incorrect test setup");
 
         GPv2Interaction.Data[] memory interactions = new GPv2Interaction.Data[](1);
         interactions[0] = GPv2Interaction.Data({target: address(0), value: value, callData: hex""});
+
+        vm.expectRevert();
+        settlement.executeInteractionsTest(interactions);
     }
 
     function test_emits_an_interaction_event() public {
