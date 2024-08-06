@@ -10,6 +10,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     function test_should_compute_amounts_for_fill_or_kill_sell_orders() public {
         GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
+        order.partiallyFillable = false;
 
         (uint256 executedSellAmount, uint256 executedBuyAmount) = computeSettlementForOrder(order);
 
@@ -20,6 +21,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     function test_should_respect_limit_price_for_fill_or_kill_sell_order() public {
         GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_SELL;
+        order.partiallyFillable = false;
 
         (, uint256 executedBuyAmount) = computeSettlementForOrder(order);
         assertGt(executedBuyAmount, order.buyAmount);
@@ -28,6 +30,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     function test_should_compute_amounts_for_fill_or_kill_buy_orders() public {
         GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
+        order.partiallyFillable = false;
 
         (uint256 executedSellAmount, uint256 executedBuyAmount) = computeSettlementForOrder(order);
 
@@ -38,6 +41,7 @@ contract OrderExecutedAmounts is BaseComputeTradeExecutions {
     function test_should_respect_limit_price_for_fill_or_kill_buy_order() public {
         GPv2Order.Data memory order = defaultOrder();
         order.kind = GPv2Order.KIND_BUY;
+        order.partiallyFillable = false;
 
         (uint256 executedSellAmount,) = computeSettlementForOrder(order);
         assertLt(executedSellAmount, order.sellAmount);
