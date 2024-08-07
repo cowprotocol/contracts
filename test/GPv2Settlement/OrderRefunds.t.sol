@@ -10,7 +10,7 @@ enum FreeFunctionVariant {
 }
 
 abstract contract Variant is Helper {
-    FreeFunctionVariant internal freeFn;
+    FreeFunctionVariant internal immutable freeFn;
 
     constructor(FreeFunctionVariant _freeFn) {
         freeFn = _freeFn;
@@ -51,10 +51,8 @@ abstract contract Variant is Helper {
     }
 
     function test_should_revert_if_the_encoded_order_uid_are_malformed() public {
-        bytes memory orderUidLt =
-            hex"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-        bytes memory orderUidGt =
-            hex"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+        bytes memory orderUidLt = new bytes(GPv2Order.UID_LENGTH - 1);
+        bytes memory orderUidGt = new bytes(GPv2Order.UID_LENGTH + 1);
 
         checkInvalidLength(orderUidLt);
         checkInvalidLength(orderUidGt);
