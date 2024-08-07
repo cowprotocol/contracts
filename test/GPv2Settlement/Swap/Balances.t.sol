@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8;
 
-import {Vm} from "forge-std/Test.sol";
-
 import {GPv2Order, GPv2Signing, IERC20, IVault} from "src/contracts/GPv2Settlement.sol";
 
 import {Helper} from "../Helper.sol";
@@ -11,32 +9,31 @@ import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
 contract Balances is Helper {
     using SwapEncoder for SwapEncoder.State;
 
-    function test_performs_a_swap_from_erc20_to_erc20_balance_when_specified() public {
+    function test_performs_a_swap_to_sell_erc20_from_buy_erc20_when_specified() public {
         performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_ERC20);
     }
 
-    function test_performs_a_swap_from_internal_to_erc20_balance_when_specified() public {
-        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_INTERNAL, GPv2Order.BALANCE_ERC20);
-    }
-
-    function test_performs_a_swap_from_erc20_to_external_balance_when_specified() public {
-        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_EXTERNAL);
-    }
-
-    function test_performs_a_swap_from_internal_to_external_balance_when_specified() public {
-        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_INTERNAL, GPv2Order.BALANCE_EXTERNAL);
-    }
-
-    function test_performs_a_swap_from_erc20_to_internal_balance_when_specified() public {
+    function test_performs_a_swap_to_sell_erc20_from_buy_internal_when_specified() public {
         performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_INTERNAL);
     }
 
-    function test_performs_a_swap_from_internal_to_internal_balance_when_specified() public {
+    function test_performs_a_swap_to_sell_external_from_buy_erc20_when_specified() public {
+        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_EXTERNAL, GPv2Order.BALANCE_ERC20);
+    }
+
+    function test_performs_a_swap_to_sell_external_from_buy_internal_when_specified() public {
+        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_EXTERNAL, GPv2Order.BALANCE_INTERNAL);
+    }
+
+    function test_performs_a_swap_to_sell_internal_from_buy_erc20_when_specified() public {
+        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_INTERNAL, GPv2Order.BALANCE_ERC20);
+    }
+
+    function test_performs_a_swap_to_sell_internal_from_buy_internal_when_specified() public {
         performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_INTERNAL, GPv2Order.BALANCE_INTERNAL);
     }
 
-    function performs_a_swap_with_the_specified_balances(bytes32 buyTokenBalance, bytes32 sellTokenBalance) private {
-        Vm.Wallet memory trader = vm.createWallet("trader");
+    function performs_a_swap_with_the_specified_balances(bytes32 sellTokenBalance, bytes32 buyTokenBalance) private {
         address payable receiver = payable(makeAddr("receiver"));
         IERC20 sellToken = IERC20(makeAddr("sell token"));
         IERC20 buyToken = IERC20(makeAddr("buy token"));
