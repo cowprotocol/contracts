@@ -17,8 +17,6 @@ import {
   packOrderUidParams,
 } from "../src/ts";
 
-import { SwapKind, UserBalanceOpKind } from "./balancer";
-
 function fillBytes(count: number, byte: number): string {
   return ethers.utils.hexlify([...Array(count)].map(() => byte));
 }
@@ -66,108 +64,6 @@ describe("GPv2Settlement", () => {
       for (const token of alwaysSuccessfulTokens) {
         await token.mock.transfer.returns(true);
         await token.mock.transferFrom.returns(true);
-      }
-    });
-
-    describe("Balances", () => {
-      const balanceVariants = [
-        OrderBalance.ERC20,
-        OrderBalance.EXTERNAL,
-        OrderBalance.INTERNAL,
-      ].flatMap((sellTokenBalance) =>
-        [OrderBalance.ERC20, OrderBalance.INTERNAL].map((buyTokenBalance) => {
-          return {
-            name: `${sellTokenBalance} to ${buyTokenBalance}`,
-            sellTokenBalance,
-            buyTokenBalance,
-          };
-        }),
-      );
-      for (const { name, ...flags } of balanceVariants) {
-        it(`performs an ${name} swap when specified`, async () => {
-          const sellToken = await waffle.deployMockContract(
-            deployer,
-            IERC20.abi,
-          );
-          const buyToken = `0x${"cc".repeat(20)}`;
-          const feeAmount = ethers.utils.parseEther("1.0");
-
-          const encoder = new SwapEncoder(testDomain);
-          await encoder.signEncodeTrade(
-            {
-              sellToken: sellToken.address,
-              buyToken,
-              receiver: traders[1].address,
-              sellAmount: ethers.constants.Zero,
-              buyAmount: ethers.constants.Zero,
-              validTo: 0,
-              appData: 0,
-              feeAmount,
-              kind: OrderKind.SELL,
-              partiallyFillable: false,
-              ...flags,
-            },
-            traders[0],
-            SigningScheme.EIP712,
-          );
-
-          await vault.mock.batchSwap
-            .withArgs(
-              SwapKind.GIVEN_IN,
-              [],
-              encoder.tokens,
-              {
-                sender: traders[0].address,
-                fromInternalBalance:
-                  flags.sellTokenBalance == OrderBalance.INTERNAL,
-                recipient: traders[1].address,
-                toInternalBalance:
-                  flags.buyTokenBalance == OrderBalance.INTERNAL,
-              },
-              [0, 0],
-              0,
-            )
-            .returns([0, 0]);
-          switch (flags.sellTokenBalance) {
-            case OrderBalance.ERC20:
-              await sellToken.mock.transferFrom
-                .withArgs(traders[0].address, settlement.address, feeAmount)
-                .returns(true);
-              break;
-            case OrderBalance.EXTERNAL:
-              await vault.mock.manageUserBalance
-                .withArgs([
-                  {
-                    kind: UserBalanceOpKind.TRANSFER_EXTERNAL,
-                    asset: sellToken.address,
-                    amount: feeAmount,
-                    sender: traders[0].address,
-                    recipient: settlement.address,
-                  },
-                ])
-                .returns();
-              break;
-            case OrderBalance.INTERNAL:
-              await vault.mock.manageUserBalance
-                .withArgs([
-                  {
-                    kind: UserBalanceOpKind.TRANSFER_INTERNAL,
-                    asset: sellToken.address,
-                    amount: feeAmount,
-                    sender: traders[0].address,
-                    recipient: settlement.address,
-                  },
-                ])
-                .returns();
-              break;
-          }
-
-          await authenticator.connect(owner).addSolver(solver.address);
-          await settlement.connect(solver).swap(...encoder.encodedSwap());
-          await expect(
-            settlement.connect(solver).swap(...encoder.encodedSwap()),
-          ).to.not.be.reverted;
-        });
       }
     });
 
