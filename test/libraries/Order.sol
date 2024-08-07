@@ -35,9 +35,13 @@ library Order {
     }
 
     function ALL_FLAGS() internal pure returns (Flags[] memory out) {
-        uint256 numBools = 2;
+        uint256 numBools = 1;
+        uint256 boolLength = 2;
+        // "out" has as many entries as there are distinct options to fill the
+        // `Flags` struct.
         out = new Flags[](
-            ALL_KINDS().length * ALL_SELL_TOKEN_BALANCES().length * ALL_BUY_TOKEN_BALANCES().length * numBools
+            ALL_KINDS().length * ALL_SELL_TOKEN_BALANCES().length * ALL_BUY_TOKEN_BALANCES().length
+                * (boolLength * numBools)
         );
         uint256 offset = 0;
         for (uint256 kindI = 0; kindI < ALL_KINDS().length; kindI++) {
