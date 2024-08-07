@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8;
 
-import {Vm} from "forge-std/Test.sol";
-
 import {GPv2Order, GPv2Signing, IERC20, IVault} from "src/contracts/GPv2Settlement.sol";
 
 import {Helper} from "../Helper.sol";
@@ -36,7 +34,6 @@ contract Balances is Helper {
     }
 
     function performs_a_swap_with_the_specified_balances(bytes32 sellTokenBalance, bytes32 buyTokenBalance) private {
-        Vm.Wallet memory trader = vm.createWallet("trader");
         address payable receiver = payable(makeAddr("receiver"));
         IERC20 sellToken = IERC20(makeAddr("sell token"));
         IERC20 buyToken = IERC20(makeAddr("buy token"));
