@@ -50,10 +50,10 @@ contract Order is Helper {
                 buyTokenBalance: flags[i].buyTokenBalance
             });
 
-            bytes32 orderSignignHash = executor.hashTest(order, domainSeparator);
-            assertEq(orderSignignHash, order.toEip812SignedStruct().typedDataHash(domainSeparator));
-            require(!seen[orderSignignHash], "different flags led to the same hash");
-            seen[orderSignignHash] = true;
+            bytes32 orderSigningHash = executor.hashTest(order, domainSeparator);
+            assertEq(orderSigningHash, order.toEip712SignedStruct().typedDataHash(domainSeparator));
+            require(!seen[orderSigningHash], "different flags led to the same hash");
+            seen[orderSigningHash] = true;
         }
     }
 }

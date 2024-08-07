@@ -79,7 +79,7 @@ library Eip712 {
         }
     }
 
-    function toEip812SignedStruct(GPv2Order.Data memory order) internal pure returns (Order memory) {
+    function toEip712SignedStruct(GPv2Order.Data memory order) internal pure returns (Order memory) {
         return Order({
             sellToken: address(order.sellToken),
             buyToken: address(order.buyToken),
