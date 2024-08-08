@@ -42,23 +42,7 @@ contract ExtractOrder is Helper {
     }
 
     function assertSameOrder(GPv2Order.Data memory lhs, GPv2Order.Data memory rhs) private pure {
-        uint256 assertionCount = 12;
-        assertEq(address(lhs.sellToken), address(rhs.sellToken));
-        assertEq(address(lhs.buyToken), address(rhs.buyToken));
-        assertEq(lhs.receiver, rhs.receiver);
-        assertEq(lhs.sellAmount, rhs.sellAmount);
-        assertEq(lhs.buyAmount, rhs.buyAmount);
-        assertEq(lhs.validTo, rhs.validTo);
-        assertEq(lhs.appData, rhs.appData);
-        assertEq(lhs.feeAmount, rhs.feeAmount);
-        assertEq(lhs.kind, rhs.kind);
-        assertEq(lhs.partiallyFillable, rhs.partiallyFillable);
-        assertEq(lhs.sellTokenBalance, rhs.sellTokenBalance);
-        assertEq(lhs.buyTokenBalance, rhs.buyTokenBalance);
-        // We want to make sure that if we add new fields to `GPv2Order.Data` we
-        // don't forget to add the corresponding assertion.
-        // This only works because all fields are _not_ of dynamic length.
-        require(abi.encode(lhs).length == assertionCount * 32, "bad test setup when comparing two orders");
+        assertEq(abi.encode(lhs), abi.encode(rhs));
     }
 
     function testFuzz_should_round_trip_encode_order_data(Fuzzed memory fuzzed) public {
