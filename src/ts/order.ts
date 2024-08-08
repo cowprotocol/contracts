@@ -164,15 +164,6 @@ export const ORDER_TYPE_FIELDS = [
 ];
 
 /**
- * The EIP-712 type hash for a Gnosis Protocol v2 order.
- */
-export const ORDER_TYPE_HASH = ethers.utils.id(
-  `Order(${ORDER_TYPE_FIELDS.map(({ name, type }) => `${type} ${name}`).join(
-    ",",
-  )})`,
-);
-
-/**
  * Normalizes a timestamp value to a Unix timestamp.
  * @param time The timestamp value to normalize.
  * @return Unix timestamp or number of seconds since the Unix Epoch.

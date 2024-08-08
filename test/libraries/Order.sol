@@ -17,6 +17,63 @@ library Order {
         bool partiallyFillable;
     }
 
+    // I wish I could declare the following as constants and export them as part
+    // of the library. However, "Only constants of value type and byte array
+    // type are implemented." and "Library cannot have non-constant state
+    // variables". So I'm left with defining them as functions.
+
+    function ALL_KINDS() internal pure returns (bytes32[2] memory) {
+        return [GPv2Order.KIND_SELL, GPv2Order.KIND_BUY];
+    }
+
+    function ALL_SELL_TOKEN_BALANCES() internal pure returns (bytes32[3] memory) {
+        return [GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_EXTERNAL, GPv2Order.BALANCE_INTERNAL];
+    }
+
+    function ALL_BUY_TOKEN_BALANCES() internal pure returns (bytes32[2] memory) {
+        return [GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_INTERNAL];
+    }
+
+    function ALL_FLAGS() internal pure returns (Flags[] memory out) {
+        uint256 numBools = 1;
+        uint256 boolLength = 2;
+        // "out" has as many entries as there are distinct options to fill the
+        // `Flags` struct.
+        out = new Flags[](
+            ALL_KINDS().length * ALL_SELL_TOKEN_BALANCES().length * ALL_BUY_TOKEN_BALANCES().length
+                * (boolLength * numBools)
+        );
+        uint256 offset = 0;
+        for (uint256 kindI = 0; kindI < ALL_KINDS().length; kindI++) {
+            for (
+                uint256 sellTokenBalanceI = 0; sellTokenBalanceI < ALL_SELL_TOKEN_BALANCES().length; sellTokenBalanceI++
+            ) {
+                for (
+                    uint256 buyTokenBalanceI = 0; buyTokenBalanceI < ALL_BUY_TOKEN_BALANCES().length; buyTokenBalanceI++
+                ) {
+                    bytes32 kind = ALL_KINDS()[kindI];
+                    bytes32 sellTokenBalance = ALL_SELL_TOKEN_BALANCES()[sellTokenBalanceI];
+                    bytes32 buyTokenBalance = ALL_BUY_TOKEN_BALANCES()[buyTokenBalanceI];
+                    out[offset] = Flags({
+                        kind: kind,
+                        sellTokenBalance: sellTokenBalance,
+                        buyTokenBalance: buyTokenBalance,
+                        partiallyFillable: false
+                    });
+                    out[offset + 1] = Flags({
+                        kind: kind,
+                        sellTokenBalance: sellTokenBalance,
+                        buyTokenBalance: buyTokenBalance,
+                        partiallyFillable: true
+                    });
+                    offset += 2;
+                }
+            }
+        }
+        // Sanity check: we filled all array slots.
+        require(offset == out.length, "undefined entries in flag array");
+    }
+
     /// @dev Return an empty sell order
     function emptySell() internal pure returns (GPv2Order.Data memory order) {
         order.sellToken = IERC20(address(0));

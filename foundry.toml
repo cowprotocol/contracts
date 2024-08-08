@@ -24,3 +24,6 @@ ignore = [
   # migration to Foundry is concluded.
   "src/contracts/**/*"
 ]
+
+[profile.ci]
+fuzz.seed = '0'
