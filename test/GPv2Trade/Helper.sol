@@ -3,13 +3,18 @@ pragma solidity ^0.8;
 
 import {Test, Vm} from "forge-std/Test.sol";
 
-import {GPv2Signing, GPv2Trade, Order, Trade} from "test/libraries/Trade.sol";
+import {GPv2Order, GPv2Signing, GPv2Trade, IERC20, Order, Trade} from "test/libraries/Trade.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
-import {GPv2TradeTestInterface} from "test/src/GPv2TradeTestInterface.sol";
 
-// TODO: move the content of `GPv2TradeTestInterface` here once all tests have been removed.
-// solhint-disable-next-line no-empty-blocks
-contract Harness is GPv2TradeTestInterface {
+contract Harness {
+    function extractOrderTest(IERC20[] calldata tokens, GPv2Trade.Data calldata trade)
+        external
+        pure
+        returns (GPv2Order.Data memory order)
+    {
+        GPv2Trade.extractOrder(trade, tokens, order);
+    }
+
     function extractFlagsStructuredTest(uint256 flags) external pure returns (Trade.Flags memory) {
         (
             bytes32 kind,
