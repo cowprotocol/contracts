@@ -99,9 +99,3 @@ export function decodeOrder(order: AbiOrder): Order {
     buyTokenBalance: decodeOrderBalance(order[11]),
   };
 }
-
-export const OrderBalanceId = {
-  ERC20: ethers.utils.id(OrderBalance.ERC20),
-  EXTERNAL: ethers.utils.id(OrderBalance.EXTERNAL),
-  INTERNAL: ethers.utils.id(OrderBalance.INTERNAL),
-};
