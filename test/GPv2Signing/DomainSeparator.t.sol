@@ -5,7 +5,6 @@ import {Helper} from "./Helper.sol";
 
 import {Harness, Helper} from "./Helper.sol";
 import {Eip712} from "test/libraries/Eip712.sol";
-import {Order as OrderLib} from "test/libraries/Order.sol";
 
 contract DomainSeparator is Helper {
     function test_TYPE_HASH_matches_the_EIP_712_order_type_hash() public view {
