@@ -39,7 +39,8 @@ contract SetPreSignature is Helper {
     }
 
     function test_should_emit_a_PreSignature_event_even_if_storage_does_not_change() public {
-        emit GPv2Signing.PreSignature(owner, orderUid, true);
+        vm.prank(owner);
+        executor.setPreSignature(orderUid, true);
         vm.prank(owner);
         vm.expectEmit(address(executor));
         emit GPv2Signing.PreSignature(owner, orderUid, true);
