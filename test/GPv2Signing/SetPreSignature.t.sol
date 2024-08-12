@@ -5,20 +5,17 @@ import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Helper} from "./Helper.sol";
 import {Order} from "test/libraries/Order.sol";
+import {Sign} from "test/libraries/Sign.sol";
 
 contract SetPreSignature is Helper {
     address private immutable owner = makeAddr("GPv2Signing.SetPreSignature owner");
     bytes private orderUid =
         Order.computeOrderUid(keccak256("GPv2Signing.SetPreSignature order hash"), owner, type(uint32).max);
 
-    // Same constant as in GPv2Signing.PRE_SIGNED.
-    uint256 private constant PRE_SIGNED = uint256(keccak256("GPv2Signing.Scheme.PreSign"));
-    uint256 private constant NOT_SIGNED = 0;
-
     function test_should_set_the_pre_signature() public {
         vm.prank(owner);
         executor.setPreSignature(orderUid, true);
-        assertEq(executor.preSignature(orderUid), PRE_SIGNED);
+        assertEq(executor.preSignature(orderUid), Sign.PRE_SIGNED);
     }
 
     function test_should_unset_the_pre_signature() public {
@@ -26,7 +23,7 @@ contract SetPreSignature is Helper {
         executor.setPreSignature(orderUid, true);
         vm.prank(owner);
         executor.setPreSignature(orderUid, false);
-        assertEq(executor.preSignature(orderUid), NOT_SIGNED);
+        assertEq(executor.preSignature(orderUid), 0);
     }
 
     function test_should_emit_a_pre_signature_event() public {
