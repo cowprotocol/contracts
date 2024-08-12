@@ -6,7 +6,7 @@ import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Helper} from "./Helper.sol";
 
-import {Order as OrderLib, Trade as TradeLib} from "test/libraries/Trade.sol";
+import {Order as OrderLib, Sign as SignLib, Trade as TradeLib} from "test/libraries/Trade.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 
 contract ExtractOrder is Helper {
@@ -34,7 +34,7 @@ contract ExtractOrder is Helper {
     }
 
     function test_should_extract_all_supported_signing_schemes() public view {
-        GPv2Signing.Scheme[4] memory schemes = TradeLib.ALL_SIGNING_SCHEMES();
+        GPv2Signing.Scheme[4] memory schemes = SignLib.ALL_SIGNING_SCHEMES();
         for (uint256 i = 0; i < schemes.length; i++) {
             TradeLib.Flags memory flags = TradeLib.Flags({
                 signingScheme: schemes[i],
