@@ -58,7 +58,10 @@ contract CalldataManipulation is Helper {
         uint256 startNumTokenWord = 4 + 2 * 32;
         uint256 startFirstTokenWord = startNumTokenWord + 32;
         uint256 encodedNumTokens = abi.decode(encodedTransactionData.slice(startNumTokenWord, 32), (uint256));
-        require(encodedNumTokens == 2, "invalid test setup; has the transaction encoding changed?");
+        require(
+            encodedNumTokens == ((order.sellToken == order.buyToken) ? 1 : 2),
+            "invalid test setup; has the transaction encoding changed?"
+        );
         bytes memory encodedFirstToken = encodedTransactionData.slice(startFirstTokenWord, 32);
         uint256 tokenPaddingSize = 12;
         for (uint256 i = 0; i < tokenPaddingSize; i++) {
