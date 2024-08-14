@@ -3,12 +3,10 @@ pragma solidity ^0.8;
 
 import {Vm} from "forge-std/Test.sol";
 
-import {EIP1271Verifier, GPv2EIP1271} from "src/contracts/mixins/GPv2Signing.sol";
-import {GPv2Order, GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
+import {EIP1271Verifier, GPv2EIP1271, GPv2Order, GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Helper} from "./Helper.sol";
 import {Order} from "test/libraries/Order.sol";
-
 import {OrderFuzz} from "test/libraries/OrderFuzz.sol";
 import {Sign} from "test/libraries/Sign.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
