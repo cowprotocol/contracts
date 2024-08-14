@@ -3,15 +3,20 @@ pragma solidity ^0.8;
 
 import {Test} from "forge-std/Test.sol";
 
-import {GPv2Order} from "src/contracts/mixins/GPv2Signing.sol";
+import {GPv2Order, GPv2Signing, GPv2Trade, IERC20} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Sign} from "test/libraries/Sign.sol";
-import {GPv2SigningTestInterface} from "test/src/GPv2SigningTestInterface.sol";
 
-// TODO: move the content of `GPv2SigningTestInterface` here once all tests have
-// been removed.
-// solhint-disable-next-line no-empty-blocks
-contract Harness is GPv2SigningTestInterface {
+contract Harness is GPv2Signing {
+    function recoverOrderFromTradeTest(IERC20[] calldata tokens, GPv2Trade.Data calldata trade)
+        external
+        view
+        returns (GPv2Signing.RecoveredOrder memory recoveredOrder)
+    {
+        recoveredOrder = allocateRecoveredOrder();
+        recoverOrderFromTrade(recoveredOrder, tokens, trade);
+    }
+
     function recoverOrderSignerTest(GPv2Order.Data memory order, Sign.Signature calldata signature)
         public
         view

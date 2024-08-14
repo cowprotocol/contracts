@@ -5,7 +5,7 @@ import {Vm} from "forge-std/Test.sol";
 
 import {GPv2Order, GPv2Signing, IERC20} from "src/contracts/mixins/GPv2Signing.sol";
 
-import {GPv2SigningTestInterface, Helper} from "./Helper.sol";
+import {Harness, Helper} from "./Helper.sol";
 
 import {Bytes} from "test/libraries/Bytes.sol";
 import {OrderFuzz} from "test/libraries/OrderFuzz.sol";
@@ -47,7 +47,7 @@ contract CalldataManipulation is Helper {
 
         IERC20[] memory tokens = encoder.tokens();
         bytes memory encodedTransactionData =
-            abi.encodeCall(GPv2SigningTestInterface.recoverOrderFromTradeTest, (tokens, encoder.trades[0]));
+            abi.encodeCall(Harness.recoverOrderFromTradeTest, (tokens, encoder.trades[0]));
 
         // calldata encoding:
         //  -  4 bytes: signature
