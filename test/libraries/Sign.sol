@@ -16,6 +16,8 @@ library Sign {
 
     // Copied from GPv2Signing.sol
     uint256 internal constant PRE_SIGNED = uint256(keccak256("GPv2Signing.Scheme.PreSign"));
+    // As prescribed by EIP-1271
+    bytes4 internal constant EIP1271_MAGIC_VALUE = bytes4(keccak256("isValidSignature(bytes32,bytes)"));
 
     /// @dev A struct combining the signing scheme and the scheme's specific-encoded data
     struct Signature {
