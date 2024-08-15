@@ -8,7 +8,7 @@ import {GPv2Order, GPv2Signing, IERC20} from "src/contracts/mixins/GPv2Signing.s
 import {GPv2SigningTestInterface, Helper} from "./Helper.sol";
 
 import {Bytes} from "test/libraries/Bytes.sol";
-import {OrderFuzz} from "test/libraries/OrderFuzz.sol";
+import {Order} from "test/libraries/Order.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 
 contract CalldataManipulation is Helper {
@@ -22,7 +22,7 @@ contract CalldataManipulation is Helper {
     }
 
     function test_invalid_EVM_transaction_encoding_does_not_change_order_hash(
-        OrderFuzz.Params memory params,
+        Order.Fuzzed memory params,
         uint256 paddingIndex
     ) public {
         // The variables for an EVM transaction are encoded in multiples of 32
@@ -40,7 +40,7 @@ contract CalldataManipulation is Helper {
         // is not the case by showing that such calldata manipulation causes the
         // transaction to revert.
 
-        GPv2Order.Data memory order = OrderFuzz.order(params);
+        GPv2Order.Data memory order = Order.fuzz(params);
 
         SettlementEncoder.State storage encoder = SettlementEncoder.makeSettlementEncoder();
         encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 0);
