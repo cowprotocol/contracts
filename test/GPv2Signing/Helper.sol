@@ -3,7 +3,7 @@ pragma solidity ^0.8;
 
 import {Test} from "forge-std/Test.sol";
 
-import {GPv2Order} from "src/contracts/mixins/GPv2Signing.sol";
+import {GPv2Order, GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Sign} from "test/libraries/Sign.sol";
 import {GPv2SigningTestInterface} from "test/src/GPv2SigningTestInterface.sol";
@@ -18,6 +18,13 @@ contract Harness is GPv2SigningTestInterface {
         returns (address owner)
     {
         (, owner) = recoverOrderSigner(order, signature.scheme, signature.data);
+    }
+
+    function uint8ToScheme(uint8 scheme) public pure returns (uint8) {
+        // Round trip encodes and decodes a uint8 to a Scheme and back. This is
+        // useful to make sure the code can't use an internally invalid signing
+        // scheme in its internal operations.
+        return uint8(GPv2Signing.Scheme(scheme));
     }
 }
 

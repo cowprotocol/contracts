@@ -49,10 +49,9 @@ contract RecoverOrderSigner is Helper {
     }
 
     function test_reverts_for_invalid_signing_schemes() public {
+        // panic: failed to convert value into enum type
         vm.expectRevert();
-        executor.recoverOrderSignerTest(
-            defaultOrder(), Sign.Signature({scheme: GPv2Signing.Scheme(uint8(42)), data: hex""})
-        );
+        executor.uint8ToScheme(42);
     }
 
     function test_reverts_for_malformed_ECDSA_signatures() public {
