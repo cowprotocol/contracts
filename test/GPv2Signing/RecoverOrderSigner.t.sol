@@ -49,10 +49,9 @@ contract RecoverOrderSigner is Helper {
     }
 
     function test_reverts_for_invalid_signing_schemes() public {
+        // panic: failed to convert value into enum type
         vm.expectRevert();
-        executor.recoverOrderSignerTest(
-            defaultOrder(), Sign.Signature({scheme: GPv2Signing.Scheme(uint8(42)), data: hex""})
-        );
+        executor.uint8ToScheme(42);
     }
 
     function test_reverts_for_malformed_ECDSA_signatures() public {
@@ -152,7 +151,7 @@ contract RecoverOrderSigner is Helper {
         bytes memory eip1271SignatureData = hex"";
 
         assertEq(evilVerifier.state(), 0);
-        assertEq(evilVerifier.isValidSignature(hash, eip1271SignatureData), Sign.EIP1271_MAGIC_VALUE);
+        assertEq(evilVerifier.isValidSignature(hash, eip1271SignatureData), EIP1271Verifier.isValidSignature.selector);
         assertEq(evilVerifier.state(), 1);
         vm.expectRevert();
         executor.recoverOrderSignerTest(

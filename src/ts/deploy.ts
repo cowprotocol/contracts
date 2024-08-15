@@ -20,7 +20,6 @@ export const DEPLOYER_CONTRACT = "0x4e59b44847b379578588920ca78fbf26c0b4956c";
 export const CONTRACT_NAMES = {
   authenticator: "GPv2AllowListAuthentication",
   settlement: "GPv2Settlement",
-  tradeSimulator: "GPv2TradeSimulator",
 } as const;
 
 /**
@@ -36,8 +35,6 @@ export type DeploymentArguments<T> =
     ? never
     : T extends typeof CONTRACT_NAMES.settlement
     ? [string, string]
-    : T extends typeof CONTRACT_NAMES.tradeSimulator
-    ? []
     : unknown[];
 
 /**

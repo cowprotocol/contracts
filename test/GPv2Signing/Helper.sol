@@ -24,6 +24,13 @@ contract Harness is GPv2Signing {
     {
         (, owner) = recoverOrderSigner(order, signature.scheme, signature.data);
     }
+
+    function uint8ToScheme(uint8 scheme) public pure returns (uint8) {
+        // Round trip encodes and decodes a uint8 to a Scheme and back. This is
+        // useful to make sure the code can't use an internally invalid signing
+        // scheme in its internal operations.
+        return uint8(GPv2Signing.Scheme(scheme));
+    }
 }
 
 contract Helper is Test {

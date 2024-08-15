@@ -16,8 +16,6 @@ library Sign {
 
     // Copied from GPv2Signing.sol
     uint256 internal constant PRE_SIGNED = uint256(keccak256("GPv2Signing.Scheme.PreSign"));
-    // As prescribed by EIP-1271
-    bytes4 internal constant EIP1271_MAGIC_VALUE = bytes4(keccak256("isValidSignature(bytes32,bytes)"));
 
     /// @dev A struct combining the signing scheme and the scheme's specific-encoded data
     struct Signature {
@@ -31,6 +29,15 @@ library Sign {
     struct Eip1271Signature {
         address verifier;
         bytes signature;
+    }
+
+    function ALL_SIGNING_SCHEMES() internal pure returns (GPv2Signing.Scheme[4] memory) {
+        return [
+            GPv2Signing.Scheme.Eip712,
+            GPv2Signing.Scheme.EthSign,
+            GPv2Signing.Scheme.Eip1271,
+            GPv2Signing.Scheme.PreSign
+        ];
     }
 
     /// @dev Encode and sign the order using the provided signing scheme (EIP-712 or EthSign)
