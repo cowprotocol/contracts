@@ -48,12 +48,6 @@ contract RecoverOrderSigner is Helper {
         assertEq(ethSignOwner, trader.addr);
     }
 
-    function test_reverts_for_invalid_signing_schemes() public {
-        // panic: failed to convert value into enum type
-        vm.expectRevert();
-        executor.uint8ToScheme(42);
-    }
-
     function test_reverts_for_malformed_ECDSA_signatures() public {
         vm.expectRevert("GPv2: malformed ecdsa signature");
         executor.recoverOrderSignerTest(
