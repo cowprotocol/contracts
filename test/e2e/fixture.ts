@@ -16,7 +16,6 @@ export interface TestDeployment {
   authenticator: Contract;
   settlement: Contract;
   vaultRelayer: Contract;
-  tradeSimulator: Contract;
   gasToken: Contract;
 }
 
@@ -32,7 +31,6 @@ export const deployTestContracts: () => Promise<TestDeployment> =
       const {
         GPv2AllowListAuthentication,
         GPv2Settlement,
-        GPv2TradeSimulator,
         Vault,
         VaultAuthorizer,
         WETH,
@@ -66,10 +64,6 @@ export const deployTestContracts: () => Promise<TestDeployment> =
         "GPv2VaultRelayer",
         await settlement.vaultRelayer(),
       );
-      const tradeSimulator = await ethers.getContractAt(
-        "GPv2TradeSimulator",
-        GPv2TradeSimulator.address,
-      );
 
       return {
         deployer: deployerWallet,
@@ -84,7 +78,6 @@ export const deployTestContracts: () => Promise<TestDeployment> =
         authenticator,
         settlement,
         vaultRelayer,
-        tradeSimulator,
         gasToken: await deployGasToken(allWallets[0]),
       };
     },

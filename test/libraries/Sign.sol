@@ -33,6 +33,15 @@ library Sign {
         bytes signature;
     }
 
+    function ALL_SIGNING_SCHEMES() internal pure returns (GPv2Signing.Scheme[4] memory) {
+        return [
+            GPv2Signing.Scheme.Eip712,
+            GPv2Signing.Scheme.EthSign,
+            GPv2Signing.Scheme.Eip1271,
+            GPv2Signing.Scheme.PreSign
+        ];
+    }
+
     /// @dev Encode and sign the order using the provided signing scheme (EIP-712 or EthSign)
     function sign(
         Vm vm,

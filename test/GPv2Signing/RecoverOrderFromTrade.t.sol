@@ -7,7 +7,6 @@ import {EIP1271Verifier, GPv2EIP1271, GPv2Order, GPv2Signing} from "src/contract
 
 import {Helper} from "./Helper.sol";
 import {Order} from "test/libraries/Order.sol";
-import {OrderFuzz} from "test/libraries/OrderFuzz.sol";
 import {Sign} from "test/libraries/Sign.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 
@@ -22,10 +21,10 @@ contract RecoverOrderFromTrade is Helper {
     }
 
     function test_should_round_trip_encode_order_data_and_unique_identifier(
-        OrderFuzz.Params memory params,
+        Order.Fuzzed memory params,
         uint256 executedAmount
     ) public {
-        GPv2Order.Data memory order = OrderFuzz.order(params);
+        GPv2Order.Data memory order = Order.fuzz(params);
 
         SettlementEncoder.State storage encoder = SettlementEncoder.makeSettlementEncoder();
         encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, executedAmount);
@@ -36,8 +35,8 @@ contract RecoverOrderFromTrade is Helper {
         assertEq(recovered.uid, Order.computeOrderUid(order, domainSeparator, trader.addr));
     }
 
-    function test_should_recover_the_order_for_all_signing_schemes(OrderFuzz.Params memory params) public {
-        GPv2Order.Data memory order = OrderFuzz.order(params);
+    function test_should_recover_the_order_for_all_signing_schemes(Order.Fuzzed memory params) public {
+        GPv2Order.Data memory order = Order.fuzz(params);
 
         address traderPreSign = makeAddr("trader pre-sign");
         EIP1271Verifier traderEip1271 = EIP1271Verifier(makeAddr("eip1271 verifier"));
