@@ -151,7 +151,7 @@ contract RecoverOrderSigner is Helper {
         bytes memory eip1271SignatureData = hex"";
 
         assertEq(evilVerifier.state(), 0);
-        assertEq(evilVerifier.isValidSignature(hash, eip1271SignatureData), Sign.EIP1271_MAGIC_VALUE);
+        assertEq(evilVerifier.isValidSignature(hash, eip1271SignatureData), EIP1271Verifier.isValidSignature.selector);
         assertEq(evilVerifier.state(), 1);
         vm.expectRevert();
         executor.recoverOrderSignerTest(
