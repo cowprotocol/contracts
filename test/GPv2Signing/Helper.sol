@@ -1,30 +1,19 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8;
 
-import {IERC20} from "src/contracts/interfaces/IERC20.sol";
-import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
-import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
-import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
+import {Test} from "forge-std/Test.sol";
 
-// solhint-disable func-name-mixedcase
-contract Harness is GPv2Signing {
-    constructor(bytes32 _domainSeparator) {
-        domainSeparator = _domainSeparator;
-    }
+import {GPv2SigningTestInterface} from "test/src/GPv2SigningTestInterface.sol";
 
-    function exposed_recoverOrderFromTrade(
-        RecoveredOrder memory recoveredOrder,
-        IERC20[] calldata tokens,
-        GPv2Trade.Data calldata trade
-    ) external view {
-        recoverOrderFromTrade(recoveredOrder, tokens, trade);
-    }
+// TODO: move the content of `GPv2SigningTestInterface` here once all tests have
+// been removed.
+// solhint-disable-next-line no-empty-blocks
+contract Harness is GPv2SigningTestInterface {}
 
-    function exposed_recoverOrderSigner(GPv2Order.Data memory order, Scheme signingScheme, bytes calldata signature)
-        external
-        view
-        returns (bytes32 orderDigest, address owner)
-    {
-        (orderDigest, owner) = recoverOrderSigner(order, signingScheme, signature);
+contract Helper is Test {
+    Harness internal executor;
+
+    function setUp() public {
+        executor = new Harness();
     }
 }

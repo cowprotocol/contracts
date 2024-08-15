@@ -38,25 +38,6 @@ describe("GPv2Signing", () => {
     testDomain = domain(chainId, signing.address);
   });
 
-  describe("domainSeparator", () => {
-    it("should have an EIP-712 domain separator", async () => {
-      expect(await signing.domainSeparator()).to.equal(
-        ethers.utils._TypedDataEncoder.hashDomain(testDomain),
-      );
-    });
-
-    it("should have a different replay protection for each deployment", async () => {
-      const GPv2Signing = await ethers.getContractFactory(
-        "GPv2SigningTestInterface",
-      );
-      const signing2 = await GPv2Signing.deploy();
-
-      expect(await signing.domainSeparator()).to.not.equal(
-        await signing2.domainSeparator(),
-      );
-    });
-  });
-
   describe("setPreSignature", () => {
     const [owner, nonOwner] = traders;
     const orderUid = packOrderUidParams({

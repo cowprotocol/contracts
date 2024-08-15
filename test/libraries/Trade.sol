@@ -20,15 +20,6 @@ library Trade {
         GPv2Signing.Scheme signingScheme;
     }
 
-    function ALL_SIGNING_SCHEMES() internal pure returns (GPv2Signing.Scheme[4] memory) {
-        return [
-            GPv2Signing.Scheme.Eip712,
-            GPv2Signing.Scheme.EthSign,
-            GPv2Signing.Scheme.Eip1271,
-            GPv2Signing.Scheme.PreSign
-        ];
-    }
-
     /// @dev Given a `flags` struct, encode it into a uint256 for a GPv2Trade
     function toUint256(Flags memory flags) internal pure returns (uint256 encodedFlags) {
         encodedFlags |= flags.flags.toUint256();
