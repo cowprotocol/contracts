@@ -17,6 +17,19 @@ library Order {
         bool partiallyFillable;
     }
 
+    /// All parameters needed to generated a valid fuzzed order.
+    struct Fuzzed {
+        address sellToken;
+        address buyToken;
+        address receiver;
+        uint256 sellAmount;
+        uint256 buyAmount;
+        uint32 validTo;
+        bytes32 appData;
+        uint256 feeAmount;
+        bytes32 flagsPick;
+    }
+
     // I wish I could declare the following as constants and export them as part
     // of the library. However, "Only constants of value type and byte array
     // type are implemented." and "Library cannot have non-constant state
@@ -144,5 +157,26 @@ library Order {
     {
         orderUid = new bytes(GPv2Order.UID_LENGTH);
         orderUid.packOrderUidParams(orderHash, owner, validTo);
+    }
+
+    function fuzz(Fuzzed memory params) internal pure returns (GPv2Order.Data memory) {
+        Order.Flags[] memory allFlags = Order.ALL_FLAGS();
+        // `flags` isn't exactly random, but for fuzzing purposes it should be
+        // more than enough.
+        Order.Flags memory flags = allFlags[uint256(params.flagsPick) % allFlags.length];
+        return GPv2Order.Data({
+            sellToken: IERC20(params.sellToken),
+            buyToken: IERC20(params.buyToken),
+            receiver: params.receiver,
+            sellAmount: params.sellAmount,
+            buyAmount: params.buyAmount,
+            validTo: params.validTo,
+            appData: params.appData,
+            feeAmount: params.feeAmount,
+            partiallyFillable: flags.partiallyFillable,
+            kind: flags.kind,
+            sellTokenBalance: flags.sellTokenBalance,
+            buyTokenBalance: flags.buyTokenBalance
+        });
     }
 }

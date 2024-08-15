@@ -23,7 +23,6 @@ export * from "./deploy";
 export * from "./interaction";
 export * from "./order";
 export * from "./proxy";
-export * from "./reader";
 export * from "./settlement";
 export * from "./sign";
 export * from "./swap";

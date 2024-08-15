@@ -4,6 +4,10 @@ pragma solidity ^0.8;
 import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 
 library Eip712 {
+    /// EIP-712 domain information (a.k.a. "domain separator"). The salt
+    /// parameter is intentionally omitted as there is no need to disambiguate
+    /// with the available information. More details can be found at:
+    /// https://eips.ethereum.org/EIPS/eip-712#definition-of-domainseparator
     struct EIP712Domain {
         string name;
         string version;
