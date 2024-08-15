@@ -3,7 +3,7 @@ pragma solidity ^0.8;
 
 import {Test} from "forge-std/Test.sol";
 
-import {GPv2Order, GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
+import {GPv2Order} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Sign} from "test/libraries/Sign.sol";
 import {GPv2SigningTestInterface} from "test/src/GPv2SigningTestInterface.sol";
