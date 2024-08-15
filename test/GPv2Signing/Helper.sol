@@ -12,8 +12,10 @@ contract Harness is GPv2SigningTestInterface {}
 
 contract Helper is Test {
     Harness internal executor;
+    bytes32 internal domainSeparator;
 
     function setUp() public {
         executor = new Harness();
+        domainSeparator = executor.domainSeparator();
     }
 }

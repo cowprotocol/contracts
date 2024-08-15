@@ -4,8 +4,6 @@ import { artifacts, ethers, waffle } from "hardhat";
 
 import {
   EIP1271_MAGICVALUE,
-  OrderBalance,
-  OrderKind,
   SettlementEncoder,
   SigningScheme,
   TypedDataDomain,
@@ -16,8 +14,8 @@ import {
   signOrder,
 } from "../src/ts";
 
-import { decodeOrder, encodeOrder } from "./encoding";
-import { fillBytes, fillUint, SAMPLE_ORDER } from "./testHelpers";
+import { encodeOrder } from "./encoding";
+import { SAMPLE_ORDER } from "./testHelpers";
 
 describe("GPv2Signing", () => {
   const [deployer, ...traders] = waffle.provider.getWallets();
@@ -37,111 +35,6 @@ describe("GPv2Signing", () => {
   });
 
   describe("recoverOrderFromTrade", () => {
-    it("should round-trip encode order data", async () => {
-      // NOTE: Pay extra attention to use all bytes for each field, and that
-      // they all have different values to make sure the are correctly
-      // round-tripped.
-      const order = {
-        sellToken: fillBytes(20, 0x01),
-        buyToken: fillBytes(20, 0x02),
-        receiver: fillBytes(20, 0x03),
-        sellAmount: fillUint(256, 0x04),
-        buyAmount: fillUint(256, 0x05),
-        validTo: fillUint(32, 0x06).toNumber(),
-        appData: fillBytes(32, 0x07),
-        feeAmount: fillUint(256, 0x08),
-        kind: OrderKind.BUY,
-        partiallyFillable: true,
-        sellTokenBalance: OrderBalance.EXTERNAL,
-        buyTokenBalance: OrderBalance.INTERNAL,
-      };
-      const tradeExecution = {
-        executedAmount: fillUint(256, 0x09),
-      };
-
-      const encoder = new SettlementEncoder(testDomain);
-      await encoder.signEncodeTrade(
-        order,
-        traders[0],
-        SigningScheme.EIP712,
-        tradeExecution,
-      );
-
-      const { data: encodedOrder } = await signing.recoverOrderFromTradeTest(
-        encoder.tokens,
-        encoder.trades[0],
-      );
-      expect(decodeOrder(encodedOrder)).to.deep.equal(order);
-    });
-
-    it("should compute order unique identifier", async () => {
-      const encoder = new SettlementEncoder(testDomain);
-      await encoder.signEncodeTrade(
-        SAMPLE_ORDER,
-        traders[0],
-        SigningScheme.EIP712,
-      );
-
-      const { uid: orderUid } = await signing.recoverOrderFromTradeTest(
-        encoder.tokens,
-        encoder.trades[0],
-      );
-      expect(orderUid).to.equal(
-        computeOrderUid(testDomain, SAMPLE_ORDER, traders[0].address),
-      );
-    });
-
-    it("should recover the owner for all signing schemes", async () => {
-      const artifact = await artifacts.readArtifact("EIP1271Verifier");
-      const verifier = await waffle.deployMockContract(deployer, artifact.abi);
-      await verifier.mock.isValidSignature.returns(EIP1271_MAGICVALUE);
-
-      const sampleOrderUid = computeOrderUid(
-        testDomain,
-        SAMPLE_ORDER,
-        traders[2].address,
-      );
-      await signing.connect(traders[2]).setPreSignature(sampleOrderUid, true);
-
-      const encoder = new SettlementEncoder(testDomain);
-      await encoder.signEncodeTrade(
-        SAMPLE_ORDER,
-        traders[0],
-        SigningScheme.EIP712,
-      );
-      await encoder.signEncodeTrade(
-        SAMPLE_ORDER,
-        traders[1],
-        SigningScheme.ETHSIGN,
-      );
-      encoder.encodeTrade(SAMPLE_ORDER, {
-        scheme: SigningScheme.EIP1271,
-        data: {
-          verifier: verifier.address,
-          signature: "0x",
-        },
-      });
-      encoder.encodeTrade(SAMPLE_ORDER, {
-        scheme: SigningScheme.PRESIGN,
-        data: traders[2].address,
-      });
-
-      const owners = [
-        traders[0].address,
-        traders[1].address,
-        verifier.address,
-        traders[2].address,
-      ];
-
-      for (const [i, trade] of encoder.trades.entries()) {
-        const { owner } = await signing.recoverOrderFromTradeTest(
-          encoder.tokens,
-          trade,
-        );
-        expect(owner).to.equal(owners[i]);
-      }
-    });
-
     describe("uid uniqueness", () => {
       it("invalid EVM transaction encoding does not change order hash", async () => {
         // The variables for an EVM transaction are encoded in multiples of 32
