@@ -6,7 +6,6 @@ import {
   EIP1271_MAGICVALUE,
   OrderBalance,
   OrderKind,
-  PRE_SIGNED,
   SettlementEncoder,
   SigningScheme,
   TypedDataDomain,
@@ -14,7 +13,6 @@ import {
   domain,
   encodeEip1271SignatureData,
   hashOrder,
-  packOrderUidParams,
   signOrder,
 } from "../src/ts";
 
@@ -36,51 +34,6 @@ describe("GPv2Signing", () => {
 
     const { chainId } = await ethers.provider.getNetwork();
     testDomain = domain(chainId, signing.address);
-  });
-
-  describe("setPreSignature", () => {
-    const [owner, nonOwner] = traders;
-    const orderUid = packOrderUidParams({
-      orderDigest: ethers.constants.HashZero,
-      owner: owner.address,
-      validTo: 0xffffffff,
-    });
-
-    it("should set the pre-signature", async () => {
-      await signing.connect(owner).setPreSignature(orderUid, true);
-      expect(await signing.preSignature(orderUid)).to.equal(PRE_SIGNED);
-    });
-
-    it("should unset the pre-signature", async () => {
-      await signing.connect(owner).setPreSignature(orderUid, true);
-      await signing.connect(owner).setPreSignature(orderUid, false);
-      expect(await signing.preSignature(orderUid)).to.equal(
-        ethers.constants.Zero,
-      );
-    });
-
-    it("should emit a PreSignature event", async () => {
-      await expect(signing.connect(owner).setPreSignature(orderUid, true))
-        .to.emit(signing, "PreSignature")
-        .withArgs(owner.address, orderUid, true);
-
-      await expect(signing.connect(owner).setPreSignature(orderUid, false))
-        .to.emit(signing, "PreSignature")
-        .withArgs(owner.address, orderUid, false);
-    });
-
-    it("should emit a PreSignature event even if storage doesn't change", async () => {
-      await signing.connect(owner).setPreSignature(orderUid, true);
-      await expect(signing.connect(owner).setPreSignature(orderUid, true))
-        .to.emit(signing, "PreSignature")
-        .withArgs(owner.address, orderUid, true);
-    });
-
-    it("should revert if the order owner is not the transaction sender", async () => {
-      await expect(
-        signing.connect(nonOwner).setPreSignature(orderUid, true),
-      ).to.be.revertedWith("cannot presign order");
-    });
   });
 
   describe("recoverOrderFromTrade", () => {
