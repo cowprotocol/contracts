@@ -4,8 +4,3 @@ export enum UserBalanceOpKind {
   TRANSFER_INTERNAL = 2,
   TRANSFER_EXTERNAL = 3,
 }
-
-export enum BalancerErrors {
-  SWAP_LIMIT = "BAL#507",
-  SWAP_DEADLINE = "BAL#508",
-}

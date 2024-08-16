@@ -14,9 +14,14 @@ import {
   domain,
   grantRequiredRoles,
 } from "../../src/ts";
-import { UserBalanceOpKind, BalancerErrors } from "../balancer";
+import { UserBalanceOpKind } from "../balancer";
 
 import { deployTestContracts } from "./fixture";
+
+export enum BalancerErrors {
+  SWAP_LIMIT = "BAL#507",
+  SWAP_DEADLINE = "BAL#508",
+}
 
 const LOTS = ethers.utils.parseEther("10000.0");
 const debug = Debug("e2e:balancerSwap");
