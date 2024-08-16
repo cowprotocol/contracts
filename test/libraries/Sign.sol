@@ -3,16 +3,16 @@ pragma solidity ^0.8;
 
 import {Vm} from "forge-std/Test.sol";
 
-import {EIP1271Verifier, GPv2Order, GPv2Signing, GPv2Trade} from "src/contracts/mixins/GPv2Signing.sol";
+import {EIP1271Verifier, GPv2Order, GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Bytes} from "./Bytes.sol";
+import {Order} from "./Order.sol";
 
 type PreSignSignature is address;
 
 library Sign {
-    using GPv2Order for GPv2Order.Data;
-    using GPv2Trade for uint256;
     using Bytes for bytes;
+    using Order for GPv2Order.Data;
 
     // Copied from GPv2Signing.sol
     uint256 internal constant PRE_SIGNED = uint256(keccak256("GPv2Signing.Scheme.PreSign"));
@@ -123,8 +123,12 @@ library Sign {
     }
 
     /// @dev Given a GPv2Trade encoded flags, decode them into a `GPv2Signing.Scheme`
-    function toSigningScheme(uint256 encodedFlags) internal pure returns (GPv2Signing.Scheme signingScheme) {
-        (,,,, signingScheme) = encodedFlags.extractFlags();
+    function toSigningScheme(uint256 encodedFlags) internal pure returns (GPv2Signing.Scheme) {
+        uint256 encodedScheme = (encodedFlags >> 5);
+        if (encodedScheme >= 4) {
+            revert("invalid flag encoding, trying to use invalid signature scheme");
+        }
+        return GPv2Signing.Scheme(encodedScheme);
     }
 
     /// @dev Internal helper function for EthSign signatures (non-EIP-712)

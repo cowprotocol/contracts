@@ -2,13 +2,10 @@
 pragma solidity ^0.8;
 
 import {GPv2Order, IERC20} from "src/contracts/libraries/GPv2Order.sol";
-import {GPv2Trade} from "src/contracts/libraries/GPv2Trade.sol";
+
+import {Eip712} from "./Eip712.sol";
 
 library Order {
-    using GPv2Order for GPv2Order.Data;
-    using GPv2Order for bytes;
-    using GPv2Trade for uint256;
-
     /// Order flags
     struct Flags {
         bytes32 kind;
@@ -134,10 +131,24 @@ library Order {
         }
     }
 
-    /// @dev Given a GPv2Trade encoded flags, decode them into a `Flags` struct
-    function toFlags(uint256 encodedFlags) internal pure returns (Flags memory flags) {
-        (flags.kind, flags.partiallyFillable, flags.sellTokenBalance, flags.buyTokenBalance,) =
-            encodedFlags.extractFlags();
+    /// @dev Given a GPv2Trade encoded flags, decode them into a `Flags` struct.
+    /// See GPv2Trade.extractFlags for a complete definition of each flag.
+    function toFlags(uint256 encodedFlags) internal pure returns (Flags memory) {
+        bytes32 sellTokenBalance;
+        if (encodedFlags & 0x08 == 0) {
+            sellTokenBalance = GPv2Order.BALANCE_ERC20;
+        } else if (encodedFlags & 0x04 == 0) {
+            sellTokenBalance = GPv2Order.BALANCE_EXTERNAL;
+        } else {
+            sellTokenBalance = GPv2Order.BALANCE_INTERNAL;
+        }
+
+        return Flags({
+            kind: (encodedFlags & 0x01 == 0) ? GPv2Order.KIND_SELL : GPv2Order.KIND_BUY,
+            partiallyFillable: encodedFlags & 0x02 != 0,
+            sellTokenBalance: sellTokenBalance,
+            buyTokenBalance: (encodedFlags & 0x10 == 0) ? GPv2Order.BALANCE_ERC20 : GPv2Order.BALANCE_INTERNAL
+        });
     }
 
     /// @dev Computes the order UID for an order and the given owner
@@ -146,17 +157,16 @@ library Order {
         pure
         returns (bytes memory)
     {
-        return computeOrderUid(order.hash(domainSeparator), owner, order.validTo);
+        return computeOrderUid(hash(order, domainSeparator), owner, order.validTo);
     }
 
     /// @dev Computes the order UID for its base components
-    function computeOrderUid(bytes32 orderHash, address owner, uint32 validTo)
-        internal
-        pure
-        returns (bytes memory orderUid)
-    {
-        orderUid = new bytes(GPv2Order.UID_LENGTH);
-        orderUid.packOrderUidParams(orderHash, owner, validTo);
+    function computeOrderUid(bytes32 orderHash, address owner, uint32 validTo) internal pure returns (bytes memory) {
+        return abi.encodePacked(orderHash, owner, validTo);
+    }
+
+    function hash(GPv2Order.Data memory order, bytes32 domainSeparator) internal pure returns (bytes32) {
+        return Eip712.typedDataHash(Eip712.toEip712SignedStruct(order), domainSeparator);
     }
 
     function fuzz(Fuzzed memory params) internal pure returns (GPv2Order.Data memory) {

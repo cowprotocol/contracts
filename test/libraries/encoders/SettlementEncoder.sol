@@ -18,7 +18,6 @@ import {Trade} from "../Trade.sol";
 import {Registry, TokenRegistry} from "./TokenRegistry.sol";
 
 library SettlementEncoder {
-    using GPv2Order for GPv2Order.Data;
     using Trade for GPv2Order.Data;
     using Sign for Vm;
     using TokenRegistry for TokenRegistry.State;
