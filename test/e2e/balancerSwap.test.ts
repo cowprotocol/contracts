@@ -18,7 +18,7 @@ import { UserBalanceOpKind } from "../balancer";
 
 import { deployTestContracts } from "./fixture";
 
-export enum BalancerErrors {
+enum BalancerErrors {
   SWAP_LIMIT = "BAL#507",
   SWAP_DEADLINE = "BAL#508",
 }
