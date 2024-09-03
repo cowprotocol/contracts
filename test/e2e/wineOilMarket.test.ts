@@ -1,6 +1,6 @@
 import ERC20 from "@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json";
 import { expect } from "chai";
-import { BigNumber, Contract, Wallet } from "ethers";
+import { BigNumber, BigNumberish, Contract, Wallet } from "ethers";
 import { ethers, waffle } from "hardhat";
 
 import {
@@ -11,9 +11,12 @@ import {
   TypedDataDomain,
   domain,
 } from "../../src/ts";
-import { ceilDiv } from "../testHelpers";
 
 import { deployTestContracts } from "./fixture";
+
+function ceilDiv(p: BigNumberish, q: BigNumberish): BigNumber {
+  return BigNumber.from(p).add(q).sub(1).div(q);
+}
 
 describe("E2E: RetrETH Red Wine and Olive Oil Market", () => {
   let deployer: Wallet;
