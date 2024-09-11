@@ -2,6 +2,7 @@
 pragma solidity ^0.8;
 
 import {Test, Vm, stdJson} from "forge-std/Test.sol";
+import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 
 import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 import {
@@ -218,5 +219,12 @@ abstract contract Helper is Test {
         assembly ("memory-safe") {
             deployed := create(value, add(initCode, 0x20), mload(initCode))
         }
+    }
+
+    function deployMintableErc20(string memory name, string memory symbol) internal returns (IERC20Mintable token) {
+        // need to use like this because OZ requires ^0.7 and tests are on ^0.8
+        bytes memory initCode =
+            abi.encodePacked(vm.getCode("test/e2e/ERC20Mintable.sol:ERC20Mintable"), abi.encode(name, symbol));
+        token = IERC20Mintable(_create(initCode, 0));
     }
 }
