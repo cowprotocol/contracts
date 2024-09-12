@@ -133,9 +133,6 @@ abstract contract Helper is Test {
             _deployBalancerVaultAt(address(vault));
         }
 
-        vault = IVault(makeAddr("E2E.Helper: vault"));
-        vm.mockCallRevert(address(vault), hex"", "unexpected call to mock vault");
-
         // Deploy the settlement contract
         settlement = new Harness(authenticator, vault);
         vaultRelayer = address(settlement.vaultRelayer());
