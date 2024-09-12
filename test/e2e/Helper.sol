@@ -25,6 +25,10 @@ interface IAuthorizer {
     function grantRole(bytes32, address) external;
 }
 
+interface IERC20Mintable is IERC20 {
+    function mint(address, uint) external;
+}
+
 contract Harness is GPv2Settlement {
     constructor(GPv2Authentication authenticator_, IVault vault) GPv2Settlement(authenticator_, vault) {}
 
@@ -224,7 +228,7 @@ abstract contract Helper is Test {
     function deployMintableErc20(string memory name, string memory symbol) internal returns (IERC20Mintable token) {
         // need to use like this because OZ requires ^0.7 and tests are on ^0.8
         bytes memory initCode =
-            abi.encodePacked(vm.getCode("test/e2e/ERC20Mintable.sol:ERC20Mintable"), abi.encode(name, symbol));
+            abi.encodePacked(vm.getCode("ERC20Mintable"), abi.encode(name, symbol));
         token = IERC20Mintable(_create(initCode, 0));
     }
 }
