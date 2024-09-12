@@ -93,6 +93,7 @@ abstract contract Helper is Test {
     GPv2AllowListAuthentication internal allowList;
     GPv2AllowListAuthentication internal allowListImpl;
     address vaultRelayer;
+    address balancerVaultAuthorizer;
 
     SettlementEncoder.State internal encoder;
     SwapEncoder.State internal swapEncoder;
@@ -132,17 +133,17 @@ abstract contract Helper is Test {
         );
         authenticator = allowList;
 
-        address vaultAuthorizer;
-        (vaultAuthorizer, vault) = _deployBalancerVault();
+        (balancerVaultAuthorizer, vault) = _deployBalancerVault();
 
         // Deploy the settlement contract
         settlement = new Harness(authenticator, vault);
         vaultRelayer = address(settlement.vaultRelayer());
-
-        _grantBalancerRolesToRelayer(vaultAuthorizer, address(vault), vaultRelayer);
-
+        
         // Reset the prank
         vm.stopPrank();
+
+        _grantBalancerRolesToRelayer(balancerVaultAuthorizer, address(vault), vaultRelayer);
+
 
         // By default, allow `solver` to settle
         vm.prank(owner);
@@ -188,20 +189,22 @@ abstract contract Helper is Test {
     }
 
     function _grantBalancerRolesToRelayer(address authorizer, address deployedVault, address relayer) internal {
-        // grant required roles
-        vm.startPrank(owner);
-        IAuthorizer(authorizer).grantRole(
-            _getActionId("manageUserBalance((uint8,address,uint256,address,address)[])", address(deployedVault)),
-            relayer
+        _grantBalancerActionRole(
+            authorizer, deployedVault, relayer, "manageUserBalance((uint8,address,uint256,address,address)[])"
         );
-        IAuthorizer(authorizer).grantRole(
-            _getActionId(
-                "batchSwap(uint8,(bytes32,uint256,uint256,uint256,bytes)[],address[],(address,bool,address,bool),int256[],uint256)",
-                address(deployedVault)
-            ),
-            relayer
+        _grantBalancerActionRole(
+            authorizer,
+            deployedVault,
+            relayer,
+            "batchSwap(uint8,(bytes32,uint256,uint256,uint256,bytes)[],address[],(address,bool,address,bool),int256[],uint256)"
         );
-        vm.stopPrank();
+    }
+
+    function _grantBalancerActionRole(address authorizer, address balVault, address to, string memory action)
+        internal
+    {
+        vm.prank(owner);
+        IAuthorizer(authorizer).grantRole(_getActionId(action, balVault), to);
     }
 
     function _getActionId(string memory fnDef, address vaultAddr) internal pure returns (bytes32) {
