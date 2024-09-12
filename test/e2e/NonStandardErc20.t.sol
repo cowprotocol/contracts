@@ -4,7 +4,7 @@ pragma solidity ^0.8;
 import {Vm} from "forge-std/Vm.sol";
 
 import {ERC20NoReturn, ERC20ReturningUint} from "../src/NonStandardERC20.sol";
-import {ForkedTest} from "./ForkedTest.t.sol";
+import {Helper} from "./Helper.sol";
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 
 import {
@@ -20,7 +20,7 @@ using SettlementEncoder for SettlementEncoder.State;
 using TokenRegistry for TokenRegistry.State;
 using TokenRegistry for Registry;
 
-contract NonStandardErc20Test is ForkedTest {
+contract NonStandardErc20Test is Helper(false) {
     ERC20NoReturn noReturnToken;
     ERC20ReturningUint uintReturningToken;
 
