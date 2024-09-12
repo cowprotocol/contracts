@@ -91,6 +91,7 @@ abstract contract Helper is Test {
     GPv2Authentication internal authenticator;
     IVault internal vault;
     GPv2AllowListAuthentication internal allowList;
+    GPv2AllowListAuthentication internal allowListImpl;
     address vaultRelayer;
 
     SettlementEncoder.State internal encoder;
@@ -125,8 +126,10 @@ abstract contract Helper is Test {
         vm.startPrank(deployer);
 
         // Deploy the allowlist manager
-        allowList = new GPv2AllowListAuthentication();
-        allowList.initializeManager(owner);
+        allowListImpl = new GPv2AllowListAuthentication();
+        allowList = GPv2AllowListAuthentication(
+            deployProxy(address(allowListImpl), owner, abi.encodeCall(allowListImpl.initializeManager, (owner)))
+        );
         authenticator = allowList;
 
         address vaultAuthorizer;
@@ -223,5 +226,12 @@ abstract contract Helper is Test {
         // need to use like this because OZ requires ^0.7 and tests are on ^0.8
         bytes memory initCode = abi.encodePacked(vm.getCode("ERC20Mintable"), abi.encode(name, symbol));
         token = IERC20Mintable(_create(initCode, 0));
+    }
+
+    function deployProxy(address implAddress, address ownerAddress, bytes memory data)
+        internal
+        returns (address proxy)
+    {
+        proxy = _create(abi.encodePacked(vm.getCode("EIP173Proxy"), abi.encode(implAddress, ownerAddress, data)), 0);
     }
 }
