@@ -3,7 +3,6 @@ pragma solidity ^0.8;
 
 import {Vm} from "forge-std/Vm.sol";
 
-import {StandardERC20} from "../src/NonStandardERC20.sol";
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 import {IVault} from "src/contracts/interfaces/IVault.sol";
 
@@ -16,7 +15,7 @@ import {
 } from "../libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
 import {ERC20NoReturn, ERC20ReturningUint} from "../src/NonStandardERC20.sol";
-import {ForkedTest} from "./ForkedTest.t.sol";
+import {Helper, IERC20Mintable} from "./Helper.sol";
 
 using SettlementEncoder for SettlementEncoder.State;
 using TokenRegistry for TokenRegistry.State;
@@ -28,18 +27,15 @@ interface IBalancerVault is IVault {
     function hasApprovedRelayer(address, address) external view returns (bool);
 }
 
-contract InternalBalancesTest is ForkedTest {
-    IERC20 token1;
-    IERC20 token2;
+contract InternalBalancesTest is Helper(false) {
+    IERC20Mintable token1;
+    IERC20Mintable token2;
 
     function setUp() public override {
         super.setUp();
 
-        token1 = IERC20(address(new StandardERC20()));
-        token2 = IERC20(address(new StandardERC20()));
-
-        token1 = IERC20(address(token1));
-        token2 = IERC20(address(token2));
+        token1 = deployMintableErc20("TK1", "TK1");
+        token2 = deployMintableErc20("TK2", "TK2");
 
         GPv2Interaction.Data[] memory interactions = new GPv2Interaction.Data[](2);
         interactions[0] = GPv2Interaction.Data({
@@ -241,8 +237,8 @@ contract InternalBalancesTest is ForkedTest {
         assertEq(token2.balanceOf(address(settlement)), 1.8 ether, "token2 settlement fee amount not as expected");
     }
 
-    function _mintTokens(IERC20 token, address to, uint256 amt) internal {
-        StandardERC20(address(token)).mint(to, amt);
+    function _mintTokens(IERC20Mintable token, address to, uint256 amt) internal {
+        token.mint(to, amt);
     }
 
     function _getInternalBalance(address token, address who) internal view returns (uint256) {
