@@ -15,10 +15,10 @@ import {
     IVault
 } from "src/contracts/GPv2Settlement.sol";
 
+import {WETH9} from "./WETH9.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
 
-address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
 interface IAuthorizer {
@@ -26,7 +26,7 @@ interface IAuthorizer {
 }
 
 interface IERC20Mintable is IERC20 {
-    function mint(address, uint) external;
+    function mint(address, uint256) external;
 }
 
 contract Harness is GPv2Settlement {
@@ -102,6 +102,8 @@ abstract contract Helper is Test {
     bool immutable isForked;
     uint256 forkId;
 
+    WETH9 weth;
+
     constructor(bool _isForked) {
         isForked = _isForked;
     }
@@ -111,6 +113,9 @@ abstract contract Helper is Test {
             uint256 blockNumber = vm.envUint("FORK_BLOCK_NUMBER");
             string memory forkUrl = vm.envString("FORK_URL");
             forkId = vm.createSelectFork(forkUrl, blockNumber);
+            weth = WETH9(payable(WETH));
+        } else {
+            weth = new WETH9();
         }
 
         // Configure addresses
@@ -124,18 +129,14 @@ abstract contract Helper is Test {
         allowList.initializeManager(owner);
         authenticator = allowList;
 
-        // use production deployment if forked base
-        if (isForked) {
-            vault = IVault(BALANCER_VAULT);
-        }
-        // deploy balancer vault if not forked
-        else {
-            _deployBalancerVaultAt(address(vault));
-        }
+        address vaultAuthorizer;
+        (vaultAuthorizer, vault) = _deployBalancerVault();
 
         // Deploy the settlement contract
         settlement = new Harness(authenticator, vault);
         vaultRelayer = address(settlement.vaultRelayer());
+
+        _grantBalancerRolesToRelayer(vaultAuthorizer, address(vault), vaultRelayer);
 
         // Reset the prank
         vm.stopPrank();
@@ -172,35 +173,30 @@ abstract contract Helper is Test {
         });
     }
 
-    function _deployBalancerVaultAt(address _vault) internal {
+    function _deployBalancerVault() internal returns (address, IVault) {
         bytes memory authorizerInitCode = abi.encodePacked(_getBalancerBytecode("Authorizer"), abi.encode(owner));
         address authorizer = _create(authorizerInitCode, 0);
 
-        bytes memory vaultInitCode = abi.encodePacked(_getBalancerBytecode("Vault"), abi.encode(authorizer, WETH, 0, 0));
-        vm.record();
+        bytes memory vaultInitCode =
+            abi.encodePacked(_getBalancerBytecode("Vault"), abi.encode(authorizer, address(weth), 0, 0));
         address deployedVault = _create(vaultInitCode, 0);
-        (, bytes32[] memory writeSlots) = vm.accesses(deployedVault);
 
-        // replay storage writes made in the constructor and set the balancer code
-        vm.etch(address(_vault), deployedVault.code);
-        for (uint256 i = 0; i < writeSlots.length; i++) {
-            bytes32 slot = writeSlots[i];
-            bytes32 val = vm.load(deployedVault, slot);
-            vm.store(address(_vault), slot, val);
-        }
+        return (authorizer, IVault(deployedVault));
+    }
 
+    function _grantBalancerRolesToRelayer(address authorizer, address deployedVault, address relayer) internal {
         // grant required roles
         vm.startPrank(owner);
         IAuthorizer(authorizer).grantRole(
             _getActionId("manageUserBalance((uint8,address,uint256,address,address)[])", address(deployedVault)),
-            vaultRelayer
+            relayer
         );
         IAuthorizer(authorizer).grantRole(
             _getActionId(
                 "batchSwap(uint8,(bytes32,uint256,uint256,uint256,bytes)[],address[],(address,bool,address,bool),int256[],uint256)",
                 address(deployedVault)
             ),
-            vaultRelayer
+            relayer
         );
         vm.stopPrank();
     }
@@ -220,12 +216,12 @@ abstract contract Helper is Test {
         assembly ("memory-safe") {
             deployed := create(value, add(initCode, 0x20), mload(initCode))
         }
+        require(deployed != address(0), "deployment failed");
     }
 
     function deployMintableErc20(string memory name, string memory symbol) internal returns (IERC20Mintable token) {
         // need to use like this because OZ requires ^0.7 and tests are on ^0.8
-        bytes memory initCode =
-            abi.encodePacked(vm.getCode("ERC20Mintable"), abi.encode(name, symbol));
+        bytes memory initCode = abi.encodePacked(vm.getCode("ERC20Mintable"), abi.encode(name, symbol));
         token = IERC20Mintable(_create(initCode, 0));
     }
 }
