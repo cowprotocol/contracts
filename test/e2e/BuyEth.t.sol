@@ -15,7 +15,7 @@ import {
 } from "test/libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "test/libraries/encoders/TokenRegistry.sol";
 
-import {ForkedTest} from "./ForkedTest.t.sol";
+import {Helper} from "./Helper.sol";
 
 interface IUSDT {
     function getOwner() external view returns (address);
@@ -32,7 +32,7 @@ using SettlementEncoder for SettlementEncoder.State;
 using TokenRegistry for TokenRegistry.State;
 using TokenRegistry for Registry;
 
-contract BuyEthTest is ForkedTest {
+contract BuyEthTest is Helper(true) {
     // Settle a trivial batch between two overlapping trades:
     //
     //   /----(1. SELL 1 WETH for USDT if p(WETH) >= 1100)----\
