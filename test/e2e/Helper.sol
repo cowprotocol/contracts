@@ -138,12 +138,11 @@ abstract contract Helper is Test {
         // Deploy the settlement contract
         settlement = new Harness(authenticator, vault);
         vaultRelayer = address(settlement.vaultRelayer());
-        
+
         // Reset the prank
         vm.stopPrank();
 
         _grantBalancerRolesToRelayer(balancerVaultAuthorizer, address(vault), vaultRelayer);
-
 
         // By default, allow `solver` to settle
         vm.prank(owner);
