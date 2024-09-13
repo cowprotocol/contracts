@@ -14,7 +14,10 @@ deny_warnings = true
 fs_permissions = [
   { access = "read", path = "./balancer"},
   { access = "read", path = "./networks.json"},
-  { access = "read", path = "./out"}
+  { access = "read", path = "./out"},
+  { access = "read", path = "./node_modules/@0x/contract-artifacts-v2/lib/artifacts"},
+  { access = "read", path = "./node_modules/@uniswap/v2-core/build/"},
+  { access = "read", path = "./node_modules/@gnosis.pm/safe-contracts/build/artifacts/"},
 ]
 
 [fmt]
