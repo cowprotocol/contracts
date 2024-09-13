@@ -9,4 +9,8 @@ contract ERC20Mintable is ERC20 {
     function mint(address account, uint256 amount) external {
         _mint(account, amount);
     }
+
+    function burn(uint256 amount) external {
+        _burn(msg.sender, amount);
+    }
 }

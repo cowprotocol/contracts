@@ -27,6 +27,7 @@ interface IAuthorizer {
 
 interface IERC20Mintable is IERC20 {
     function mint(address, uint256) external;
+    function burn(uint256) external;
 }
 
 contract Harness is GPv2Settlement {
