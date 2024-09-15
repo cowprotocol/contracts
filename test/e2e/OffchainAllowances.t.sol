@@ -9,7 +9,6 @@ import {GPv2Interaction} from "src/contracts/libraries/GPv2Interaction.sol";
 import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
-import {Eip712} from "../libraries/Eip712.sol";
 import {SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
 import {Helper, IERC20Mintable} from "./Helper.sol";
@@ -31,8 +30,8 @@ using TokenRegistry for TokenRegistry.State;
 using TokenRegistry for Registry;
 
 contract OffchainAllowancesTest is Helper(false) {
-    IERC20Mintable EUR1;
-    IERC20Mintable EUR2;
+    IERC20Mintable eur1;
+    IERC20Mintable eur2;
 
     Vm.Wallet trader1;
     Vm.Wallet trader2;
@@ -40,8 +39,8 @@ contract OffchainAllowancesTest is Helper(false) {
     function setUp() public override {
         super.setUp();
 
-        EUR1 = IERC20Mintable(_create(abi.encodePacked(vm.getCode("ERC20PresetPermit"), abi.encode("EUR1")), 0));
-        EUR2 = IERC20Mintable(_create(abi.encodePacked(vm.getCode("ERC20PresetPermit"), abi.encode("EUR1")), 0));
+        eur1 = IERC20Mintable(_create(abi.encodePacked(vm.getCode("ERC20PresetPermit"), abi.encode("eur1")), 0));
+        eur2 = IERC20Mintable(_create(abi.encodePacked(vm.getCode("ERC20PresetPermit"), abi.encode("eur1")), 0));
 
         trader1 = vm.createWallet("trader1");
         trader2 = vm.createWallet("trader2");
@@ -49,17 +48,17 @@ contract OffchainAllowancesTest is Helper(false) {
 
     function test_eip_2612_permits_trader_allowance_with_settlement() external {
         // mint and approve tokens to and from trader1
-        EUR1.mint(trader1.addr, 1 ether);
+        eur1.mint(trader1.addr, 1 ether);
         vm.prank(trader1.addr);
-        EUR1.approve(vaultRelayer, type(uint256).max);
+        eur1.approve(vaultRelayer, type(uint256).max);
 
-        // place order to sell 1 EUR1 for min 1 EUR2 from trader1
+        // place order to sell 1 eur1 for min 1 eur2 from trader1
         encoder.signEncodeTrade(
             vm,
             trader1,
             GPv2Order.Data({
-                sellToken: EUR1,
-                buyToken: EUR2,
+                sellToken: eur1,
+                buyToken: eur2,
                 receiver: trader1.addr,
                 sellAmount: 1 ether,
                 buyAmount: 1 ether,
@@ -77,26 +76,26 @@ contract OffchainAllowancesTest is Helper(false) {
         );
 
         // mint some tokens to trader2
-        EUR2.mint(trader2.addr, 1 ether);
-        uint256 nonce = IERC2612(address(EUR2)).nonces(trader2.addr);
-        (uint8 v, bytes32 r, bytes32 s) = _permit(EUR2, trader2, vaultRelayer, 1 ether, nonce, 0xffffffff);
+        eur2.mint(trader2.addr, 1 ether);
+        uint256 nonce = IERC2612(address(eur2)).nonces(trader2.addr);
+        (uint8 v, bytes32 r, bytes32 s) = _permit(eur2, trader2, vaultRelayer, 1 ether, nonce, 0xffffffff);
         // interaction for setting the approval with permit
         encoder.addInteraction(
             GPv2Interaction.Data({
-                target: address(EUR2),
+                target: address(eur2),
                 value: 0,
                 callData: abi.encodeCall(IERC2612.permit, (trader2.addr, vaultRelayer, 1 ether, 0xffffffff, v, r, s))
             }),
             SettlementEncoder.InteractionStage.PRE
         );
 
-        // buy 1 EUR1 with max 1 EUR2
+        // buy 1 eur1 with max 1 eur2
         encoder.signEncodeTrade(
             vm,
             trader2,
             GPv2Order.Data({
-                sellToken: EUR2,
-                buyToken: EUR1,
+                sellToken: eur2,
+                buyToken: eur1,
                 receiver: trader2.addr,
                 sellAmount: 1 ether,
                 buyAmount: 1 ether,
@@ -115,8 +114,8 @@ contract OffchainAllowancesTest is Helper(false) {
 
         // set prices
         IERC20[] memory tokens = new IERC20[](2);
-        tokens[0] = EUR1;
-        tokens[1] = EUR2;
+        tokens[0] = eur1;
+        tokens[1] = eur2;
         uint256[] memory prices = new uint256[](2);
         prices[0] = 1;
         prices[1] = 1;
@@ -126,22 +125,22 @@ contract OffchainAllowancesTest is Helper(false) {
         vm.prank(solver);
         settle(encodedSettlement);
 
-        assertEq(EUR2.balanceOf(trader2.addr), 0, "permit didnt work");
+        assertEq(eur2.balanceOf(trader2.addr), 0, "permit didnt work");
     }
 
     function test_allows_setting_vault_relayer_approval_with_interactions() external {
         // mint and approve tokens to and from trader1
-        EUR1.mint(trader1.addr, 1 ether);
+        eur1.mint(trader1.addr, 1 ether);
         vm.prank(trader1.addr);
-        EUR1.approve(vaultRelayer, type(uint256).max);
+        eur1.approve(vaultRelayer, type(uint256).max);
 
-        // place order to sell 1 EUR1 for min 1 EUR2 from trader1
+        // place order to sell 1 eur1 for min 1 eur2 from trader1
         encoder.signEncodeTrade(
             vm,
             trader1,
             GPv2Order.Data({
-                sellToken: EUR1,
-                buyToken: EUR2,
+                sellToken: eur1,
+                buyToken: eur2,
                 receiver: trader1.addr,
                 sellAmount: 1 ether,
                 buyAmount: 1 ether,
@@ -159,14 +158,14 @@ contract OffchainAllowancesTest is Helper(false) {
         );
 
         // mint some tokens to trader2
-        EUR2.mint(trader2.addr, 1 ether);
+        eur2.mint(trader2.addr, 1 ether);
         // deposit tokens into balancer internal balance
         vm.startPrank(trader2.addr);
-        EUR2.approve(address(vault), type(uint256).max);
+        eur2.approve(address(vault), type(uint256).max);
         IVault.UserBalanceOp[] memory ops = new IVault.UserBalanceOp[](1);
         ops[0] = IVault.UserBalanceOp({
             kind: IVault.UserBalanceOpKind.DEPOSIT_INTERNAL,
-            asset: EUR2,
+            asset: eur2,
             amount: 1 ether,
             sender: trader2.addr,
             recipient: payable(trader2.addr)
@@ -193,8 +192,8 @@ contract OffchainAllowancesTest is Helper(false) {
             vm,
             trader2,
             GPv2Order.Data({
-                sellToken: EUR2,
-                buyToken: EUR1,
+                sellToken: eur2,
+                buyToken: eur1,
                 receiver: trader2.addr,
                 sellAmount: 1 ether,
                 buyAmount: 1 ether,
@@ -213,8 +212,8 @@ contract OffchainAllowancesTest is Helper(false) {
 
         // set prices
         IERC20[] memory tokens = new IERC20[](2);
-        tokens[0] = EUR1;
-        tokens[1] = EUR2;
+        tokens[0] = eur1;
+        tokens[1] = eur2;
         uint256[] memory prices = new uint256[](2);
         prices[0] = 1;
         prices[1] = 1;
@@ -225,7 +224,7 @@ contract OffchainAllowancesTest is Helper(false) {
         vm.prank(solver);
         settle(encodedSettlement);
 
-        assertEq(EUR2.balanceOf(trader2.addr), 0, "balancer signed approval didnt work");
+        assertEq(eur2.balanceOf(trader2.addr), 0, "balancer signed approval didnt work");
     }
 
     function _permit(
