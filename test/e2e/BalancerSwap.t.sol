@@ -6,13 +6,9 @@ import {Vm} from "forge-std/Vm.sol";
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 import {IVault} from "src/contracts/interfaces/IVault.sol";
 
-import {GPv2Interaction} from "src/contracts/libraries/GPv2Interaction.sol";
 import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
-import {Eip712} from "../libraries/Eip712.sol";
-
-import {Sign} from "../libraries/Sign.sol";
 import {SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
 import {SwapEncoder} from "../libraries/encoders/SwapEncoder.sol";
 import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
@@ -63,20 +59,20 @@ contract BalancerSwapTest is Helper(false) {
         tokens[1] = token2;
         tokens[2] = token3;
 
-        uint256 LOTS = 10000 ether;
+        uint256 lots = 10000 ether;
 
         for (uint256 i = 0; i < tokens.length; i++) {
             (IERC20Mintable token0_, IERC20Mintable token1_) = (tokens[i], tokens[(i + 1) % tokens.length]);
             (IERC20Mintable tokenA, IERC20Mintable tokenB) =
                 address(token0_) < address(token1_) ? (token0_, token1_) : (token1_, token0_);
 
-            uint256 TWO_TOKEN_SPECIALIZATION = 2;
+            uint256 twoTokenSpecialization = 2;
 
             vm.startPrank(deployer);
             IMockPool pool = IMockPool(
                 _create(
                     abi.encodePacked(
-                        vm.getCode("balancer/test/MockPool.json"), abi.encode(address(vault), TWO_TOKEN_SPECIALIZATION)
+                        vm.getCode("balancer/test/MockPool.json"), abi.encode(address(vault), twoTokenSpecialization)
                     ),
                     0
                 )
@@ -91,14 +87,14 @@ contract BalancerSwapTest is Helper(false) {
             vm.stopPrank();
 
             for (uint256 j = 0; j < tks.length; j++) {
-                IERC20Mintable(address(tks[j])).mint(pooler.addr, LOTS);
+                IERC20Mintable(address(tks[j])).mint(pooler.addr, lots);
                 vm.prank(pooler.addr);
                 tks[j].approve(address(vault), type(uint256).max);
             }
 
             uint256[] memory maxAmountsIn = new uint256[](2);
-            maxAmountsIn[0] = LOTS;
-            maxAmountsIn[1] = LOTS;
+            maxAmountsIn[0] = lots;
+            maxAmountsIn[1] = lots;
             uint256[] memory poolFees = new uint256[](2);
             IBalancerVault.JoinPoolRequest memory request = IBalancerVault.JoinPoolRequest({
                 assets: tks,
