@@ -7,11 +7,7 @@ import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 import {GPv2Transfer} from "src/contracts/libraries/GPv2Transfer.sol";
 
 import {
-    GPv2Interaction,
-    GPv2Order,
-    GPv2Signing,
-    GPv2Trade,
-    SettlementEncoder
+    GPv2Interaction, GPv2Order, GPv2Signing, SettlementEncoder
 } from "test/libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "test/libraries/encoders/TokenRegistry.sol";
 
