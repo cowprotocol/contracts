@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+// solhint-disable-next-line compiler-version
 pragma solidity ^0.7;
 
 import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
@@ -91,6 +92,7 @@ contract EIP173Proxy is Proxy {
         }
 
         if (data.length > 0) {
+            // solhint-disable-next-line avoid-low-level-calls
             (bool success,) = impl.delegatecall(data);
             if (!success) {
                 assembly {

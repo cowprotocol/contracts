@@ -10,7 +10,6 @@ import {
     GPv2Interaction,
     GPv2Settlement,
     GPv2Trade,
-    GPv2Transfer,
     IERC20,
     IVault
 } from "src/contracts/GPv2Settlement.sol";
@@ -31,6 +30,7 @@ interface IERC20Mintable is IERC20 {
 }
 
 // solhint-disable func-name-mixedcase
+// solhint-disable max-states-count
 abstract contract Helper is Test {
     using stdJson for string;
     using SettlementEncoder for SettlementEncoder.State;
