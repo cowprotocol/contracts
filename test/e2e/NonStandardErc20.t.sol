@@ -7,13 +7,7 @@ import {ERC20NoReturn, ERC20ReturningUint} from "../src/NonStandardERC20.sol";
 import {Helper} from "./Helper.sol";
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 
-import {
-    GPv2Interaction,
-    GPv2Order,
-    GPv2Signing,
-    GPv2Trade,
-    SettlementEncoder
-} from "../libraries/encoders/SettlementEncoder.sol";
+import {GPv2Order, GPv2Signing, SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
 
 using SettlementEncoder for SettlementEncoder.State;
