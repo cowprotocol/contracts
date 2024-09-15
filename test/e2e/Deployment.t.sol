@@ -98,7 +98,7 @@ contract DeploymentTest is Helper(false) {
     }
 
     function _computeCreate2Addr(bytes memory initCode) internal view returns (address) {
-        return vm.computeCreate2Address(SALT, hashInitCode(initCode), address(this));
+        return vm.computeCreate2Address(SALT, hashInitCode(initCode), deployer);
     }
 
     function _implementationAddress(address proxy) internal view returns (address) {
