@@ -5,13 +5,7 @@ import {Vm} from "forge-std/Vm.sol";
 
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 
-import {
-    GPv2Interaction,
-    GPv2Order,
-    GPv2Signing,
-    GPv2Trade,
-    SettlementEncoder
-} from "../libraries/encoders/SettlementEncoder.sol";
+import {GPv2Order, GPv2Signing, SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
 import {Helper, IERC20Mintable} from "./Helper.sol";
 
@@ -20,18 +14,18 @@ using TokenRegistry for TokenRegistry.State;
 using TokenRegistry for Registry;
 
 contract WineOilTest is Helper(false) {
-    IERC20Mintable EUR;
-    IERC20Mintable OIL;
-    IERC20Mintable WINE;
+    IERC20Mintable eur;
+    IERC20Mintable oil;
+    IERC20Mintable wine;
 
     uint256 constant STARTING_BALANCE = 1000 ether;
 
     function setUp() public override {
         super.setUp();
 
-        EUR = deployMintableErc20("EUR", "EUR");
-        OIL = deployMintableErc20("OIL", "OIL");
-        WINE = deployMintableErc20("WINE", "WINE");
+        eur = deployMintableErc20("eur", "eur");
+        oil = deployMintableErc20("oil", "oil");
+        wine = deployMintableErc20("wine", "wine");
     }
 
     // Settlement for the RetrETH wine and olive oil market:
@@ -51,12 +45,12 @@ contract WineOilTest is Helper(false) {
         Vm.Wallet memory trader4 = vm.createWallet("trader4");
         uint256 feeAmount = 1 ether;
 
-        // sell 12 WINE for min 12 OIL
+        // sell 12 wine for min 12 oil
         _createOrder(
             trader1,
             _orderData({
-                sellToken: WINE,
-                buyToken: OIL,
+                sellToken: wine,
+                buyToken: oil,
                 sellAmount: 12 ether,
                 buyAmount: 12 ether,
                 feeAmount: feeAmount,
@@ -65,12 +59,12 @@ contract WineOilTest is Helper(false) {
             }),
             0
         );
-        // sell 15 OIL for min 180 EUR
+        // sell 15 oil for min 180 eur
         _createOrder(
             trader2,
             _orderData({
-                sellToken: OIL,
-                buyToken: EUR,
+                sellToken: oil,
+                buyToken: eur,
                 sellAmount: 15 ether,
                 buyAmount: 180 ether,
                 feeAmount: feeAmount,
@@ -79,13 +73,13 @@ contract WineOilTest is Helper(false) {
             }),
             0
         );
-        // buy 4 OIL with max 52 EUR
+        // buy 4 oil with max 52 eur
         uint256 order3ExecutedAmount = uint256(27 ether) / 13;
         _createOrder(
             trader3,
             _orderData({
-                sellToken: EUR,
-                buyToken: OIL,
+                sellToken: eur,
+                buyToken: oil,
                 sellAmount: 52 ether,
                 buyAmount: 4 ether,
                 feeAmount: feeAmount,
@@ -94,13 +88,13 @@ contract WineOilTest is Helper(false) {
             }),
             order3ExecutedAmount
         );
-        // buy 20 WINE with max 280 EUR
+        // buy 20 wine with max 280 eur
         uint256 order4ExecutedAmount = 12 ether;
         _createOrder(
             trader4,
             _orderData({
-                sellToken: EUR,
-                buyToken: WINE,
+                sellToken: eur,
+                buyToken: wine,
                 sellAmount: 280 ether,
                 buyAmount: 20 ether,
                 feeAmount: feeAmount,
@@ -115,9 +109,9 @@ contract WineOilTest is Helper(false) {
         {
             // set token prices
             IERC20[] memory tokens = new IERC20[](3);
-            tokens[0] = EUR;
-            tokens[1] = OIL;
-            tokens[2] = WINE;
+            tokens[0] = eur;
+            tokens[1] = oil;
+            tokens[2] = wine;
             uint256[] memory prices = new uint256[](3);
             prices[0] = 1 ether;
             prices[1] = oilPrice;
@@ -132,39 +126,39 @@ contract WineOilTest is Helper(false) {
         settle(encodedSettlement);
 
         assertEq(
-            WINE.balanceOf(trader1.addr),
+            wine.balanceOf(trader1.addr),
             STARTING_BALANCE - 12 ether - feeAmount,
             "trader1 sold token amounts not as expected"
         );
         uint256 trader1AmountOut = ceilDiv(uint256(12 ether * 14 ether), 13 ether);
-        assertEq(OIL.balanceOf(trader1.addr), trader1AmountOut, "trader1 amountOut not as expected");
+        assertEq(oil.balanceOf(trader1.addr), trader1AmountOut, "trader1 amountOut not as expected");
 
         assertEq(
-            OIL.balanceOf(trader2.addr),
+            oil.balanceOf(trader2.addr),
             STARTING_BALANCE - 15 ether - feeAmount,
             "trader2 sold token amounts not as expected"
         );
-        assertEq(EUR.balanceOf(trader2.addr), 15 ether * 13, "trader2 amountOut not as expected");
+        assertEq(eur.balanceOf(trader2.addr), 15 ether * 13, "trader2 amountOut not as expected");
 
-        // order: buy 4 OIL with max 52 EUR, partial execution
+        // order: buy 4 oil with max 52 eur, partial execution
         uint256 order3SellAmount = order3ExecutedAmount * oilPrice / 1 ether;
         uint256 order3FeeAmount = feeAmount * order3ExecutedAmount / 4 ether;
         assertEq(
-            EUR.balanceOf(trader3.addr),
+            eur.balanceOf(trader3.addr),
             STARTING_BALANCE - order3SellAmount - order3FeeAmount,
             "trader3 sold token amount not as expected"
         );
-        assertEq(OIL.balanceOf(trader3.addr), order3ExecutedAmount, "trader3 amountOut not as expected");
+        assertEq(oil.balanceOf(trader3.addr), order3ExecutedAmount, "trader3 amountOut not as expected");
 
-        // order: buy 20 WINE with max 280 EUR, partial execution
+        // order: buy 20 wine with max 280 eur, partial execution
         uint256 order4SellAmount = order4ExecutedAmount * winePrice / 1 ether;
         uint256 order4FeeAmount = feeAmount * order4ExecutedAmount / 20 ether;
         assertEq(
-            EUR.balanceOf(trader4.addr),
+            eur.balanceOf(trader4.addr),
             STARTING_BALANCE - order4SellAmount - order4FeeAmount,
             "trader4 sold token amount not as expected"
         );
-        assertEq(WINE.balanceOf(trader4.addr), order4ExecutedAmount, "trader4 amountOut not as expected");
+        assertEq(wine.balanceOf(trader4.addr), order4ExecutedAmount, "trader4 amountOut not as expected");
     }
 
     function _createOrder(Vm.Wallet memory wallet, GPv2Order.Data memory order, uint256 executedAmount) internal {
