@@ -1,25 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8;
 
-import {Vm} from "forge-std/Vm.sol";
-
-import {IERC20} from "src/contracts/interfaces/IERC20.sol";
-import {IVault} from "src/contracts/interfaces/IVault.sol";
-
 import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 
-import {GPv2Settlement} from "src/contracts/GPv2Settlement.sol";
-import {GPv2Interaction} from "src/contracts/libraries/GPv2Interaction.sol";
-import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
-import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
-
-import {Eip712} from "../libraries/Eip712.sol";
-
-import {Sign} from "../libraries/Sign.sol";
-import {SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
-import {SwapEncoder} from "../libraries/encoders/SwapEncoder.sol";
-import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
-import {Helper, IERC20Mintable} from "./Helper.sol";
+import {Helper} from "./Helper.sol";
 
 interface IEIP173Proxy {
     function owner() external view returns (address);
