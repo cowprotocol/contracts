@@ -57,6 +57,8 @@ abstract contract Helper is Test {
 
     WETH9 weth;
 
+    bytes32 constant SALT = "Mattresses in Berlin!";
+
     constructor(bool _isForked) {
         isForked = _isForked;
     }
@@ -78,16 +80,16 @@ abstract contract Helper is Test {
         vm.startPrank(deployer);
 
         // Deploy the allowlist manager
-        allowListImpl = new GPv2AllowListAuthentication();
+        allowListImpl = new GPv2AllowListAuthentication{salt: SALT}();
         allowList = GPv2AllowListAuthentication(
-            deployProxy(address(allowListImpl), owner, abi.encodeCall(allowListImpl.initializeManager, (owner)))
+            deployProxy(address(allowListImpl), owner, abi.encodeCall(allowListImpl.initializeManager, (owner)), SALT)
         );
         authenticator = allowList;
 
         (balancerVaultAuthorizer, vault) = _deployBalancerVault();
 
         // Deploy the settlement contract
-        settlement = new GPv2Settlement(authenticator, vault);
+        settlement = new GPv2Settlement{salt: SALT}(authenticator, vault);
         vaultRelayer = address(settlement.vaultRelayer());
 
         // Reset the prank
@@ -175,16 +177,24 @@ abstract contract Helper is Test {
         require(deployed != address(0), "deployment failed");
     }
 
+    function _create2(bytes memory initCode, uint256 value, bytes32 salt) internal returns (address deployed) {
+        assembly ("memory-safe") {
+            deployed := create2(value, add(initCode, 0x20), mload(initCode), salt)
+        }
+        require(deployed != address(0), "deployment failed");
+    }
+
     function deployMintableErc20(string memory name, string memory symbol) internal returns (IERC20Mintable token) {
         // need to use like this because OZ requires ^0.7 and tests are on ^0.8
         bytes memory initCode = abi.encodePacked(vm.getCode("ERC20Mintable"), abi.encode(name, symbol));
         token = IERC20Mintable(_create(initCode, 0));
     }
 
-    function deployProxy(address implAddress, address ownerAddress, bytes memory data)
+    function deployProxy(address implAddress, address ownerAddress, bytes memory data, bytes32 salt)
         internal
         returns (address proxy)
     {
-        proxy = _create(abi.encodePacked(vm.getCode("EIP173Proxy"), abi.encode(implAddress, ownerAddress, data)), 0);
+        proxy =
+            _create2(abi.encodePacked(vm.getCode("EIP173Proxy"), abi.encode(implAddress, ownerAddress, data)), 0, salt);
     }
 }
