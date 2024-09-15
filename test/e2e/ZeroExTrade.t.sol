@@ -8,7 +8,6 @@ import {GPv2Interaction} from "src/contracts/libraries/GPv2Interaction.sol";
 import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
 import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
-import {Eip712} from "../libraries/Eip712.sol";
 import {SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
 import {Helper, IERC20Mintable} from "./Helper.sol";
@@ -19,8 +18,8 @@ using TokenRegistry for TokenRegistry.State;
 using TokenRegistry for Registry;
 
 contract ZeroExTradeTest is Helper(false) {
-    IERC20Mintable OWL;
-    IERC20Mintable GNO;
+    IERC20Mintable owl;
+    IERC20Mintable gno;
 
     Vm.Wallet marketMaker;
 
@@ -31,8 +30,8 @@ contract ZeroExTradeTest is Helper(false) {
     function setUp() public override {
         super.setUp();
 
-        OWL = deployMintableErc20("OWL", "OWL");
-        GNO = deployMintableErc20("GNO", "GNO");
+        owl = deployMintableErc20("owl", "owl");
+        gno = deployMintableErc20("gno", "gno");
 
         marketMaker = vm.createWallet("marketMaker");
 
@@ -41,16 +40,16 @@ contract ZeroExTradeTest is Helper(false) {
 
     function test_should_settle_an_eoa_trade_with_a_0x_trade() external {
         // mint some tokens to trader
-        OWL.mint(trader.addr, 140 ether);
+        owl.mint(trader.addr, 140 ether);
         vm.prank(trader.addr);
-        OWL.approve(vaultRelayer, type(uint256).max);
+        owl.approve(vaultRelayer, type(uint256).max);
 
-        // place order to buy 1 OWL with max 130 GNO
+        // place order to buy 1 owl with max 130 gno
         GPv2Order.Data memory makerOrder = GPv2Order.Data({
             kind: GPv2Order.KIND_BUY,
             partiallyFillable: false,
-            buyToken: GNO,
-            sellToken: OWL,
+            buyToken: gno,
+            sellToken: owl,
             buyAmount: 1 ether,
             sellAmount: 130 ether,
             feeAmount: 10 ether,
@@ -63,9 +62,9 @@ contract ZeroExTradeTest is Helper(false) {
         encoder.signEncodeTrade(vm, trader, makerOrder, domainSeparator, GPv2Signing.Scheme.Eip712, 0);
 
         // mint some tokens to market maker
-        GNO.mint(marketMaker.addr, 1000 ether);
+        gno.mint(marketMaker.addr, 1000 ether);
         vm.prank(marketMaker.addr);
-        GNO.approve(erc20Proxy, type(uint256).max);
+        gno.approve(erc20Proxy, type(uint256).max);
 
         // sign zero ex order
         uint256 zeroExGnoPrice = 110;
@@ -74,9 +73,9 @@ contract ZeroExTradeTest is Helper(false) {
             exchange,
             ZeroExV2SimpleOrder({
                 takerAddress: address(settlement),
-                makerAssetAddress: address(GNO),
+                makerAssetAddress: address(gno),
                 makerAssetAmount: 1000 ether,
-                takerAssetAddress: address(OWL),
+                takerAssetAddress: address(owl),
                 takerAssetAmount: 1000 ether * zeroExGnoPrice
             })
         );
@@ -91,7 +90,7 @@ contract ZeroExTradeTest is Helper(false) {
         // add interactions for filling the zero ex order in settlement
         encoder.addInteraction(
             GPv2Interaction.Data({
-                target: address(OWL),
+                target: address(owl),
                 value: 0,
                 callData: abi.encodeCall(IERC20.approve, (erc20Proxy, zeroExTakerAmount))
             }),
@@ -108,8 +107,8 @@ contract ZeroExTradeTest is Helper(false) {
 
         // set token prices
         IERC20[] memory tokens = new IERC20[](2);
-        tokens[0] = OWL;
-        tokens[1] = GNO;
+        tokens[0] = owl;
+        tokens[1] = gno;
         uint256[] memory prices = new uint256[](2);
         prices[0] = 1;
         prices[1] = gpv2GnoPrice;
@@ -122,13 +121,11 @@ contract ZeroExTradeTest is Helper(false) {
         vm.prank(solver);
         settle(encodedSettlement);
 
-        assertEq(OWL.balanceOf(trader.addr), gpv2OwlSurplus, "trader owl surplus not as expected");
+        assertEq(owl.balanceOf(trader.addr), gpv2OwlSurplus, "trader owl surplus not as expected");
         assertEq(
-            OWL.balanceOf(address(settlement)),
+            owl.balanceOf(address(settlement)),
             zeroExOwlSurplus + makerOrder.feeAmount,
             "settlement surplus and fee not as expected"
         );
     }
-
-    function _generateSettlementSolution() internal {}
 }

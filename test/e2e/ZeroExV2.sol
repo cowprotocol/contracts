@@ -42,8 +42,6 @@ struct ZeroExV2SimpleOrder {
 }
 
 library ZeroExV2 {
-    event log_bytes32(bytes32);
-
     function signSimpleOrder(Vm.Wallet memory wallet, address exchange, ZeroExV2SimpleOrder memory simpleOrder)
         internal
         returns (ZeroExV2Order memory order, bytes32 hash, uint8 v, bytes32 r, bytes32 s)
