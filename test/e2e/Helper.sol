@@ -30,56 +30,6 @@ interface IERC20Mintable is IERC20 {
     function burn(uint256) external;
 }
 
-contract Harness is GPv2Settlement {
-    constructor(GPv2Authentication authenticator_, IVault vault) GPv2Settlement(authenticator_, vault) {}
-
-    function setFilledAmount(bytes calldata orderUid, uint256 amount) external {
-        filledAmount[orderUid] = amount;
-    }
-
-    function computeTradeExecutionsTest(
-        IERC20[] calldata tokens,
-        uint256[] calldata clearingPrices,
-        GPv2Trade.Data[] calldata trades
-    ) external returns (GPv2Transfer.Data[] memory inTransfers, GPv2Transfer.Data[] memory outTransfers) {
-        (inTransfers, outTransfers) = computeTradeExecutions(tokens, clearingPrices, trades);
-    }
-
-    function computeTradeExecutionMemoryTest() external returns (uint256 mem) {
-        RecoveredOrder memory recoveredOrder;
-        GPv2Transfer.Data memory inTransfer;
-        GPv2Transfer.Data memory outTransfer;
-
-        // NOTE: Solidity stores the free memory pointer at address 0x40. Read
-        // it before and after calling `processOrder` to ensure that there are
-        // no memory allocations.
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            mem := mload(0x40)
-        }
-
-        recoveredOrder.data.validTo = uint32(block.timestamp);
-        computeTradeExecution(recoveredOrder, 1, 1, 0, inTransfer, outTransfer);
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            mem := sub(mload(0x40), mem)
-        }
-    }
-
-    function executeInteractionsTest(GPv2Interaction.Data[] calldata interactions) external {
-        executeInteractions(interactions);
-    }
-
-    function freeFilledAmountStorageTest(bytes[] calldata orderUids) external {
-        this.freeFilledAmountStorage(orderUids);
-    }
-
-    function freePreSignatureStorageTest(bytes[] calldata orderUids) external {
-        this.freePreSignatureStorage(orderUids);
-    }
-}
-
 // solhint-disable func-name-mixedcase
 abstract contract Helper is Test {
     using stdJson for string;
@@ -87,7 +37,7 @@ abstract contract Helper is Test {
 
     address internal deployer;
     address internal owner;
-    Harness internal settlement;
+    GPv2Settlement internal settlement;
     bytes32 internal domainSeparator;
     GPv2Authentication internal authenticator;
     IVault internal vault;
@@ -137,7 +87,7 @@ abstract contract Helper is Test {
         (balancerVaultAuthorizer, vault) = _deployBalancerVault();
 
         // Deploy the settlement contract
-        settlement = new Harness(authenticator, vault);
+        settlement = new GPv2Settlement(authenticator, vault);
         vaultRelayer = address(settlement.vaultRelayer());
 
         // Reset the prank
