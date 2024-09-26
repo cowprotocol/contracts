@@ -30,20 +30,10 @@ contract InternalBalancesTest is Helper(false) {
         token1 = deployMintableErc20("TK1", "TK1");
         token2 = deployMintableErc20("TK2", "TK2");
 
-        GPv2Interaction.Data[] memory interactions = new GPv2Interaction.Data[](2);
-        interactions[0] = GPv2Interaction.Data({
-            target: address(token1),
-            value: 0,
-            callData: abi.encodeCall(IERC20.approve, (address(vault), type(uint256).max))
-        });
-        interactions[1] = GPv2Interaction.Data({
-            target: address(token2),
-            value: 0,
-            callData: abi.encodeCall(IERC20.approve, (address(vault), type(uint256).max))
-        });
-        SettlementEncoder.EncodedSettlement memory encodedSettlement = encoder.encode(interactions);
-        vm.prank(solver);
-        settle(encodedSettlement);
+        vm.startPrank(address(settlement));
+        token1.approve(address(vault), type(uint256).max);
+        token2.approve(address(vault), type(uint256).max);
+        vm.stopPrank();
     }
 
     function test_should_settle_orders_buying_and_selling_with_internal_balances() external {
@@ -51,14 +41,6 @@ contract InternalBalancesTest is Helper(false) {
         Vm.Wallet memory trader2 = vm.createWallet("trader2");
         Vm.Wallet memory trader3 = vm.createWallet("trader3");
         Vm.Wallet memory trader4 = vm.createWallet("trader4");
-        vm.label(trader1.addr, "trader1");
-        vm.label(trader2.addr, "trader2");
-        vm.label(trader3.addr, "trader3");
-        vm.label(trader4.addr, "trader4");
-        vm.label(address(token1), "token1");
-        vm.label(address(token2), "token2");
-        vm.label(vaultRelayer, "vaultRelayer");
-        vm.label(address(vault), "vault");
 
         // mint some tokens to trader1
         _mintTokens(token1, trader1.addr, 1.001 ether);
