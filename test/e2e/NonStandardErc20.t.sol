@@ -3,12 +3,60 @@ pragma solidity ^0.8;
 
 import {Vm} from "forge-std/Vm.sol";
 
-import {ERC20NoReturn, ERC20ReturningUint} from "../src/NonStandardERC20.sol";
 import {Helper} from "./Helper.sol";
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 
 import {GPv2Order, GPv2Signing, SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
+
+abstract contract NonStandardERC20 {
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+
+    function mint(address to, uint256 amount) external {
+        balanceOf[to] += amount;
+    }
+
+    function approve(address spender, uint256 amount) external {
+        allowance[msg.sender][spender] = amount;
+    }
+
+    function transfer_(address to, uint256 amount) internal {
+        balanceOf[msg.sender] -= amount;
+        balanceOf[to] += amount;
+    }
+
+    function transferFrom_(address from, address to, uint256 amount) internal {
+        allowance[from][msg.sender] -= amount;
+        balanceOf[from] -= amount;
+        balanceOf[to] += amount;
+    }
+}
+
+contract ERC20NoReturn is NonStandardERC20 {
+    function transfer(address to, uint256 amount) external {
+        transfer_(to, amount);
+    }
+
+    function transferFrom(address from, address to, uint256 amount) external {
+        transferFrom_(from, to, amount);
+    }
+}
+
+contract ERC20ReturningUint is NonStandardERC20 {
+    // Largest 256-bit prime :)
+    uint256 private constant OK = 115792089237316195423570985008687907853269984665640564039457584007913129639747;
+
+    function transfer(address to, uint256 amount) external returns (uint256) {
+        transfer_(to, amount);
+        return OK;
+    }
+
+    function transferFrom(address from, address to, uint256 amount) external returns (uint256) {
+        transferFrom_(from, to, amount);
+        return OK;
+    }
+}
 
 using SettlementEncoder for SettlementEncoder.State;
 using TokenRegistry for TokenRegistry.State;
