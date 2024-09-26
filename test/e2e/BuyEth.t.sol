@@ -71,10 +71,8 @@ contract BuyEthTest is Helper(true) {
         // give some usdt to trader2
         _mintUsdt(trader2.addr, 1201.2e6);
         // approve usdt for trading on the vault
-        vm.startPrank(trader2.addr);
-        USDT.approve(vaultRelayer, 0);
+        vm.prank(trader2.addr);
         USDT.approve(vaultRelayer, type(uint256).max);
-        vm.stopPrank();
         // place the usdt to eth swap order
         encoder.signEncodeTrade(
             vm,
