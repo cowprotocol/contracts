@@ -32,6 +32,7 @@ jobs:
     name: Foundry project
     runs-on: ubuntu-latest
     env:
+      # should support archive requests
       FORK_URL: 'https://eth.llamarpc.com'
       FORK_BLOCK_NUMBER: 20691292
     steps:
