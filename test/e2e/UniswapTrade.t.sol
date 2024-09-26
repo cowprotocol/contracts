@@ -27,7 +27,7 @@ interface IUniswapV2Pair {
     function swap(uint256, uint256, address, bytes calldata) external;
 }
 
-contract UniswapTradeTest is Helper(false) {
+contract UniswapTradeTest is Helper(true) {
     IERC20Mintable dai;
     IERC20Mintable wETH;
 
@@ -42,7 +42,7 @@ contract UniswapTradeTest is Helper(false) {
         dai = deployMintableErc20("dai", "dai");
         wETH = deployMintableErc20("wETH", "wETH");
 
-        factory = IUniswapV2Factory(_create(abi.encodePacked(_getCode("UniswapV2Factory"), abi.encode(address(0))), 0));
+        factory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
         uniswapPair = IUniswapV2Pair(factory.createPair(address(wETH), address(dai)));
 
         isWethToken0 = uniswapPair.token0() == address(wETH);
