@@ -6,7 +6,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 import {IVault} from "src/contracts/interfaces/IVault.sol";
 
-import {GPv2Interaction, GPv2Order, GPv2Signing, SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
+import {GPv2Order, GPv2Signing, SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
 import {Helper, IERC20Mintable} from "./Helper.sol";
 
