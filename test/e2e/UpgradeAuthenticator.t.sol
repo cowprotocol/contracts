@@ -3,13 +3,18 @@ pragma solidity ^0.8;
 
 import {GPv2AllowListAuthentication} from "src/contracts/GPv2AllowListAuthentication.sol";
 
-import {GPv2AllowListAuthenticationV2} from "../src/GPv2AllowListAuthenticationV2.sol";
 import {Helper} from "./Helper.sol";
 
 interface IEIP173Proxy {
     function upgradeTo(address) external;
     function transferOwnership(address) external;
     function owner() external view returns (address);
+}
+
+contract GPv2AllowListAuthenticationV2 is GPv2AllowListAuthentication {
+    function newMethod() external pure returns (uint256) {
+        return 1337;
+    }
 }
 
 contract UpgradeAuthenticatorTest is Helper(false) {
