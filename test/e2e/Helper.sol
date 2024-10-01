@@ -66,11 +66,13 @@ abstract contract Helper is Test {
     function setUp() public virtual {
         if (isForked) {
             uint256 blockNumber = vm.envUint("FORK_BLOCK_NUMBER");
-            string memory forkUrl = "https://eth.llamarpc.com";
+            string memory forkUrl;
 
             try vm.envString("FORK_URL") returns (string memory url) {
                 forkUrl = url;
-            } catch {}
+            } catch {
+                forkUrl = "https://eth.llamarpc.com";
+            }
 
             forkId = vm.createSelectFork(forkUrl, blockNumber);
             weth = WETH9(payable(WETH));
