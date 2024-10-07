@@ -38,7 +38,7 @@ interface IBalancerVault is IVault {
     function getInternalBalance(address user, IERC20[] calldata tokens) external view returns (uint256[] memory);
 }
 
-contract BalancerSwapTest is Helper(false) {
+contract BalancerSwapTest is Helper(true) {
     IERC20Mintable token1;
     IERC20Mintable token2;
     IERC20Mintable token3;
