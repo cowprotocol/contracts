@@ -21,6 +21,8 @@ import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
 address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
+uint256 constant FORK_BLOCK_NUMBER = 20913563;
+
 interface IAuthorizer {
     function grantRole(bytes32, address) external;
     function canPerform(bytes32 actionId, address account, address where) external view returns (bool);
@@ -71,7 +73,6 @@ abstract contract Helper is Test {
 
     function setUp() public virtual {
         if (isForked) {
-            uint256 blockNumber = vm.envUint("FORK_BLOCK_NUMBER");
             string memory forkUrl;
 
             try vm.envString("FORK_URL") returns (string memory url) {
@@ -80,7 +81,7 @@ abstract contract Helper is Test {
                 forkUrl = "https://eth.merkle.io";
             }
 
-            forkId = vm.createSelectFork(forkUrl, blockNumber);
+            forkId = vm.createSelectFork(forkUrl, FORK_BLOCK_NUMBER);
             weth = WETH9(payable(WETH));
         } else {
             weth = new WETH9();
