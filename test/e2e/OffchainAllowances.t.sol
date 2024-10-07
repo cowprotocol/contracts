@@ -256,7 +256,7 @@ contract OffchainAllowancesTest is Helper(false) {
     }
 
     function _balancerSetRelayerApprovalSignature(
-        Vm.Wallet memory wallet,
+        Vm.Wallet memory owner,
         bytes memory cd,
         address sender,
         uint256 nonce,
@@ -271,6 +271,6 @@ contract OffchainAllowancesTest is Helper(false) {
             deadline
         );
         bytes32 digest = keccak256(abi.encodePacked(hex"1901", ds, keccak256(ecd)));
-        (v, r, s) = vm.sign(wallet, digest);
+        (v, r, s) = vm.sign(owner, digest);
     }
 }
