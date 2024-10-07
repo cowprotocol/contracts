@@ -19,14 +19,20 @@ import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
 
 address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
 interface IAuthorizer {
     function grantRole(bytes32, address) external;
+    function canPerform(bytes32 actionId, address account, address where) external view returns (bool);
 }
 
 interface IERC20Mintable is IERC20 {
     function mint(address, uint256) external;
     function burn(uint256) external;
+}
+
+interface IBalancerVault is IVault {
+    function getAuthorizer() external view returns (address);
 }
 
 // solhint-disable func-name-mixedcase
@@ -136,15 +142,21 @@ abstract contract Helper is Test {
         });
     }
 
-    function _deployBalancerVault() internal returns (address, IVault) {
-        bytes memory authorizerInitCode = abi.encodePacked(_getBalancerBytecode("Authorizer"), abi.encode(owner));
-        address authorizer = _create(authorizerInitCode, 0);
+    function _deployBalancerVault() internal returns (address, IBalancerVault) {
+        if (isForked) {
+            IBalancerVault balancerVault = IBalancerVault(BALANCER_VAULT);
+            address authorizer = balancerVault.getAuthorizer();
+            return (authorizer, balancerVault);
+        } else {
+            bytes memory authorizerInitCode = abi.encodePacked(_getBalancerBytecode("Authorizer"), abi.encode(owner));
+            address authorizer = _create(authorizerInitCode, 0);
 
-        bytes memory vaultInitCode =
-            abi.encodePacked(_getBalancerBytecode("Vault"), abi.encode(authorizer, address(weth), 0, 0));
-        address deployedVault = _create(vaultInitCode, 0);
+            bytes memory vaultInitCode =
+                abi.encodePacked(_getBalancerBytecode("Vault"), abi.encode(authorizer, address(weth), 0, 0));
+            address deployedVault = _create(vaultInitCode, 0);
 
-        return (authorizer, IVault(deployedVault));
+            return (authorizer, IBalancerVault(deployedVault));
+        }
     }
 
     function _grantBalancerRolesToRelayer(address authorizer, address deployedVault, address relayer) internal {
@@ -162,8 +174,10 @@ abstract contract Helper is Test {
     function _grantBalancerActionRole(address authorizer, address balVault, address to, string memory action)
         internal
     {
-        vm.prank(owner);
-        IAuthorizer(authorizer).grantRole(_getActionId(action, balVault), to);
+        bytes32 actionId = _getActionId(action, balVault);
+        vm.mockCall(
+            address(authorizer), abi.encodeCall(IAuthorizer.canPerform, (actionId, to, balVault)), abi.encode(true)
+        );
     }
 
     function _getActionId(string memory fnDef, address vaultAddr) internal pure returns (bytes32) {
