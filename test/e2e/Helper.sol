@@ -77,7 +77,7 @@ abstract contract Helper is Test {
             try vm.envString("FORK_URL") returns (string memory url) {
                 forkUrl = url;
             } catch {
-                forkUrl = "https://eth.llamarpc.com";
+                forkUrl = "https://eth.merkle.io";
             }
 
             forkId = vm.createSelectFork(forkUrl, blockNumber);
