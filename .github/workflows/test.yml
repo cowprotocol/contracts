@@ -53,7 +53,7 @@ jobs:
           version: nightly
 
       - name: Run Forge build with ${{ matrix.profile }}
-        # We always build with 0.7.6 to ensure that the project is compatible with the oldest version
+        # Set FORK_URL only for default profile and build accordingly
         run: |
           forge --version
           if [ "${{ matrix.profile }}" == "solc-0.7.6" ]; then
@@ -66,5 +66,9 @@ jobs:
       - name: Run Forge tests
         if: matrix.profile != 'solc-0.7.6'
         run: |
+          if [ "${{ matrix.profile }}" == "default" ]; then
+            echo "Setting FORK_URL for default profile"
+            export FORK_URL="${{ secrets.MAINNET_ARCHIVE_RPC }}"
+          fi
           FOUNDRY_PROFILE=ci forge test -vvv
         id: test
