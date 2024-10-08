@@ -25,6 +25,7 @@ interface IUniswapV2Pair {
     function token0() external view returns (address);
     function mint(address) external;
     function swap(uint256, uint256, address, bytes calldata) external;
+    function getReserves() external view returns (uint256, uint256);
 }
 
 contract UniswapTradeTest is Helper(true) {
@@ -179,11 +180,16 @@ contract UniswapTradeTest is Helper(true) {
 
         assertEq(wETH.balanceOf(trader2.addr), 0.5 ether, "weth bought not correct amount");
         assertEq(dai.balanceOf(trader2.addr), 300.3 ether - (uniswapDaiOutAmount + 0.3 ether));
-    }
 
-    function _getCode(string memory artifactName) internal view returns (bytes memory) {
-        string memory data =
-            vm.readFile(string(abi.encodePacked("node_modules/@uniswap/v2-core/build/", artifactName, ".json")));
-        return vm.parseJsonBytes(data, ".bytecode");
+        uint256 finalWethReserve;
+        uint256 finalDaiReserve;
+
+        {
+            (uint256 token0Reserve, uint256 token1Reserve) = uniswapPair.getReserves();
+            (finalWethReserve, finalDaiReserve) =
+                isWethToken0 ? (token0Reserve, token1Reserve) : (token1Reserve, token0Reserve);
+        }
+        assertEq(finalWethReserve, wethReserve + uniswapWethInAmount, "weth reserve not as expected");
+        assertEq(finalDaiReserve, daiReserve - uniswapDaiOutAmount, "dai reserve not as expected");
     }
 }
