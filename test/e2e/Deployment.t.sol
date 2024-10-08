@@ -9,6 +9,9 @@ interface IEIP173Proxy {
     function owner() external view returns (address);
 }
 
+// ref: https://github.com/wighawag/hardhat-deploy/blob/e0ffcf9e7dc92b246e832c4d175f9dbd8b6df14d/solc_0.8/proxy/EIP173Proxy.sol
+bytes32 constant EIP173_IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+
 contract DeploymentTest is Helper(false) {
     event Metadata(string, bytes);
 
@@ -59,11 +62,11 @@ contract DeploymentTest is Helper(false) {
         );
     }
 
-    function test__authorization__authenticator_hash_dedicated_owner() external view {
+    function test__authorization__authenticator_has_dedicated_owner() external view {
         assertEq(IEIP173Proxy(address(allowList)).owner(), owner, "owner not as expected");
     }
 
-    function test__authorization__authenticator_hash_dedicated_manager() external view {
+    function test__authorization__authenticator_has_dedicated_manager() external view {
         assertEq(allowList.manager(), owner, "manager not as expected");
     }
 
@@ -103,7 +106,7 @@ contract DeploymentTest is Helper(false) {
 
     function _implementationAddress(address proxy) internal view returns (address) {
         return address(
-            uint160(uint256(vm.load(proxy, 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc)))
+            uint160(uint256(vm.load(proxy, EIP173_IMPLEMENTATION_SLOT)))
         );
     }
 }
