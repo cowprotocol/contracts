@@ -70,5 +70,9 @@ jobs:
       - name: Run Forge tests
         if: matrix.profile != 'solc-0.7.6'
         run: |
+          if [ "${{ matrix.profile }}" == "default" ]; then
+            echo "Setting FORK_URL for default profile"
+            export FORK_URL="${{ secrets.MAINNET_ARCHIVE_RPC }}"
+          fi
           FOUNDRY_PROFILE=ci forge test -vvv
         id: test
