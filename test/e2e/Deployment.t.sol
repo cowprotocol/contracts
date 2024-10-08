@@ -105,8 +105,6 @@ contract DeploymentTest is Helper(false) {
     }
 
     function _implementationAddress(address proxy) internal view returns (address) {
-        return address(
-            uint160(uint256(vm.load(proxy, EIP173_IMPLEMENTATION_SLOT)))
-        );
+        return address(uint160(uint256(vm.load(proxy, EIP173_IMPLEMENTATION_SLOT))));
     }
 }
