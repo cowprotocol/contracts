@@ -73,25 +73,6 @@ export interface Order {
 }
 
 /**
- * Gnosis Protocol v2 order cancellation data.
- */
-export interface OrderCancellations {
-  /**
-   * The unique identifier of the order to be cancelled.
-   */
-  orderUids: BytesLike[];
-}
-
-/**
- * Marker address to indicate that an order is buying Ether.
- *
- * Note that this address is only has special meaning in the `buyToken` and will
- * be treated as a ERC20 token address in the `sellToken` position, causing the
- * settlement to revert.
- */
-export const BUY_ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-
-/**
  * Gnosis Protocol v2 order flags.
  */
 export type OrderFlags = Pick<
@@ -102,12 +83,12 @@ export type OrderFlags = Pick<
 /**
  * A timestamp value.
  */
-export type Timestamp = number | Date;
+type Timestamp = number | Date;
 
 /**
  * A hash-like app data value.
  */
-export type HashLike = BytesLike | number;
+type HashLike = BytesLike | number;
 
 /**
  * Order kind.
@@ -168,7 +149,7 @@ export const ORDER_TYPE_FIELDS = [
  * @param time The timestamp value to normalize.
  * @return Unix timestamp or number of seconds since the Unix Epoch.
  */
-export function timestamp(t: Timestamp): number {
+function timestamp(t: Timestamp): number {
   return typeof t === "number" ? t : ~~(t.getTime() / 1000);
 }
 
@@ -177,7 +158,7 @@ export function timestamp(t: Timestamp): number {
  * @param hashLike A hash-like value to normalize.
  * @returns A 32-byte hash encoded as a hex-string.
  */
-export function hashify(h: HashLike): string {
+function hashify(h: HashLike): string {
   return typeof h === "number"
     ? `0x${h.toString(16).padStart(64, "0")}`
     : ethers.utils.hexZeroPad(h, 32);
@@ -259,21 +240,6 @@ export function hashTypedData(
 }
 
 /**
- * Compute the 32-byte signing hash for the specified order.
- *
- * @param domain The EIP-712 domain separator to compute the hash for.
- * @param order The order to compute the digest for.
- * @return Hex-encoded 32-byte order digest.
- */
-export function hashOrder(domain: TypedDataDomain, order: Order): string {
-  return hashTypedData(
-    domain,
-    { Order: ORDER_TYPE_FIELDS },
-    normalizeOrder(order),
-  );
-}
-
-/**
  * The byte length of an order UID.
  */
 export const ORDER_UID_LENGTH = 56;
@@ -281,7 +247,7 @@ export const ORDER_UID_LENGTH = 56;
 /**
  * Order unique identifier parameters.
  */
-export interface OrderUidParams {
+interface OrderUidParams {
   /**
    * The EIP-712 order struct hash.
    */
@@ -294,21 +260,6 @@ export interface OrderUidParams {
    * The timestamp this order is valid until.
    */
   validTo: number | Date;
-}
-
-/**
- * Computes the order UID for an order and the given owner.
- */
-export function computeOrderUid(
-  domain: TypedDataDomain,
-  order: Order,
-  owner: string,
-): string {
-  return packOrderUidParams({
-    orderDigest: hashOrder(domain, order),
-    owner,
-    validTo: order.validTo,
-  });
 }
 
 /**
@@ -328,26 +279,4 @@ export function packOrderUidParams({
     ["bytes32", "address", "uint32"],
     [orderDigest, owner, timestamp(validTo)],
   );
-}
-
-/**
- * Extracts the order unique identifier parameters from the specified bytes.
- *
- * @param orderUid The order UID encoded as a hexadecimal string.
- * @returns The extracted order UID parameters.
- */
-export function extractOrderUidParams(orderUid: string): OrderUidParams {
-  const bytes = ethers.utils.arrayify(orderUid);
-  if (bytes.length != ORDER_UID_LENGTH) {
-    throw new Error("invalid order UID length");
-  }
-
-  const view = new DataView(bytes.buffer);
-  return {
-    orderDigest: ethers.utils.hexlify(bytes.subarray(0, 32)),
-    owner: ethers.utils.getAddress(
-      ethers.utils.hexlify(bytes.subarray(32, 52)),
-    ),
-    validTo: view.getUint32(52),
-  };
 }
