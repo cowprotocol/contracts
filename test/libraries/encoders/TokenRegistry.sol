@@ -105,8 +105,8 @@ library TokenRegistry {
         return (sellTokenIndex - 1, buyTokenIndex - 1);
     }
 
-    /// @dev Returns the token indices for the specified token
-    function tokenIndices(State storage state, IERC20 token) internal hydrateArray(state) returns (uint256) {
+    /// @dev Returns the token index for the specified token
+    function tokenIndex(State storage state, IERC20 token) internal hydrateArray(state) returns (uint256) {
         uint256 index = pushIfNotPresentIndexOf(state, token);
         return index - 1;
     }

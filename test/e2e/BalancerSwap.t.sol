@@ -105,6 +105,7 @@ contract BalancerSwapTest is Helper(true) {
                 userData: abi.encode(maxAmountsIn, poolFees),
                 fromInternalBalance: false
             });
+            // poolerAddr declared as separate var to prevent stack too deep errors
             address poolerAddr = pooler.addr;
             bytes32 poolId = pool.getPoolId();
             vm.prank(poolerAddr);

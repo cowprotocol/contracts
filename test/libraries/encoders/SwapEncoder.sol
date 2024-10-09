@@ -124,8 +124,8 @@ library SwapEncoder {
     function toSwapStep(State storage state, Swap memory swap) private returns (IVault.BatchSwapStep memory step) {
         TokenRegistry.State storage tokenRegistry = state.tokenRegistry.tokenRegistry();
         step.poolId = swap.poolId;
-        step.assetInIndex = TokenRegistry.tokenIndices(tokenRegistry, swap.assetIn);
-        step.assetOutIndex = TokenRegistry.tokenIndices(tokenRegistry, swap.assetOut);
+        step.assetInIndex = TokenRegistry.tokenIndex(tokenRegistry, swap.assetIn);
+        step.assetOutIndex = TokenRegistry.tokenIndex(tokenRegistry, swap.assetOut);
         step.amount = swap.amount;
         step.userData = swap.userData;
     }
