@@ -240,21 +240,6 @@ export function hashTypedData(
 }
 
 /**
- * Compute the 32-byte signing hash for the specified order.
- *
- * @param domain The EIP-712 domain separator to compute the hash for.
- * @param order The order to compute the digest for.
- * @return Hex-encoded 32-byte order digest.
- */
-function hashOrder(domain: TypedDataDomain, order: Order): string {
-  return hashTypedData(
-    domain,
-    { Order: ORDER_TYPE_FIELDS },
-    normalizeOrder(order),
-  );
-}
-
-/**
  * The byte length of an order UID.
  */
 export const ORDER_UID_LENGTH = 56;
