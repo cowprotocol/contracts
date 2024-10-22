@@ -139,6 +139,11 @@ export default {
       ...sharedNetworkConfig,
       url: "https://arb1.arbitrum.io/rpc",
     },
+    base: {
+      ...sharedNetworkConfig,
+      url: "https://mainnet.base.org",
+      chainId: 8453,
+    },
   },
   namedAccounts: {
     // Note: accounts defined by a number refer to the the accounts as configured
@@ -166,6 +171,17 @@ export default {
     apiKey: {
       sepolia: ETHERSCAN_API_KEY,
       arbitrumOne: ETHERSCAN_API_KEY,
+      base: ETHERSCAN_API_KEY,
     },
+    customChains: [
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org",
+        },
+      },
+    ],
   },
 };

@@ -23,6 +23,10 @@
     "42161": {
       "address": "0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6",
       "transactionHash": "0x7b3fcae6346e179585d978bd668f9ba3f38c1473539b7c5b882ec0840abcc053"
+    },
+    "8453": {
+      "address": "0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6",
+      "transactionHash": "0xd84761268b0e127b1490a65f9a2f77937fec951bd0cb637850953a7058ed7ab9"
     }
   },
   "Vault": {
@@ -49,6 +53,10 @@
     "42161": {
       "address": "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
       "transactionHash": "0xe2c3826bd7b15ef8d338038769fe6140a44f1957a36b0f27ab321ab6c68d5a8e"
+    },
+    "8453": {
+      "address": "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
+      "transactionHash": "0x0dc2e3d436424f2f038774805116896d31828c0bf3795a6901337bdec4e0dff6"
     }
   }
 }
