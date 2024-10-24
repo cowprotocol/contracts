@@ -14,7 +14,7 @@ deny_warnings = true
 fs_permissions = [
   { access = "read", path = "./balancer"},
   { access = "read", path = "./networks.json"},
-  { access = "read", path = "./out"}
+  { access = "read", path = "./out"},
 ]
 
 [fmt]
