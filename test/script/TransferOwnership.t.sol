@@ -50,10 +50,10 @@ contract TestTransferOwnership is Test {
         assertEq(proxy.owner(), owner);
         assertEq(proxyAsAuthenticator.manager(), owner);
 
-        address NO_MANAGER = script.NO_MANAGER();
-        require(owner != NO_MANAGER, "Invalid test setup, owner should not coincide with NO_MANAGER flag address");
+        address noManager = script.NO_MANAGER();
+        require(owner != noManager, "Invalid test setup, owner should not coincide with NO_MANAGER flag address");
         TransferOwnership.ScriptParams memory params =
-            TransferOwnership.ScriptParams({newOwner: newOwner, authenticatorProxy: proxy, newManager: NO_MANAGER});
+            TransferOwnership.ScriptParams({newOwner: newOwner, authenticatorProxy: proxy, newManager: noManager});
 
         script.runWith(params);
 
