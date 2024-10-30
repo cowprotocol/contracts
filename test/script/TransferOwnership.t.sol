@@ -30,32 +30,19 @@ contract TestTransferOwnership is Test {
         proxyAsAuthenticator = GPv2AllowListAuthentication(deployed);
     }
 
-    function test_transfers_proxy_ownership_and_resets_manager() public {
+    function test_transfers_proxy_ownership_and_updates_manager() public {
         address newOwner = makeAddr("TestTransferOwnership: new proxy owner");
+        address newManager = makeAddr("TestTransferOwnership: new authenticator manager");
         assertEq(proxy.owner(), owner);
         assertEq(proxyAsAuthenticator.manager(), owner);
 
         TransferOwnership.ScriptParams memory params =
-            TransferOwnership.ScriptParams({newOwner: newOwner, authenticatorProxy: proxy, resetManager: true});
+            TransferOwnership.ScriptParams({newOwner: newOwner, authenticatorProxy: proxy, newManager: newManager});
 
         script.runWith(params);
 
         assertEq(proxy.owner(), newOwner, "did not change the owner");
-        assertEq(proxyAsAuthenticator.manager(), newOwner, "did not change the manager");
-    }
-
-    function test_only_transfers_proxy_ownership() public {
-        address newOwner = makeAddr("TestTransferOwnership: new proxy owner");
-        assertEq(proxy.owner(), owner);
-        assertEq(proxyAsAuthenticator.manager(), owner);
-
-        TransferOwnership.ScriptParams memory params =
-            TransferOwnership.ScriptParams({newOwner: newOwner, authenticatorProxy: proxy, resetManager: false});
-
-        script.runWith(params);
-
-        assertEq(proxy.owner(), newOwner, "did not change the owner");
-        assertEq(proxyAsAuthenticator.manager(), owner, "changed the manager");
+        assertEq(proxyAsAuthenticator.manager(), newManager, "did not change the manager");
     }
 
     function test_reverts_if_no_proxy_at_target() public {
@@ -63,7 +50,7 @@ contract TestTransferOwnership is Test {
         TransferOwnership.ScriptParams memory params = TransferOwnership.ScriptParams({
             newOwner: makeAddr("some owner"),
             authenticatorProxy: ERC173(notAProxy),
-            resetManager: false
+            newManager: makeAddr("some manager")
         });
 
         vm.expectRevert(bytes(string.concat("No code at target authenticator proxy ", vm.toString(notAProxy), ".")));
@@ -75,7 +62,7 @@ contract TestTransferOwnership is Test {
         TransferOwnership.ScriptParams memory params = TransferOwnership.ScriptParams({
             newOwner: makeAddr("some owner"),
             authenticatorProxy: ERC173(noERC173Proxy),
-            resetManager: false
+            newManager: makeAddr("some manager")
         });
         vm.etch(noERC173Proxy, hex"1337");
         vm.mockCall(
@@ -99,7 +86,7 @@ contract TestTransferOwnership is Test {
         TransferOwnership.ScriptParams memory params = TransferOwnership.ScriptParams({
             newOwner: makeAddr("some owner"),
             authenticatorProxy: ERC173(revertingProxy),
-            resetManager: false
+            newManager: makeAddr("some manager")
         });
         vm.etch(revertingProxy, hex"1337");
         vm.mockCallRevert(

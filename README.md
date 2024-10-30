@@ -142,8 +142,8 @@ The following parameters can be set:
 
 ```sh
 export ETH_RPC_URL='https://rpc.url.example.com'
-export NEW_OWNER=0x1111111111111111111111111111111111111111 
-export RESET_MANAGER=true # true if the new owner should also become the manager, false otherwise
+export NEW_OWNER=0x1111111111111111111111111111111111111111
+export NEW_MANAGER=0x2222222222222222222222222222222222222222
 ```
 
 To test run the script from a specific owner (sender):
@@ -155,7 +155,7 @@ forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RP
 To actually execute the transaction:
 
 ```sh
-forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --private-key 0x0000000000000000000000000000000000000000000000000000000000000001 --broadcast
+forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --private-key 0x0000000000000000000000000000000000000000000000000000000000000001 --broadcast --slow
 ```
 
 ## Releases
