@@ -6,7 +6,6 @@ import {Sign} from "./Sign.sol";
 import {GPv2Order, GPv2Signing, GPv2Trade, IERC20} from "src/contracts/mixins/GPv2Signing.sol";
 
 library Trade {
-    using GPv2Trade for uint256;
     using Order for Order.Flags;
     using Order for uint256;
     using Sign for GPv2Signing.Scheme;
