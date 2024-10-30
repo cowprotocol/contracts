@@ -11,15 +11,19 @@ import {NetworksJson} from "./lib/NetworksJson.sol";
 contract TransferOwnership is NetworksJson {
     // Required input
     string private constant INPUT_ENV_NEW_OWNER = "NEW_OWNER";
-    string private constant INPUT_ENV_RESET_MANAGER = "RESET_MANAGER";
+    string private constant INPUT_ENV_NEW_MANAGER = "NEW_MANAGER";
     // Optional input
     string private constant INPUT_ENV_AUTHENTICATOR_PROXY = "AUTHENTICATOR_PROXY";
+
+    address public constant NO_MANAGER = address(0);
 
     NetworksJson internal networksJson;
 
     struct ScriptParams {
         address newOwner;
-        bool resetManager;
+        /// Contains either the value `NO_MANAGER` if the manager should not be
+        /// updated or the address of the new manager.
+        address newManager;
         ERC173 authenticatorProxy;
     }
 
@@ -46,17 +50,17 @@ contract TransferOwnership is NetworksJson {
 
         // Make sure to reset the manager BEFORE transferring ownership, or else
         // we will not be able to do it once we lose permissions.
-        if (params.resetManager) {
+        if (params.newManager != NO_MANAGER) {
             console.log(
                 string.concat(
                     "Setting new solver manager from ",
                     vm.toString(authenticator.manager()),
                     " to ",
-                    vm.toString(params.newOwner)
+                    vm.toString(params.newManager)
                 )
             );
             vm.broadcast(msg.sender);
-            authenticator.setManager(params.newOwner);
+            authenticator.setManager(params.newManager);
             console.log("Set new solver manager account.");
         }
 
@@ -68,11 +72,23 @@ contract TransferOwnership is NetworksJson {
         vm.broadcast(msg.sender);
         params.authenticatorProxy.transferOwnership(params.newOwner);
         console.log("Set new owner of the authenticator proxy.");
+
+        console.log(string.concat("Final owner:   ", vm.toString(params.authenticatorProxy.owner())));
+        console.log(string.concat("Final manager: ", vm.toString(authenticator.manager())));
     }
 
     function paramsFromEnv() internal view returns (ScriptParams memory) {
         address newOwner = vm.envAddress(INPUT_ENV_NEW_OWNER);
-        bool resetManager = vm.envBool(INPUT_ENV_RESET_MANAGER);
+
+        address newManager;
+        try vm.envAddress(INPUT_ENV_NEW_MANAGER) returns (address env) {
+            if (env == NO_MANAGER) {
+                revert(string.concat("Invalid parameter: cannot update the manager to address ", vm.toString(env)));
+            }
+            newManager = env;
+        } catch {
+            newManager = NO_MANAGER;
+        }
 
         address authenticatorProxy;
         try vm.envAddress(INPUT_ENV_AUTHENTICATOR_PROXY) returns (address env) {
@@ -95,11 +111,8 @@ contract TransferOwnership is NetworksJson {
             }
         }
 
-        return ScriptParams({
-            newOwner: newOwner,
-            resetManager: resetManager,
-            authenticatorProxy: ERC173(authenticatorProxy)
-        });
+        return
+            ScriptParams({newOwner: newOwner, newManager: newManager, authenticatorProxy: ERC173(authenticatorProxy)});
     }
 
     function checkIsProxy(address candidate) internal view {
