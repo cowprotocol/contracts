@@ -143,7 +143,7 @@ The following parameters can be set:
 ```sh
 export ETH_RPC_URL='https://rpc.url.example.com'
 export NEW_OWNER=0x1111111111111111111111111111111111111111
-export NEW_MANAGER=0x2222222222222222222222222222222222222222 # optional parameter, the manager does not change if this variable is unset 
+export NEW_MANAGER=0x2222222222222222222222222222222222222222
 ```
 
 To test run the script from a specific owner (sender):
