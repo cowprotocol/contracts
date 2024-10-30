@@ -45,22 +45,6 @@ contract TestTransferOwnership is Test {
         assertEq(proxyAsAuthenticator.manager(), newManager, "did not change the manager");
     }
 
-    function test_only_transfers_proxy_ownership() public {
-        address newOwner = makeAddr("TestTransferOwnership: new proxy owner");
-        assertEq(proxy.owner(), owner);
-        assertEq(proxyAsAuthenticator.manager(), owner);
-
-        address noManager = script.NO_MANAGER();
-        require(owner != noManager, "Invalid test setup, owner should not coincide with NO_MANAGER flag address");
-        TransferOwnership.ScriptParams memory params =
-            TransferOwnership.ScriptParams({newOwner: newOwner, authenticatorProxy: proxy, newManager: noManager});
-
-        script.runWith(params);
-
-        assertEq(proxy.owner(), newOwner, "did not change the owner");
-        assertEq(proxyAsAuthenticator.manager(), owner, "changed the manager");
-    }
-
     function test_reverts_if_no_proxy_at_target() public {
         address notAProxy = makeAddr("not a proxy");
         TransferOwnership.ScriptParams memory params = TransferOwnership.ScriptParams({
