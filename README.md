@@ -1,5 +1,5 @@
 > [!IMPORTANT]  
-> This repository is in the process of being migrated to the [Foundry](https://getfoundry.sh) Ethereum application development environment. Developers wishing to integrate and/or develop on the CoW Protocol smart contracts with hardhat should refer to tag [`v1.6.0`](https://github.com/cowprotocol/contracts/releases/tag/v1.6.0) [Browse files](https://github.com/cowprotocol/contracts/tree/1d673839a7402bdb2949175ebb61e8b5c4f39ecb).
+> This repository is in the process of being migrated to the [Foundry](https://getfoundry.sh) Ethereum application development environment. Developers wishing to integrate and/or develop on the CoW Protocol smart contracts with hardhat should refer to branch [`v1`](https://github.com/cowprotocol/contracts/tree/v1).
 
 # CoW Protocol
 
@@ -157,15 +157,3 @@ To actually execute the transaction:
 ```sh
 forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --private-key 0x0000000000000000000000000000000000000000000000000000000000000001 --broadcast --slow
 ```
-
-## Releases
-
-The content of this repo is published on NPM as [`@cowprotocol/contracts`](https://www.npmjs.com/package/@cowprotocol/contracts).
-
-Maintainers this repository can manually trigger a new release. The steps are as follows:
-
-1. Update the package version number in `./package.json` on branch `main`.
-
-2. On GitHub, visit the "Actions" tab, "Publish package to NPM", "Run workflow" with `main` as the target branch.
-
-Once the workflow has been executed successfully, a new NPM package version should be available as well as a new git tag named after the released version.
