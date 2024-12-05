@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> This NPM package is in maintenance mode and is expected to become deprecated in the future.
+> If you are looking for a JavaScript library to interact with CoW Protocol, consider [@cowprotocol/cow-sdk](https://www.npmjs.com/package/@cowprotocol/cow-sdk).
+
 # CoW Protocol
 
 This repository contains the Solidity smart contract code for the **CoW Protocol** (formerly known as **Gnosis Protocol**).
