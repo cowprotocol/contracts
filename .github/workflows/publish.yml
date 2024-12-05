@@ -1,0 +1,19 @@
+# This is a placeholder GitHub Action with the sole purpose of making this
+# action appear on the Action interface. It isn't supposed to be executed on
+# the current branch, only on the `v1` branch.
+# Related discussion: https://github.com/github/docs/issues/31007
+
+name: Publish package to NPM
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Print warning
+        run: echo 'Publishing this branch to NPM is not supported'
+      - name: Make the action fail
+        run: exit 1
