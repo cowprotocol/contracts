@@ -22,6 +22,10 @@
     "42161": {
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
       "transactionHash": "0x084c7e025a5064a2649adbce79f94f23666c1c7e4c7ce02466412524502097ad"
+    },
+    "8453": {
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "transactionHash": "0x20077f1eef14ea6989fe65349c516b7f91f3b405e345a6c5ffaadabf20bd711c"
     }
   },
   "GPv2AllowListAuthentication_Proxy": {
@@ -48,6 +52,10 @@
     "42161": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0xe994adff141a2e72bd9dab3eb7b3480637013bdfb1aa42c62d9d6c90de091237"
+    },
+    "8453": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x5497004d2a37c9eafd0bd1e5861a67d3a209c5b845724166e3dbca9527ee05ec"
     }
   },
   "GPv2AllowListAuthentication": {
@@ -74,6 +82,10 @@
     "42161": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0xe994adff141a2e72bd9dab3eb7b3480637013bdfb1aa42c62d9d6c90de091237"
+    },
+    "8453": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x5497004d2a37c9eafd0bd1e5861a67d3a209c5b845724166e3dbca9527ee05ec"
     }
   },
   "GPv2Settlement": {
@@ -100,6 +112,10 @@
     "42161": {
       "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
       "transactionHash": "0x240486f35ebf42ea69b2b3f1569d587c18c87f98c0ec997bef7d18182ca4c38c"
+    },
+    "8453": {
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "transactionHash": "0x00a3c4e2dc4241465208beeba27e90a9ce3159ad4f41581c4c3a1ef02d6e37cb"
     }
   },
   "GPv2VaultRelayer": {
@@ -126,6 +142,10 @@
     "42161": {
       "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
       "transactionHash": "0x240486f35ebf42ea69b2b3f1569d587c18c87f98c0ec997bef7d18182ca4c38c"
+    },
+    "8453": {
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "transactionHash": "0x00a3c4e2dc4241465208beeba27e90a9ce3159ad4f41581c4c3a1ef02d6e37cb"
     }
   }
 }
