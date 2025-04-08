@@ -144,6 +144,26 @@ export default {
       url: "https://mainnet.base.org",
       chainId: 8453,
     },
+    bsc: {
+      ...sharedNetworkConfig,
+      url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
+    },
+    polygon: {
+      ...sharedNetworkConfig,
+      url: "https://polygon-rpc.com/",
+      chainId: 137,
+    },
+    optimism: {
+      ...sharedNetworkConfig,
+      url: "https://mainnet.optimism.io/",
+      chainId: 10,
+    },
+    avalanche: {
+      ...sharedNetworkConfig,
+      url: "https://api.avax.network/ext/bc/C/rpc",
+      chainId: 43114,
+    },
   },
   namedAccounts: {
     // Note: accounts defined by a number refer to the the accounts as configured
