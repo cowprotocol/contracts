@@ -11,9 +11,21 @@
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
       "transactionHash": "0x24f4f80b46a17345011065f9ea2af823f582db56be81098b3b66cc2db9659ea7"
     },
+    "10": {
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "transactionHash": "0x80787d59d982e6926fad6bdbeb088886f52e853ba82a0da1242080fad159889a"
+    },
+    "56": {
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "transactionHash": "0xe9fa2ed7870a418dc23e66aa35eed89334502dcabd990b0d9f4618f6a7c9488d"
+    },
     "100": {
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
       "transactionHash": "0xe52d425fe34d6d5215ccfc9ddfa485d490b3018f0ee5bbed708f2d172044d60d"
+    },
+    "137": {
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "transactionHash": "0xd5d023a8df8fc2a94265b5da07bcb4d8f64d480988c75643358475c2f06e2c04"
     },
     "11155111": {
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
@@ -26,6 +38,10 @@
     "8453": {
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
       "transactionHash": "0x20077f1eef14ea6989fe65349c516b7f91f3b405e345a6c5ffaadabf20bd711c"
+    },
+    "43114": {
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "transactionHash": "0x38d05a77e33e13ba3411efe92eb9607946053e4bfe94af7629f34bc66d34d80b"
     }
   },
   "GPv2AllowListAuthentication_Proxy": {
@@ -41,9 +57,21 @@
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x39dcf30baf887a5db54551a84de8bfdb6cf418bb284b09680d13aed17d5fa0c1"
     },
+    "10": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x5b6403b485e369ce524d04234807df782e6639e55a7c1d859f0a67925d9a5f49"
+    },
+    "56": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x8da639c62eb4a810573c178ed245184944d66c834122e3f88994ebf679b50e34"
+    },
     "100": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x1a2d87a05a94bc6680a4faee31bbafbd74e9ddb63dd3941c717b5c609c08b957"
+    },
+    "137": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x686e4bbcfd6ebae91f0fcc667407c831953629877ec622457916729de3d461c3"
     },
     "11155111": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
@@ -56,6 +84,10 @@
     "8453": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x5497004d2a37c9eafd0bd1e5861a67d3a209c5b845724166e3dbca9527ee05ec"
+    },
+    "43114": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0xa58fc76846917779d7bcbb7d34f4a2a44aab2b702ef983594e34e6972a0c626b"
     }
   },
   "GPv2AllowListAuthentication": {
@@ -71,9 +103,21 @@
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x39dcf30baf887a5db54551a84de8bfdb6cf418bb284b09680d13aed17d5fa0c1"
     },
+    "10": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x5b6403b485e369ce524d04234807df782e6639e55a7c1d859f0a67925d9a5f49"
+    },
+    "56": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x8da639c62eb4a810573c178ed245184944d66c834122e3f88994ebf679b50e34"
+    },
     "100": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x1a2d87a05a94bc6680a4faee31bbafbd74e9ddb63dd3941c717b5c609c08b957"
+    },
+    "137": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x686e4bbcfd6ebae91f0fcc667407c831953629877ec622457916729de3d461c3"
     },
     "11155111": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
@@ -86,6 +130,10 @@
     "8453": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x5497004d2a37c9eafd0bd1e5861a67d3a209c5b845724166e3dbca9527ee05ec"
+    },
+    "43114": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0xa58fc76846917779d7bcbb7d34f4a2a44aab2b702ef983594e34e6972a0c626b"
     }
   },
   "GPv2Settlement": {
@@ -101,9 +149,21 @@
       "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
       "transactionHash": "0x982f089060ff66e19d0683ef1cc6a637297331a9ba95b65d8eb84b9f8dc64b04"
     },
+    "10": {
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "transactionHash": "0xd1bbd68ee6b0eecf6f883e148284fc4fb4c960299b75004dfddd5135246cd5eb"
+    },
+    "56": {
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "transactionHash": "0x9e0c16a655ceadcb95ba2de3bf59d2b3a3d10cce7bdf52aa5520164b58ffd969"
+    },
     "100": {
       "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
       "transactionHash": "0x9ddc538f89cd8433f4a19bc4de0de27e7c68a1d04a14b327185e4bba9af87133"
+    },
+    "137": {
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "transactionHash": "0x0e24d3a2a8530eaad5ae62e54e64d57665a77ce3970227d20c1b77da315cbbf6"
     },
     "11155111": {
       "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
@@ -116,6 +176,10 @@
     "8453": {
       "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
       "transactionHash": "0x00a3c4e2dc4241465208beeba27e90a9ce3159ad4f41581c4c3a1ef02d6e37cb"
+    },
+    "43114": {
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "transactionHash": "0x374b84f0ea6bc554abc3ffdc3fbce4374fefc76f2bd25e324ce95a62cafcc142"
     }
   },
   "GPv2VaultRelayer": {
@@ -131,9 +195,21 @@
       "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
       "transactionHash": "0x982f089060ff66e19d0683ef1cc6a637297331a9ba95b65d8eb84b9f8dc64b04"
     },
+    "10": {
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "transactionHash": "0xd1bbd68ee6b0eecf6f883e148284fc4fb4c960299b75004dfddd5135246cd5eb"
+    },
+    "56": {
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "transactionHash": "0x9e0c16a655ceadcb95ba2de3bf59d2b3a3d10cce7bdf52aa5520164b58ffd969"
+    },
     "100": {
       "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
       "transactionHash": "0x9ddc538f89cd8433f4a19bc4de0de27e7c68a1d04a14b327185e4bba9af87133"
+    },
+    "137": {
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "transactionHash": "0x0e24d3a2a8530eaad5ae62e54e64d57665a77ce3970227d20c1b77da315cbbf6"
     },
     "11155111": {
       "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
@@ -146,6 +222,10 @@
     "8453": {
       "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
       "transactionHash": "0x00a3c4e2dc4241465208beeba27e90a9ce3159ad4f41581c4c3a1ef02d6e37cb"
+    },
+    "43114": {
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "transactionHash": "0x374b84f0ea6bc554abc3ffdc3fbce4374fefc76f2bd25e324ce95a62cafcc142"
     }
   }
 }
