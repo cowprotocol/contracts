@@ -30,7 +30,7 @@ import { TypedDataDomain } from "./types/ethers";
 /**
  * The stage an interaction should be executed in.
  */
-export enum InteractionStage {
+enum InteractionStage {
   /**
    * A pre-settlement intraction.
    *
@@ -100,7 +100,7 @@ export type Trade = TradeExecution &
 /**
  * Details representing how an order was executed.
  */
-export interface TradeExecution {
+interface TradeExecution {
   /**
    * The executed trade amount.
    *
@@ -123,7 +123,7 @@ export interface TradeExecution {
  * increased again in the future. However, order refunds should not be used in
  * an actual settlement.
  */
-export interface OrderRefunds {
+interface OrderRefunds {
   /** Refund storage used for order filled amount */
   filledAmounts: BytesLike[];
   /** Refund storage used for order pre-signature */
@@ -133,12 +133,12 @@ export interface OrderRefunds {
 /**
  * Table mapping token addresses to their respective clearing prices.
  */
-export type Prices = Record<string, BigNumberish | undefined>;
+type Prices = Record<string, BigNumberish | undefined>;
 
 /**
  * Encoded settlement parameters.
  */
-export type EncodedSettlement = [
+type EncodedSettlement = [
   /** Tokens. */
   string[],
   /** Clearing prices. */
@@ -233,7 +233,7 @@ function decodeFlag<K extends FlagKey>(
  * @param scheme The signing scheme to encode.
  * @return The bitfield result.
  */
-export function encodeSigningScheme(scheme: SigningScheme): number {
+function encodeSigningScheme(scheme: SigningScheme): number {
   return encodeFlag("signingScheme", scheme);
 }
 
@@ -243,7 +243,7 @@ export function encodeSigningScheme(scheme: SigningScheme): number {
  * @param flag The encoded order flag.
  * @return The decoded signing scheme.
  */
-export function decodeSigningScheme(flags: BigNumberish): SigningScheme {
+function decodeSigningScheme(flags: BigNumberish): SigningScheme {
   return decodeFlag("signingScheme", flags);
 }
 
@@ -253,7 +253,7 @@ export function decodeSigningScheme(flags: BigNumberish): SigningScheme {
  * @param flags The order flags to encode.
  * @return The bitfield result.
  */
-export function encodeOrderFlags(flags: OrderFlags): number {
+function encodeOrderFlags(flags: OrderFlags): number {
   return (
     encodeFlag("kind", flags.kind) |
     encodeFlag("partiallyFillable", flags.partiallyFillable) |
@@ -274,7 +274,7 @@ export function encodeOrderFlags(flags: OrderFlags): number {
  * @param flags The order flags encoded as a bitfield.
  * @return The decoded order flags.
  */
-export function decodeOrderFlags(flags: BigNumberish): OrderFlags {
+function decodeOrderFlags(flags: BigNumberish): OrderFlags {
   return {
     kind: decodeFlag("kind", flags),
     partiallyFillable: decodeFlag("partiallyFillable", flags),
@@ -306,7 +306,7 @@ export function decodeTradeFlags(flags: BigNumberish): TradeFlags {
   };
 }
 
-export function encodeSignatureData(sig: Signature): string {
+function encodeSignatureData(sig: Signature): string {
   switch (sig.scheme) {
     case SigningScheme.EIP712:
     case SigningScheme.ETHSIGN:
