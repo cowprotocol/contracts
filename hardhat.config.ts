@@ -187,11 +187,17 @@ export default {
     currency: "USD",
     gasPrice: 21,
   },
+  sourcify: {
+    enabled: true,
+  },
   etherscan: {
     apiKey: {
       sepolia: ETHERSCAN_API_KEY,
       arbitrumOne: ETHERSCAN_API_KEY,
       base: ETHERSCAN_API_KEY,
+      optimisticEthereum: ETHERSCAN_API_KEY,
+      polygon: ETHERSCAN_API_KEY,
+      avalanche: ETHERSCAN_API_KEY,
     },
     customChains: [
       {
@@ -200,6 +206,14 @@ export default {
         urls: {
           apiURL: "https://api.basescan.org/api",
           browserURL: "https://basescan.org",
+        },
+      },
+      {
+        network: "avalanche",
+        chainId: 43114,
+        urls: {
+          apiURL: "https://api.snowscan.xyz/api",
+          browserURL: "https://snowscan.xyz",
         },
       },
     ],
