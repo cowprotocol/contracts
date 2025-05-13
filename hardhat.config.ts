@@ -148,6 +148,26 @@ export default {
       url: "https://mainnet.base.org",
       chainId: 8453,
     },
+    bsc: {
+      ...sharedNetworkConfig,
+      url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
+    },
+    polygon: {
+      ...sharedNetworkConfig,
+      url: "https://polygon-rpc.com/",
+      chainId: 137,
+    },
+    optimism: {
+      ...sharedNetworkConfig,
+      url: "https://mainnet.optimism.io/",
+      chainId: 10,
+    },
+    avalanche: {
+      ...sharedNetworkConfig,
+      url: "https://api.avax.network/ext/bc/C/rpc",
+      chainId: 43114,
+    },
   },
   namedAccounts: {
     // Note: accounts defined by a number refer to the the accounts as configured
@@ -171,11 +191,17 @@ export default {
     currency: "USD",
     gasPrice: 21,
   },
+  sourcify: {
+    enabled: true,
+  },
   etherscan: {
     apiKey: {
       sepolia: ETHERSCAN_API_KEY,
       arbitrumOne: ETHERSCAN_API_KEY,
       base: ETHERSCAN_API_KEY,
+      optimisticEthereum: ETHERSCAN_API_KEY,
+      polygon: ETHERSCAN_API_KEY,
+      avalanche: ETHERSCAN_API_KEY,
     },
     customChains: [
       {
@@ -184,6 +210,14 @@ export default {
         urls: {
           apiURL: "https://api.basescan.org/api",
           browserURL: "https://basescan.org",
+        },
+      },
+      {
+        network: "avalanche",
+        chainId: 43114,
+        urls: {
+          apiURL: "https://api.snowscan.xyz/api",
+          browserURL: "https://snowscan.xyz",
         },
       },
     ],
