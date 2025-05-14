@@ -1,4 +1,4 @@
-import { TypedDataDomain } from "./types/ethers";
+import type { TypedDataDomain } from "./types/core";
 
 /**
  * Return the Gnosis Protocol v2 domain used for signing.
@@ -8,15 +8,15 @@ import { TypedDataDomain } from "./types/ethers";
  * @return An EIP-712 compatible typed domain data.
  */
 export function domain(
-  chainId: number,
-  verifyingContract: string,
+	chainId: number,
+	verifyingContract: string,
 ): TypedDataDomain {
-  return {
-    name: "Gnosis Protocol",
-    version: "v2",
-    chainId,
-    verifyingContract,
-  };
+	return {
+		name: "Gnosis Protocol",
+		version: "v2",
+		chainId,
+		verifyingContract,
+	};
 }
 
 export * from "./deploy";
@@ -27,4 +27,4 @@ export * from "./settlement";
 export * from "./sign";
 export * from "./swap";
 export * from "./vault";
-export * from "./types/ethers";
+export * from "./types/core";

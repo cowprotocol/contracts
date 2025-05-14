@@ -95,5 +95,8 @@
     "lib/",
     "networks.json",
     "src/"
-  ]
+  ],
+  "dependencies": {
+    "viem": "^2.29.2"
+  }
 }

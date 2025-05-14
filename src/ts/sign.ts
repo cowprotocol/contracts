@@ -1,17 +1,13 @@
-import { BytesLike, ethers, Signer } from "ethers";
+import { type BytesLike, type Signer, ethers } from "ethers";
 
+import { ORDER_TYPE_FIELDS } from "./constants";
+import { type Order, hashTypedData, normalizeOrder } from "./order";
 import {
-  ORDER_TYPE_FIELDS,
-  Order,
-  normalizeOrder,
-  hashTypedData,
-} from "./order";
-import {
-  TypedDataTypes,
-  SignatureLike,
-  isTypedDataSigner,
-  TypedDataDomain,
-} from "./types/ethers";
+	type SignatureLike,
+	type TypedDataDomain,
+	type TypedDataTypes,
+	isTypedDataSigner,
+} from "./types/core";
 
 /**
  * Value returned by a call to `isValidSignature` if the signature was verified
@@ -19,37 +15,37 @@ import {
  * bytes4(keccak256("isValidSignature(bytes32,bytes)"))
  */
 export const EIP1271_MAGICVALUE = ethers.utils.hexDataSlice(
-  ethers.utils.id("isValidSignature(bytes32,bytes)"),
-  0,
-  4,
+	ethers.utils.id("isValidSignature(bytes32,bytes)"),
+	0,
+	4,
 );
 
 /**
  * The signing scheme used to sign the order.
  */
 export enum SigningScheme {
-  /**
-   * The EIP-712 typed data signing scheme. This is the preferred scheme as it
-   * provides more infomation to wallets performing the signature on the data
-   * being signed.
-   *
-   * <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md#definition-of-domainseparator>
-   */
-  EIP712 = 0b00,
-  /**
-   * Message signed using eth_sign RPC call.
-   */
-  ETHSIGN = 0b01,
-  /**
-   * Smart contract signatures as defined in EIP-1271.
-   *
-   * <https://eips.ethereum.org/EIPS/eip-1271>
-   */
-  EIP1271 = 0b10,
-  /**
-   * Pre-signed order.
-   */
-  PRESIGN = 0b11,
+	/**
+	 * The EIP-712 typed data signing scheme. This is the preferred scheme as it
+	 * provides more infomation to wallets performing the signature on the data
+	 * being signed.
+	 *
+	 * <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md#definition-of-domainseparator>
+	 */
+	EIP712 = 0b00,
+	/**
+	 * Message signed using eth_sign RPC call.
+	 */
+	ETHSIGN = 0b01,
+	/**
+	 * Smart contract signatures as defined in EIP-1271.
+	 *
+	 * <https://eips.ethereum.org/EIPS/eip-1271>
+	 */
+	EIP1271 = 0b10,
+	/**
+	 * Pre-signed order.
+	 */
+	PRESIGN = 0b11,
 }
 
 export type EcdsaSigningScheme = SigningScheme.EIP712 | SigningScheme.ETHSIGN;
@@ -63,87 +59,87 @@ export type Signature = EcdsaSignature | Eip1271Signature | PreSignSignature;
  * ECDSA signature of an order.
  */
 export interface EcdsaSignature {
-  /**
-   * The signing scheme used in the signature.
-   */
-  scheme: EcdsaSigningScheme;
-  /**
-   * The ECDSA signature.
-   */
-  data: SignatureLike;
+	/**
+	 * The signing scheme used in the signature.
+	 */
+	scheme: EcdsaSigningScheme;
+	/**
+	 * The ECDSA signature.
+	 */
+	data: SignatureLike;
 }
 
 /**
  * EIP-1271 signature data.
  */
 export interface Eip1271SignatureData {
-  /**
-   * The verifying contract address.
-   */
-  verifier: string;
-  /**
-   * The arbitrary signature data used for verification.
-   */
-  signature: BytesLike;
+	/**
+	 * The verifying contract address.
+	 */
+	verifier: string;
+	/**
+	 * The arbitrary signature data used for verification.
+	 */
+	signature: BytesLike;
 }
 
 /**
  * EIP-1271 signature of an order.
  */
 export interface Eip1271Signature {
-  /**
-   * The signing scheme used in the signature.
-   */
-  scheme: SigningScheme.EIP1271;
-  /**
-   * The signature data.
-   */
-  data: Eip1271SignatureData;
+	/**
+	 * The signing scheme used in the signature.
+	 */
+	scheme: SigningScheme.EIP1271;
+	/**
+	 * The signature data.
+	 */
+	data: Eip1271SignatureData;
 }
 
 /**
  * Signature data for a pre-signed order.
  */
 export interface PreSignSignature {
-  /**
-   * The signing scheme used in the signature.
-   */
-  scheme: SigningScheme.PRESIGN;
-  /**
-   * The address of the signer.
-   */
-  data: string;
+	/**
+	 * The signing scheme used in the signature.
+	 */
+	scheme: SigningScheme.PRESIGN;
+	/**
+	 * The address of the signer.
+	 */
+	data: string;
 }
 
 async function ecdsaSignTypedData(
-  scheme: EcdsaSigningScheme,
-  owner: Signer,
-  domain: TypedDataDomain,
-  types: TypedDataTypes,
-  data: Record<string, unknown>,
+	scheme: EcdsaSigningScheme,
+	owner: Signer,
+	domain: TypedDataDomain,
+	types: TypedDataTypes,
+	data: Record<string, unknown>,
 ): Promise<string> {
-  let signature: string | null = null;
+	let signature: string | null = null;
 
-  switch (scheme) {
-    case SigningScheme.EIP712:
-      if (!isTypedDataSigner(owner)) {
-        throw new Error("signer does not support signing typed data");
-      }
-      signature = await owner._signTypedData(domain, types, data);
-      break;
-    case SigningScheme.ETHSIGN:
-      signature = await owner.signMessage(
-        ethers.utils.arrayify(hashTypedData(domain, types, data)),
-      );
-      break;
-    default:
-      throw new Error("invalid signing scheme");
-  }
+	switch (scheme) {
+		case SigningScheme.EIP712:
+			if (!isTypedDataSigner(owner)) {
+				throw new Error("signer does not support signing typed data");
+			}
+			signature = await owner._signTypedData(domain, types, data);
+			break;
+		case SigningScheme.ETHSIGN:
+			signature = await owner.signMessage(
+				ethers.utils.arrayify(hashTypedData(domain, types, data)),
+			);
+			break;
+		default:
+			throw new Error("invalid signing scheme");
+	}
 
-  // Passing the signature through split/join to normalize the `v` byte.
-  // Some wallets do not pad it with `27`, which causes a signature failure
-  // `splitSignature` pads it if needed, and `joinSignature` simply puts it back together
-  return ethers.utils.joinSignature(ethers.utils.splitSignature(signature));
+	// Passing the signature through split/join to normalize the `v` byte.
+	// Some wallets do not pad it with `27`, which causes a signature failure
+	// `splitSignature` pads it if needed, and `joinSignature` simply puts it back together
+	return ethers.utils.joinSignature(ethers.utils.splitSignature(signature));
 }
 
 /**
@@ -161,21 +157,21 @@ async function ecdsaSignTypedData(
  * @return Encoded signature including signing scheme for the order.
  */
 export async function signOrder(
-  domain: TypedDataDomain,
-  order: Order,
-  owner: Signer,
-  scheme: EcdsaSigningScheme,
+	domain: TypedDataDomain,
+	order: Order,
+	owner: Signer,
+	scheme: EcdsaSigningScheme,
 ): Promise<EcdsaSignature> {
-  return {
-    scheme,
-    data: await ecdsaSignTypedData(
-      scheme,
-      owner,
-      domain,
-      { Order: ORDER_TYPE_FIELDS },
-      normalizeOrder(order),
-    ),
-  };
+	return {
+		scheme,
+		data: await ecdsaSignTypedData(
+			scheme,
+			owner,
+			domain,
+			{ Order: ORDER_TYPE_FIELDS },
+			normalizeOrder(order),
+		),
+	};
 }
 
 /**
@@ -185,10 +181,10 @@ export async function signOrder(
  * @param signature The EIP-1271 signature data to encode.
  */
 export function encodeEip1271SignatureData({
-  verifier,
-  signature,
+	verifier,
+	signature,
 }: Eip1271SignatureData): string {
-  return ethers.utils.solidityPack(["address", "bytes"], [verifier, signature]);
+	return ethers.utils.solidityPack(["address", "bytes"], [verifier, signature]);
 }
 
 /**
@@ -200,14 +196,14 @@ export function encodeEip1271SignatureData({
  * EIP-1271 signature and a verifier.
  */
 export function decodeEip1271SignatureData(
-  signature: BytesLike,
+	signature: BytesLike,
 ): Eip1271SignatureData {
-  const arrayifiedSignature = ethers.utils.arrayify(signature);
-  const verifier = ethers.utils.getAddress(
-    ethers.utils.hexlify(arrayifiedSignature.slice(0, 20)),
-  );
-  return {
-    verifier,
-    signature: arrayifiedSignature.slice(20),
-  };
+	const arrayifiedSignature = ethers.utils.arrayify(signature);
+	const verifier = ethers.utils.getAddress(
+		ethers.utils.hexlify(arrayifiedSignature.slice(0, 20)),
+	);
+	return {
+		verifier,
+		signature: arrayifiedSignature.slice(20),
+	};
 }
