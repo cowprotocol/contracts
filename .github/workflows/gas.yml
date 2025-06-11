@@ -1,0 +1,53 @@
+name: Gas
+
+on:
+  pull_request:
+    paths:
+      - '**.sol'
+      - '**.yml'
+      - '**.toml'
+      - 'lib/**'
+      - '.gitmodules'
+      - '.gas-snapshot'
+  push:
+    branches:
+      - main
+    paths:
+      - '**.sol'
+      - '**.yml'
+      - '**.toml'
+      - 'lib/**'
+      - '.gitmodules'
+      - '.gas-snapshot'
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  gas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+      - id: yarn-cache
+        run: echo "dir=$(yarn cache dir)"  >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+      - run: yarn --frozen-lockfile
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Check gas snapshots
+        run: forge snapshot --check
+        # TODO: remove failure allowance once foundry migration is complete
+        continue-on-error: true

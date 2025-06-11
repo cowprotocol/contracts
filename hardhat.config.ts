@@ -10,8 +10,6 @@ import type { HttpNetworkUserConfig } from "hardhat/types";
 import type { MochaOptions } from "mocha";
 import yargs from "yargs";
 
-import { setupTasks } from "./src/tasks";
-
 const argv = yargs
   .option("network", {
     type: "string",
@@ -65,24 +63,22 @@ switch (MOCHA_CONF) {
   case undefined:
     break;
   case "coverage":
-    // End to end and task tests are skipped because:
+    // End to end tests are skipped because:
     // - coverage tool does not play well with proxy deployment with
     //   hardhat-deploy
     // - coverage compiles without optimizer and, unlike Waffle, hardhat-deploy
     //   strictly enforces the contract size limits from EIP-170
-    mocha.grep = /^(?!E2E|Task)/;
+    mocha.grep = /^(?!E2E)/;
     // Note: unit is Wei, not GWei. This is a workaround to make the coverage
     // tool work with the London hardfork.
     initialBaseFeePerGas = 1;
     break;
   case "ignored in coverage":
-    mocha.grep = /^E2E|Task/;
+    mocha.grep = /^E2E/;
     break;
   default:
     throw new Error("Invalid MOCHA_CONF");
 }
-
-setupTasks();
 
 export default {
   mocha,
@@ -139,6 +135,35 @@ export default {
       ...sharedNetworkConfig,
       chainId: 100,
     },
+    arbitrumOne: {
+      ...sharedNetworkConfig,
+      url: "https://arb1.arbitrum.io/rpc",
+    },
+    base: {
+      ...sharedNetworkConfig,
+      url: "https://mainnet.base.org",
+      chainId: 8453,
+    },
+    bsc: {
+      ...sharedNetworkConfig,
+      url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
+    },
+    polygon: {
+      ...sharedNetworkConfig,
+      url: "https://polygon-rpc.com/",
+      chainId: 137,
+    },
+    optimism: {
+      ...sharedNetworkConfig,
+      url: "https://mainnet.optimism.io/",
+      chainId: 10,
+    },
+    avalanche: {
+      ...sharedNetworkConfig,
+      url: "https://api.avax.network/ext/bc/C/rpc",
+      chainId: 43114,
+    },
   },
   namedAccounts: {
     // Note: accounts defined by a number refer to the the accounts as configured
@@ -162,9 +187,35 @@ export default {
     currency: "USD",
     gasPrice: 21,
   },
+  sourcify: {
+    enabled: true,
+  },
   etherscan: {
     apiKey: {
       sepolia: ETHERSCAN_API_KEY,
+      arbitrumOne: ETHERSCAN_API_KEY,
+      base: ETHERSCAN_API_KEY,
+      optimisticEthereum: ETHERSCAN_API_KEY,
+      polygon: ETHERSCAN_API_KEY,
+      avalanche: ETHERSCAN_API_KEY,
     },
+    customChains: [
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org",
+        },
+      },
+      {
+        network: "avalanche",
+        chainId: 43114,
+        urls: {
+          apiURL: "https://api.snowscan.xyz/api",
+          browserURL: "https://snowscan.xyz",
+        },
+      },
+    ],
   },
 };

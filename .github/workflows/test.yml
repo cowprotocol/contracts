@@ -1,0 +1,70 @@
+name: Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '**.sol'
+      - '**.yml'
+      - '**.toml'
+      - 'lib/**'
+      - '.gitmodules'
+  push:
+    branches:
+      - main
+    paths:
+      - '**.sol'
+      - '**.yml'
+      - '**.toml'
+      - 'lib/**'
+      - '.gitmodules'
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  test:
+    strategy:
+      fail-fast: true
+      matrix:
+        profile: [solc-0.7.6,default]
+
+    name: Foundry project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+      - id: yarn-cache
+        run: echo "dir=$(yarn cache dir)"  >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+      - run: yarn --frozen-lockfile
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Forge build with ${{ matrix.profile }}
+        # We always build with 0.7.6 to ensure that the project is compatible with the oldest version
+        run: |
+          forge --version
+          if [ "${{ matrix.profile }}" == "solc-0.7.6" ]; then
+            FOUNDRY_PROFILE=ci forge build --sizes --use 0.7.6 --skip 'test/*' --skip 'script/*'
+          else
+            FOUNDRY_PROFILE=ci forge build --sizes
+          fi
+        id: build
+
+      - name: Run Forge tests
+        if: matrix.profile != 'solc-0.7.6'
+        run: |
+          FOUNDRY_PROFILE=ci forge test -vvv
+        id: test

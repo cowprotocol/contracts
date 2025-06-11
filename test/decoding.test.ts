@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { constants, utils, Wallet } from "ethers";
+import { constants, ethers, utils, Wallet } from "ethers";
 import { waffle } from "hardhat";
 
 import {
@@ -19,8 +19,6 @@ import {
   encodeTradeFlags,
   signOrder,
 } from "../src/ts";
-
-import { fillDistinctBytes, SAMPLE_ORDER } from "./testHelpers";
 
 type UnknownArray = unknown[] | readonly unknown[];
 // [A, B, C] -> [A, B]
@@ -106,6 +104,29 @@ function validFlags(): TradeFlags[] {
   });
   /* eslint-enable @typescript-eslint/no-explicit-any */
 }
+
+function fillDistinctBytes(count: number, start: number): string {
+  return ethers.utils.hexlify(
+    [...Array(count)].map((_, i) => (start + i) % 256),
+  );
+}
+
+function fillBytes(count: number, byte: number): string {
+  return ethers.utils.hexlify([...Array(count)].map(() => byte));
+}
+
+const SAMPLE_ORDER = {
+  sellToken: fillBytes(20, 0x01),
+  buyToken: fillBytes(20, 0x02),
+  receiver: fillBytes(20, 0x03),
+  sellAmount: ethers.utils.parseEther("42"),
+  buyAmount: ethers.utils.parseEther("13.37"),
+  validTo: 0xffffffff,
+  appData: ethers.constants.HashZero,
+  feeAmount: ethers.utils.parseEther("1.0"),
+  kind: OrderKind.SELL,
+  partiallyFillable: false,
+};
 
 describe("Order flags", () => {
   it("encodeTradeFlags is the right inverse of decodeTradeFlags", () => {

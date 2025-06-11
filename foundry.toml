@@ -1,0 +1,29 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["node_modules", "lib"]
+
+# Compiler settings
+via_ir = false
+optimizer = true
+optimizer_runs = 1000000
+evm_version = "cancun"
+
+deny_warnings = true
+
+fs_permissions = [
+  { access = "read", path = "./balancer"},
+  { access = "read", path = "./networks.json"},
+  { access = "read", path = "./out"}
+]
+
+[fmt]
+sort_imports = true
+ignore = [
+  # We don't want to change the formatting of our main contracts until the
+  # migration to Foundry is concluded.
+  "src/contracts/**/*"
+]
+
+[profile.ci]
+fuzz.seed = '0'

@@ -1,8 +1,11 @@
+> [!IMPORTANT]  
+> This repository is in the process of being migrated to the [Foundry](https://getfoundry.sh) Ethereum application development environment. Developers wishing to integrate and/or develop on the CoW Protocol smart contracts with hardhat should refer to branch [`v1`](https://github.com/cowprotocol/contracts/tree/v1).
+
 # CoW Protocol
 
 This repository contains the Solidity smart contract code for the **CoW Protocol** (formerly known as **Gnosis Protocol**).
 
-For more documentation on how the protocol works on a smart contract level, see the [documentation pages](docs/index.md).
+Extensive [documentation](https://docs.cow.fi/cow-protocol/reference/contracts/core) is available detailing how the protocol works on a smart contract level.
 
 ## Getting Started
 
@@ -109,7 +112,7 @@ npx hardhat tenderly:verify --network $NETWORK GPv2Contract=0xFeDbc87123caF39251
 
 This package additionally contains a `networks.json` file at the root with the address of each deployed contract as well the hash of the Ethereum transaction used to create the contract.
 
-## Test coverage [![Coverage Status](https://coveralls.io/repos/github/gnosis/gp-v2-contracts/badge.svg?branch=main)](https://coveralls.io/github/gnosis/gp-v2-contracts?branch=main)
+## Test coverage
 
 Test coverage can be checked with the command
 
@@ -131,87 +134,26 @@ This means that any solver could drain the fee amount from the user until not en
 
 We recommend to never sign orders of this form and, if developing a contract that creates orders on behalf of other users, make sure at a contract level that such orders cannot be created.
 
-## Helper scripts
-
-A collection of tools for interacting with the CoW Swap contracts.
-
-### Solver Authentication
-
-This repo contains scripts to manage the list of authenticated solvers in all networks the contract has been deployed.
-
-The scripts are called with:
-
-```sh
-yarn solvers command [arg ...]
-```
-
-Here is a list of available commands.
-The commands flagged with [**] require exporting the private key of the authentication contract owner, while those flagged with [*] require the address of either the owner or the manager.
-The private key can be exported with `export PK=<private key>`.
-
-1. `add $ADDRESS` [*]. Adds the address to the list of registered solvers.
-2. `remove $ADDRESS` [*]. Removes the address from the list of registered solvers.
-3. `check $ADDRESS`. Checks if the given address is in the list of registered solvers.
-3. `list`. Lists all registered solvers.
-3. `setManager $ADDRESS` [**]. Sets the manager of the authenticator to the input address.
-
-For example, adding the address `0x0000000000000000000000000000000000000042` to the solver list:
-
-```sh
-export PK=<private key>
-yarn solvers add 0x0000000000000000000000000000000000000042
-```
-
-### Transfer Ownership
+## Transfer Ownership
 
 There is a dedicated script to change the owner of the authenticator proxy.
 
-Usage and parameters can be seen by running:
+The following parameters can be set:
 
 ```sh
-yarn hardhat transfer-ownership --help
+export ETH_RPC_URL='https://rpc.url.example.com'
+export NEW_OWNER=0x1111111111111111111111111111111111111111
+export NEW_MANAGER=0x2222222222222222222222222222222222222222
 ```
 
-### Fee Withdrawals
-
-Script to withdraw all balances of the Settlement contract. Allows to specify what minimum value the contract must have for a token to be considered (breadcrumbs might not be worth the gas costs) and how much remaining value should be left in the contract (e.g. to feed token buffers).
-
-If no token list is passed in all traded token balances will be fetched from chain (can take a long time...)
+To test run the script from a specific owner (sender):
 
 ```sh
-export PK=<private key>
-yarn hardhat withdraw --receiver 0x6C2999B6B1fAD608ECEA71B926D68Ee6c62BeEf8 --min-value 10000 --leftover 500 0x038a68ff68c393373ec894015816e33ad41bd564 0x913d8adf7ce6986a8cbfee5a54725d9eea4f0729
+forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --sender 0xcA771eda0c70aA7d053aB1B25004559B918FE662
 ```
 
-### Decoding Settlement CallData
-
-This project exposes some handy scripts for parsing settlement calldata into human readable format.
-
-The `decode` script can be used in two ways:
-
-1. By specifying the transaction hash of an existing settlement transaction `--txhash 0x...`
+To actually execute the transaction:
 
 ```sh
-npx hardhat decode --txhash 0xc12e5bc2ef9c116932301495738d555ea1d658977dacd6c7989a6d77125a17d2 --network mainnet
+forge script script/TransferOwnership.s.sol:TransferOwnership --rpc-url "$ETH_RPC_URL" --private-key 0x0000000000000000000000000000000000000000000000000000000000000001 --broadcast --slow
 ```
-
-2. When no `txhash` is specified, by reading the calldata from stdin (`< calldata.txt`). If stdin is a terminal, the user is prompted to paste the calldata into the terminal.
-
-```sh
-> npx hardhat decode --network mainnet
-# Paste in the calldata to decode
-```
-
-Note that you will be expected to have your `INFURA_KEY` exported to your environment variables.
-
-## Releases
-
-The content of this repo is published on NPM as [`@cowprotocol/contracts`](https://www.npmjs.com/package/@cowprotocol/contracts).
-
-Maintainers this repository can manually trigger a new release. The steps are as follows:
-
-1. Update the package version number in `./package.json` on branch `main`.
-
-2. On GitHub, visit the "Actions" tab, "Publish package to NPM", "Run workflow" with `main` as the target branch.
-
-Once the workflow has been executed successfully, a new NPM package version should be available as well as a new git tag named after the released version.

@@ -1,3 +1,8 @@
+# This is a placeholder GitHub Action with the sole purpose of making this
+# action appear on the Action interface. It isn't supposed to be executed on
+# the current branch, only on the `v1` branch.
+# Related discussion: https://github.com/github/docs/issues/31007
+
 name: Publish package to NPM
 
 on:
@@ -8,12 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@cowprotocol'
-      - run: yarn --frozen-lockfile
-      - run: bash src/workflows/publish.sh
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+      - name: Print warning
+        run: echo 'Publishing this branch to NPM is not supported'
+      - name: Make the action fail
+        run: exit 1

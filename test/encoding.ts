@@ -1,17 +1,9 @@
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
-import {
-  Order,
-  OrderBalance,
-  OrderKind,
-  normalizeOrder,
-  FLAG_MASKS,
-  FlagKey,
-  FlagOptions,
-} from "../src/ts";
+import { Order, OrderBalance, OrderKind } from "../src/ts";
 
-export type AbiOrder = [
+type AbiOrder = [
   string,
   string,
   string,
@@ -25,42 +17,6 @@ export type AbiOrder = [
   string,
   string,
 ];
-
-function optionsForKey<K extends FlagKey>(key: K): FlagOptions<K> {
-  return FLAG_MASKS[key].options;
-}
-export const allOrderKinds = optionsForKey("kind");
-export const allPartiallyFillable = optionsForKey("partiallyFillable");
-export const allSigningSchemes = optionsForKey("signingScheme");
-
-export function allOptions<
-  K extends FlagKey,
-  AllOptions extends Record<K, FlagOptions<K>>,
->(): AllOptions {
-  const result: Record<string, FlagOptions<K>> = {};
-  Object.entries(FLAG_MASKS).map(
-    ([key, value]) => (result[key] = value.options),
-  );
-  return result as AllOptions;
-}
-
-export function encodeOrder(order: Order): AbiOrder {
-  const o = normalizeOrder(order);
-  return [
-    o.sellToken,
-    o.buyToken,
-    o.receiver,
-    BigNumber.from(o.sellAmount),
-    BigNumber.from(o.buyAmount),
-    o.validTo,
-    o.appData,
-    BigNumber.from(o.feeAmount),
-    ethers.utils.id(o.kind),
-    o.partiallyFillable,
-    ethers.utils.id(o.sellTokenBalance),
-    ethers.utils.id(o.buyTokenBalance),
-  ];
-}
 
 function decodeEnum<T>(hash: string, values: T[]): T {
   for (const value of values) {
@@ -99,9 +55,3 @@ export function decodeOrder(order: AbiOrder): Order {
     buyTokenBalance: decodeOrderBalance(order[11]),
   };
 }
-
-export const OrderBalanceId = {
-  ERC20: ethers.utils.id(OrderBalance.ERC20),
-  EXTERNAL: ethers.utils.id(OrderBalance.EXTERNAL),
-  INTERNAL: ethers.utils.id(OrderBalance.INTERNAL),
-};
