@@ -7,6 +7,8 @@ import Vault from "../../balancer/Vault.json";
 import BALANCER_NETWORKS from "../../balancer/networks.json";
 import { CONTRACT_NAMES, SALT } from "../ts/deploy";
 
+const DEFAULT_VAULT_ADDRESS = "0xBA12222222228d8Ba445958a75a0704d566BF2C8";
+
 const deploySettlement: DeployFunction = async function ({
   deployments,
   ethers,
@@ -46,10 +48,13 @@ const deploySettlement: DeployFunction = async function ({
     >;
     const vaultDeployment = vaultNetworks[chainId];
     if (vaultDeployment === undefined) {
-      throw new Error(`Vault not deployed on chain ${chainId}`);
+      console.warn(
+        `Vault not deployed on chain ${chainId}, using default address.`,
+      );
+      vaultAddress = DEFAULT_VAULT_ADDRESS;
+    } else {
+      vaultAddress = vaultDeployment.address;
     }
-
-    vaultAddress = vaultDeployment.address;
   }
 
   await deploy(settlement, {
