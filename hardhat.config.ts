@@ -3,6 +3,7 @@ import "hardhat-deploy";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "@tenderly/hardhat-tenderly";
+import "@nomicfoundation/hardhat-verify";
 
 import dotenv from "dotenv";
 import type { HttpNetworkUserConfig } from "hardhat/types";
@@ -104,6 +105,10 @@ export default {
       ...sharedNetworkConfig,
       url: "https://xdai.poanetwork.dev",
     },
+    lens: {
+      ...sharedNetworkConfig,
+      url: "https://rpc.lens.xyz",
+    },
   },
   namedAccounts: {
     // Note: accounts defined by a number refer to the the accounts as configured
@@ -119,6 +124,25 @@ export default {
       default: "0x6Fb5916c0f57f88004d5b5EB25f6f4D77353a1eD",
       hardhat: 2,
     },
+  },
+  etherscan: {
+    apiKey: {
+      lens: "unneeded",
+    },
+    customChains: [
+      {
+        network: "lens",
+        chainId: 232,
+        urls: {
+          apiURL:
+            "https://api-explorer-verify.lens.matterhosted.dev/contract_verification",
+          browserURL: "https://explorer.lens.xyz/",
+        },
+      },
+    ],
+  },
+  sourcify: {
+    enabled: true,
   },
   gasReporter: {
     enabled: REPORT_GAS ? true : false,
