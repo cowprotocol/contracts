@@ -5,6 +5,8 @@ import "solidity-coverage";
 import "@tenderly/hardhat-tenderly";
 import "@nomicfoundation/hardhat-verify";
 
+import 'hardhat-cannon'
+
 import dotenv from "dotenv";
 import type { HttpNetworkUserConfig } from "hardhat/types";
 import type { MochaOptions } from "mocha";
@@ -77,9 +79,9 @@ export default {
       {
         version: "0.7.6",
         settings: {
-          optimizer: {
-            enabled: true,
-            runs: 1000000,
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000000
           },
         },
       },
@@ -88,6 +90,62 @@ export default {
         version: "0.4.11",
       },
     ],
+    overrides: {
+      "src/contracts/Proxy.sol": {
+        version: "0.8.10",
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 999999
+            },
+            outputSelection: {
+                "*": {
+                    "*": [
+                        "abi",
+                        "evm.bytecode",
+                        "evm.deployedBytecode",
+                        "evm.methodIdentifiers",
+                        "metadata",
+                        "devdoc",
+                        "userdoc",
+                        "storageLayout",
+                        "evm.gasEstimates"
+                    ],
+                    "": [
+                        "ast"
+                    ]
+                }
+            },
+        },
+      },
+      "src/contracts/EIP173Proxy.sol": {
+        version: "0.8.10",
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 999999
+            },
+            outputSelection: {
+                "*": {
+                    "*": [
+                        "abi",
+                        "evm.bytecode",
+                        "evm.deployedBytecode",
+                        "evm.methodIdentifiers",
+                        "metadata",
+                        "devdoc",
+                        "userdoc",
+                        "storageLayout",
+                        "evm.gasEstimates"
+                    ],
+                    "": [
+                        "ast"
+                    ]
+                }
+            },
+        },
+      }
+    }
   },
   networks: {
     hardhat: {

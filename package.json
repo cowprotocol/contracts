@@ -79,5 +79,9 @@
     "lib/",
     "networks.json",
     "src/"
-  ]
+  ],
+  "dependencies": {
+    "@usecannon/cli": "^2.24.2",
+    "hardhat-cannon": "^2.24.2"
+  }
 }

@@ -1,0 +1,36 @@
+name = "gp-settlement"
+version = "2.0.0"
+
+[var.main]
+#salt = "<%= formatBytes32String('Mattresses in Berlin!') %>"
+salt = "0x4d61747472657373657320696e204265726c696e210000000000000000000000"
+owner = "0x6Fb5916c0f57f88004d5b5EB25f6f4D77353a1eD"
+manager = "0x6Fb5916c0f57f88004d5b5EB25f6f4D77353a1eD"
+balancerVaultAddress = "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
+
+[deploy.AuthenticatorImplementation]
+artifact = "GPv2AllowListAuthentication"
+create2 = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
+salt = "<%= settings.salt %>"
+
+[deploy.Authenticator]
+artifact = "EIP173Proxy"
+create2 = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
+salt = "<%= settings.salt %>"
+args = [
+    "<%= contracts.AuthenticatorImplementation.address %>",
+    "<%= settings.owner %>",
+    "<%= encodeFunctionData({ abi: contracts.AuthenticatorImplementation.abi, functionName: 'initializeManager', args: [settings.manager] }) %>"
+]
+
+#[deploy.VaultRelayer]
+#artifact = "GPv2VaultRelayer"
+#create2 = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
+#salt = "<%= settings.salt %>"
+#args = ["<%= settings.balancerVaultAddress %>"]
+
+[deploy.Settlement]
+artifact = "GPv2Settlement"
+create2 = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
+salt = "<%= settings.salt %>"
+args = ["<%= contracts.AuthenticatorImplementation.address %>", "<%= settings.balancerVaultAddress %>"]
