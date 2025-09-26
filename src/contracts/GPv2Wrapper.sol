@@ -34,24 +34,25 @@ abstract contract GPv2Wrapper {
         UPSTREAM_SETTLEMENT = GPv2Settlement(upstreamSettlement_);
 
         // retrieve the authentication we are supposed to use from the settlement contract
-        AUTHENTICATOR = UPSTREAM_SETTLEMENT.authenticator();
+        AUTHENTICATOR = GPv2Settlement(upstreamSettlement_).authenticator();
     }
 
     /**
      * @dev Called to initiate a wrapped call against the settlement function. See GPv2Settlement.settle() for more information.
      */
-    function settle(
+    function wrappedSettle(
         IERC20[] calldata tokens,
         uint256[] calldata clearingPrices,
         GPv2Trade.Data[] calldata trades,
-        GPv2Interaction.Data[][3] calldata interactions
+        GPv2Interaction.Data[][3] calldata interactions,
+        bytes calldata wrapperData
     ) external {
         // Revert if not a valid solver
         if (!AUTHENTICATOR.isSolver(msg.sender)) {
             revert("GPv2Wrapper: not a solver");
         }
 
-        _wrap(tokens, clearingPrices, trades, interactions);
+        _wrap(tokens, clearingPrices, trades, interactions, wrapperData);
     }
 
     /**
@@ -61,7 +62,8 @@ abstract contract GPv2Wrapper {
         IERC20[] calldata tokens,
         uint256[] calldata clearingPrices,
         GPv2Trade.Data[] calldata trades,
-        GPv2Interaction.Data[][3] calldata interactions
+        GPv2Interaction.Data[][3] calldata interactions,
+        bytes calldata wrapperData
     ) internal virtual;
 
     function _internalSettle(
