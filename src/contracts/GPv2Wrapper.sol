@@ -21,8 +21,8 @@ import "./interfaces/IGPv2Wrapper.sol";
  * @title A minimalist base that can be extended to safely implement a wrapper. It ensures the most important basic functions of a wrapper are fulfilled
  */
 abstract contract GPv2Wrapper is IGPv2Wrapper {
-    IGPv2Settlement public immutable UPSTREAM_SETTLEMENT;
-    GPv2Authentication public immutable AUTHENTICATOR;
+    IGPv2Settlement public immutable override UPSTREAM_SETTLEMENT;
+    GPv2Authentication public immutable override AUTHENTICATOR;
 
     constructor(address payable upstreamSettlement_) {
         UPSTREAM_SETTLEMENT = IGPv2Settlement(upstreamSettlement_);
@@ -40,7 +40,7 @@ abstract contract GPv2Wrapper is IGPv2Wrapper {
         GPv2Trade.Data[] calldata trades,
         GPv2Interaction.Data[][3] calldata interactions,
         bytes calldata wrapperData
-    ) external {
+    ) external override {
         // Revert if not a valid solver
         if (!AUTHENTICATOR.isSolver(msg.sender)) {
             revert("GPv2Wrapper: not a solver");
