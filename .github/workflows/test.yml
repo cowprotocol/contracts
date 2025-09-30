@@ -50,7 +50,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: v1.3.5
 
       - name: Run Forge build with ${{ matrix.profile }}
         # We always build with 0.7.6 to ensure that the project is compatible with the oldest version
