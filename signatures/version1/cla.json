@@ -95,6 +95,14 @@
       "created_at": "2025-07-31T12:58:48Z",
       "repoId": 475887809,
       "pullRequestNo": 245
+    },
+    {
+      "name": "kaze-cow",
+      "id": 230549489,
+      "comment_id": 3338845269,
+      "created_at": "2025-09-26T13:55:04Z",
+      "repoId": 475887809,
+      "pullRequestNo": 247
     }
   ]
 }
