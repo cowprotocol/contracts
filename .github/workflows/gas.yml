@@ -45,7 +45,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: v1.3.5
 
       - name: Check gas snapshots
         run: forge snapshot --check
