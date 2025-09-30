@@ -15,30 +15,24 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "./GPv2Settlement.sol";
-import "./interfaces/IERC20.sol";
+import "./interfaces/IGPv2Wrapper.sol";
 
 /**
- * @dev Interface defining required methods for wrappers of the GPv2Settlement contract for CoW orders
- * A wrapper should:
- * * call the equivalent `settle` on the GPv2Settlement contract (0x9008D19f58AAbD9eD0D60971565AA8510560ab41)
- * * verify that the caller is authorized via the GPv2Authentication contract.
- * A wrapper may also execute, or otherwise put the blockchain in a state that needs to be established prior to settlement.
- * Additionally, it needs to be approved by the GPv2Authentication contract
+ * @title A minimalist base that can be extended to safely implement a wrapper. It ensures the most important basic functions of a wrapper are fulfilled
  */
-abstract contract GPv2Wrapper {
-    GPv2Settlement public immutable UPSTREAM_SETTLEMENT;
+abstract contract GPv2Wrapper is IGPv2Wrapper {
+    IGPv2Settlement public immutable UPSTREAM_SETTLEMENT;
     GPv2Authentication public immutable AUTHENTICATOR;
 
     constructor(address payable upstreamSettlement_) {
-        UPSTREAM_SETTLEMENT = GPv2Settlement(upstreamSettlement_);
+        UPSTREAM_SETTLEMENT = IGPv2Settlement(upstreamSettlement_);
 
         // retrieve the authentication we are supposed to use from the settlement contract
-        AUTHENTICATOR = GPv2Settlement(upstreamSettlement_).authenticator();
+        AUTHENTICATOR = IGPv2Settlement(upstreamSettlement_).authenticator();
     }
 
     /**
-     * @dev Called to initiate a wrapped call against the settlement function. See GPv2Settlement.settle() for more information.
+     * @inheritdoc IGPv2Wrapper
      */
     function wrappedSettle(
         IERC20[] calldata tokens,
@@ -66,6 +60,9 @@ abstract contract GPv2Wrapper {
         bytes calldata wrapperData
     ) internal virtual;
 
+    /**
+     * @dev Should be called from within (or otherwise as a result of) _wrap. Calls GPv2Settlement.settle().
+     */
     function _internalSettle(
         IERC20[] calldata tokens,
         uint256[] calldata clearingPrices,
