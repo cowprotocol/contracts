@@ -12,7 +12,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - name: Print warning
         run: echo 'Publishing this branch to NPM is not supported'
       - name: Make the action fail
