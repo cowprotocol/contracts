@@ -23,6 +23,7 @@
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
       "transactionHash": "0xe52d425fe34d6d5215ccfc9ddfa485d490b3018f0ee5bbed708f2d172044d60d"
     },
+<<<<<<< HEAD
     "137": {
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
       "transactionHash": "0xd5d023a8df8fc2a94265b5da07bcb4d8f64d480988c75643358475c2f06e2c04"
@@ -46,6 +47,11 @@
     "59144": {
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
       "transactionHash": "0xe90008f47c12768e9b1e104f03d33f795ba0d56df09320e66f629fe388a63706"
+=======
+    "9745": {
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "transactionHash": "0xac21f1af0c6dd4e7f5ff935ade8aa9ae22d74b8d15f48028df3707ff05238287"
+>>>>>>> 8832f8c (Add plasma deployment files)
     }
   },
   "GPv2AllowListAuthentication_Proxy": {
@@ -96,6 +102,10 @@
     "59144": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x46988e84282be77758e5dc5365649de26cebd50a3b49b7d31af9695d3bb0da8f"
+    },
+    "9745": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0xc2ac50ad302e402c4db1e956bd357af7d84e3684ad65e4fdee58abea092ac88c"
     }
   },
   "GPv2AllowListAuthentication": {
@@ -146,6 +156,10 @@
     "59144": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0x46988e84282be77758e5dc5365649de26cebd50a3b49b7d31af9695d3bb0da8f"
+    },
+    "9745": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0xc2ac50ad302e402c4db1e956bd357af7d84e3684ad65e4fdee58abea092ac88c"
     }
   },
   "GPv2Settlement": {
@@ -196,6 +210,10 @@
     "59144": {
       "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
       "transactionHash": "0x6e5d2c4381320efdd21ccde1534560ded1b9ab07638776833faa22820c378155"
+    },
+    "9745": {
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "transactionHash": "0xf16bd6f307dce94ab252d8dd8266ab30091879fb3d631cbcf3d0ffddf9e6ad05"
     }
   },
   "GPv2VaultRelayer": {
@@ -246,6 +264,10 @@
     "59144": {
       "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
       "transactionHash": "0x6e5d2c4381320efdd21ccde1534560ded1b9ab07638776833faa22820c378155"
+    },
+    "9745": {
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "transactionHash": "0xf16bd6f307dce94ab252d8dd8266ab30091879fb3d631cbcf3d0ffddf9e6ad05"
     }
   }
 }
