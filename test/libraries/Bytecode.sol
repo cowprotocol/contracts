@@ -33,7 +33,7 @@ library Bytecode {
                 revert("Every immutable is expected to have at least a reference entry");
             }
 
-            // Only interested in the first occurence of the ith immutable reference
+            // Only interested in the first occurrence of the ith immutable reference
             ImmutableReference memory r = jsonImmutables[0];
             immutables[i] = which.code.slice(r.start, r.length);
         }

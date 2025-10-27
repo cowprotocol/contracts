@@ -166,7 +166,7 @@ export default {
     },
   },
   namedAccounts: {
-    // Note: accounts defined by a number refer to the the accounts as configured
+    // Note: accounts defined by a number refer to the accounts as configured
     // by the current network.
     deployer: 0,
     owner: {
