@@ -30,7 +30,7 @@ export const EIP1271_MAGICVALUE = ethers.utils.hexDataSlice(
 export enum SigningScheme {
   /**
    * The EIP-712 typed data signing scheme. This is the preferred scheme as it
-   * provides more infomation to wallets performing the signature on the data
+   * provides more information to wallets performing the signature on the data
    * being signed.
    *
    * <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md#definition-of-domainseparator>
