@@ -164,6 +164,11 @@ export default {
       url: "https://api.avax.network/ext/bc/C/rpc",
       chainId: 43114,
     },
+    linea: {
+      ...sharedNetworkConfig,
+      url: "https://rpc.linea.build",
+      chainId: 59144,
+    },
   },
   namedAccounts: {
     // Note: accounts defined by a number refer to the accounts as configured

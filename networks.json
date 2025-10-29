@@ -42,6 +42,10 @@
     "43114": {
       "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
       "transactionHash": "0x38d05a77e33e13ba3411efe92eb9607946053e4bfe94af7629f34bc66d34d80b"
+    },
+    "59144": {
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "transactionHash": "0xe90008f47c12768e9b1e104f03d33f795ba0d56df09320e66f629fe388a63706"
     }
   },
   "GPv2AllowListAuthentication_Proxy": {
@@ -88,6 +92,10 @@
     "43114": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0xa58fc76846917779d7bcbb7d34f4a2a44aab2b702ef983594e34e6972a0c626b"
+    },
+    "59144": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x46988e84282be77758e5dc5365649de26cebd50a3b49b7d31af9695d3bb0da8f"
     }
   },
   "GPv2AllowListAuthentication": {
@@ -134,6 +142,10 @@
     "43114": {
       "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
       "transactionHash": "0xa58fc76846917779d7bcbb7d34f4a2a44aab2b702ef983594e34e6972a0c626b"
+    },
+    "59144": {
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "transactionHash": "0x46988e84282be77758e5dc5365649de26cebd50a3b49b7d31af9695d3bb0da8f"
     }
   },
   "GPv2Settlement": {
@@ -180,6 +192,10 @@
     "43114": {
       "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
       "transactionHash": "0x374b84f0ea6bc554abc3ffdc3fbce4374fefc76f2bd25e324ce95a62cafcc142"
+    },
+    "59144": {
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "transactionHash": "0x6e5d2c4381320efdd21ccde1534560ded1b9ab07638776833faa22820c378155"
     }
   },
   "GPv2VaultRelayer": {
@@ -226,6 +242,10 @@
     "43114": {
       "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
       "transactionHash": "0x374b84f0ea6bc554abc3ffdc3fbce4374fefc76f2bd25e324ce95a62cafcc142"
+    },
+    "59144": {
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "transactionHash": "0x6e5d2c4381320efdd21ccde1534560ded1b9ab07638776833faa22820c378155"
     }
   }
 }
