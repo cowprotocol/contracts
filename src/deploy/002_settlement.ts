@@ -47,7 +47,7 @@ const deploySettlement: DeployFunction = async function ({
     const vaultDeployment = vaultNetworks[chainId];
     if (vaultDeployment === undefined) {
       throw new Error(
-        `Vault not deployed on chain ${chainId}. Get the balancer address from the balancer team and add it to the networks.json file`,
+        `Vault not validated on chain ${chainId}. Make sure the Balancer deployment is safe to use first, then add it to the networks.json file`,
       );
     }
 
