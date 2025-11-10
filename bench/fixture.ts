@@ -300,7 +300,7 @@ export class BenchFixture {
           };
           break;
         default:
-          throw new Error("unreacheable");
+          throw new Error("unreachable");
       }
       const signingScheme =
         (i + Math.floor(i / 4)) % 2 == 0

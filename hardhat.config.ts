@@ -169,9 +169,13 @@ export default {
       url: "https://rpc.linea.build",
       chainId: 59144,
     },
+    plasma: {
+      ...sharedNetworkConfig,
+      url: "https://rpc.plasma.to",
+    },
   },
   namedAccounts: {
-    // Note: accounts defined by a number refer to the the accounts as configured
+    // Note: accounts defined by a number refer to the accounts as configured
     // by the current network.
     deployer: 0,
     owner: {
