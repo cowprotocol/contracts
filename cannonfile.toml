@@ -1,4 +1,4 @@
-name = "gp-settlement"
+name = "cow-settlement"
 version = "2.0.0"
 
 [var.main]
