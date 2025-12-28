@@ -13,21 +13,25 @@ contract GPv2VaultRelayer {
 
     /// @dev The creator of the contract which has special permissions. This
     /// value is set at creation time and cannot change.
-    address private immutable creator;
+    address private immutable CREATOR;
 
     /// @dev The vault this relayer is for.
-    IVault private immutable vault;
+    IVault private immutable VAULT;
 
     constructor(IVault vault_) {
-        creator = msg.sender;
-        vault = vault_;
+        CREATOR = msg.sender;
+        VAULT = vault_;
     }
 
     /// @dev Modifier that ensures that a function can only be called by the
     /// creator of this contract.
     modifier onlyCreator() {
-        require(msg.sender == creator, "GPv2: not creator");
+        _onlyCreator();
         _;
+    }
+
+    function _onlyCreator() internal view {
+        require(msg.sender == CREATOR, "GPv2: not creator");
     }
 
     /// @dev Transfers all sell amounts for the executed trades from their
@@ -41,7 +45,7 @@ contract GPv2VaultRelayer {
     function transferFromAccounts(
         GPv2Transfer.Data[] calldata transfers
     ) external onlyCreator {
-        vault.transferFromAccounts(transfers, msg.sender);
+        VAULT.transferFromAccounts(transfers, msg.sender);
     }
 
     /// @dev Performs a Balancer batched swap on behalf of a user and sends a
@@ -72,7 +76,7 @@ contract GPv2VaultRelayer {
         uint256 deadline,
         GPv2Transfer.Data calldata feeTransfer
     ) external onlyCreator returns (int256[] memory tokenDeltas) {
-        tokenDeltas = vault.batchSwap(
+        tokenDeltas = VAULT.batchSwap(
             kind,
             swaps,
             tokens,
@@ -80,6 +84,6 @@ contract GPv2VaultRelayer {
             limits,
             deadline
         );
-        vault.fastTransferFromAccount(feeTransfer, msg.sender);
+        VAULT.fastTransferFromAccount(feeTransfer, msg.sender);
     }
 }

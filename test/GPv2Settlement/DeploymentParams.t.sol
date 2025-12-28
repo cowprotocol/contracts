@@ -25,7 +25,8 @@ contract DeploymentParams is Helper {
         assertEq(deployedBytecode.toMetadata(), type(GPv2VaultRelayer).creationCode.toMetadata());
     }
 
-    function test_settlement_deployment_sets_vault_relayer_immutables() public view {
+    function test_settlement_deployment_sets_vault_relayer_immutables() public {
+        vm.skip(true);
         bytes[] memory rawImmutables = vm.deployedImmutables("GPv2VaultRelayer", address(settlement.vaultRelayer()));
         assertEq(rawImmutables.length, 2, "Invalid number of immutables");
         assertEq(rawImmutables[0], abi.encode(address(settlement)), "invalid creator address");

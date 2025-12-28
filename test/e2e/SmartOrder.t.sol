@@ -25,13 +25,13 @@ contract SmartSellOrder is EIP1271Verifier {
 
     bytes32 public constant APPDATA = keccak256("SmartSellOrder");
 
-    address public immutable owner;
-    bytes32 public immutable domainSeparator;
-    IERC20 public immutable sellToken;
-    IERC20 public immutable buyToken;
-    uint256 public immutable totalSellAmount;
-    uint256 public immutable totalFeeAmount;
-    uint32 public immutable validTo;
+    address public immutable OWNER;
+    bytes32 public immutable DOMAIN_SEPARATOR;
+    IERC20 public immutable SELL_TOKEN;
+    IERC20 public immutable BUY_TOKEN;
+    uint256 public immutable TOTAL_SELL_AMOUNT;
+    uint256 public immutable TOTAL_FEE_AMOUNT;
+    uint32 public immutable VALID_TO;
 
     constructor(
         GPv2Settlement settlement,
@@ -41,30 +41,30 @@ contract SmartSellOrder is EIP1271Verifier {
         uint256 totalSellAmount_,
         uint256 totalFeeAmount_
     ) {
-        owner = msg.sender;
-        domainSeparator = settlement.domainSeparator();
-        sellToken = sellToken_;
-        buyToken = buyToken_;
-        validTo = validTo_;
-        totalSellAmount = totalSellAmount_;
-        totalFeeAmount = totalFeeAmount_;
+        OWNER = msg.sender;
+        DOMAIN_SEPARATOR = settlement.DOMAIN_SEPARATOR();
+        SELL_TOKEN = sellToken_;
+        BUY_TOKEN = buyToken_;
+        VALID_TO = validTo_;
+        TOTAL_SELL_AMOUNT = totalSellAmount_;
+        TOTAL_FEE_AMOUNT = totalFeeAmount_;
 
         sellToken_.approve(address(settlement.vaultRelayer()), type(uint256).max);
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "not owner");
+        require(msg.sender == OWNER, "not owner");
         _;
     }
 
     function withdraw(uint256 amount) external onlyOwner {
-        sellToken.safeTransfer(owner, amount);
+        SELL_TOKEN.safeTransfer(OWNER, amount);
     }
 
     function close() external onlyOwner {
-        uint256 balance = sellToken.balanceOf(address(this));
+        uint256 balance = SELL_TOKEN.balanceOf(address(this));
         if (balance != 0) {
-            sellToken.safeTransfer(owner, balance);
+            SELL_TOKEN.safeTransfer(OWNER, balance);
         }
     }
 
@@ -72,20 +72,20 @@ contract SmartSellOrder is EIP1271Verifier {
         uint256 sellAmount = abi.decode(signature, (uint256));
         GPv2Order.Data memory order = orderForSellAmount(sellAmount);
 
-        if (order.hash(domainSeparator) == hash) {
+        if (order.hash(DOMAIN_SEPARATOR) == hash) {
             magicValue = GPv2EIP1271.MAGICVALUE;
         }
     }
 
     function orderForSellAmount(uint256 sellAmount) public view returns (GPv2Order.Data memory order) {
-        order.sellToken = sellToken;
-        order.buyToken = buyToken;
-        order.receiver = owner;
+        order.sellToken = SELL_TOKEN;
+        order.buyToken = BUY_TOKEN;
+        order.receiver = OWNER;
         order.sellAmount = sellAmount;
         order.buyAmount = buyAmountForSellAmount(sellAmount);
-        order.validTo = validTo;
+        order.validTo = VALID_TO;
         order.appData = APPDATA;
-        order.feeAmount = totalFeeAmount.mul(sellAmount).div(totalSellAmount);
+        order.feeAmount = TOTAL_FEE_AMOUNT.mul(sellAmount).div(TOTAL_SELL_AMOUNT);
         order.kind = GPv2Order.KIND_SELL;
         // NOTE: We counter-intuitively set `partiallyFillable` to `false`, even
         // if the smart order as a whole acts like a partially fillable order.
@@ -98,13 +98,13 @@ contract SmartSellOrder is EIP1271Verifier {
 
     function buyAmountForSellAmount(uint256 sellAmount) private view returns (uint256 buyAmount) {
         uint256 feeAdjustedBalance =
-            sellToken.balanceOf(address(this)).mul(totalSellAmount).div(totalSellAmount.add(totalFeeAmount));
-        uint256 soldAmount = totalSellAmount > feeAdjustedBalance ? totalSellAmount - feeAdjustedBalance : 0;
+            SELL_TOKEN.balanceOf(address(this)).mul(TOTAL_SELL_AMOUNT).div(TOTAL_SELL_AMOUNT.add(TOTAL_FEE_AMOUNT));
+        uint256 soldAmount = TOTAL_SELL_AMOUNT > feeAdjustedBalance ? TOTAL_SELL_AMOUNT - feeAdjustedBalance : 0;
 
         // NOTE: This is currently a silly price strategy where the xrate
         // increases linearly from 1:1 to 1:2 as the smart order gets filled.
         // This can be extended to more complex "price curves".
-        buyAmount = sellAmount.mul(totalSellAmount.add(sellAmount).add(soldAmount)).div(totalSellAmount);
+        buyAmount = sellAmount.mul(TOTAL_SELL_AMOUNT.add(sellAmount).add(soldAmount)).div(TOTAL_SELL_AMOUNT);
     }
 }
 

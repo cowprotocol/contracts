@@ -2,10 +2,10 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "../interfaces/IERC20.sol";
-import "../interfaces/IVault.sol";
-import "./GPv2Order.sol";
-import "./GPv2SafeERC20.sol";
+import {IERC20} from "../interfaces/IERC20.sol";
+import {IVault} from "../interfaces/IVault.sol";
+import {GPv2Order} from "./GPv2Order.sol";
+import {GPv2SafeERC20} from "./GPv2SafeERC20.sol";
 
 /// @title Gnosis Protocol v2 Transfers
 /// @author Gnosis Developers

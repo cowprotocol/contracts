@@ -16,8 +16,12 @@ contract EIP173Proxy is Proxy {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     modifier onlyOwner() {
-        require(msg.sender == _owner(), "NOT_AUTHORIZED");
+        _onlyOwner();
         _;
+    }
+
+    function _onlyOwner() internal view {
+        require(msg.sender == _owner(), "NOT_AUTHORIZED");
     }
 
     constructor(address implAddress, address ownerAddress, bytes memory data) {

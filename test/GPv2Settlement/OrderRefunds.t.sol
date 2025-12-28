@@ -12,10 +12,10 @@ enum FreeFunctionVariant {
 }
 
 abstract contract Variant is Helper {
-    FreeFunctionVariant internal immutable freeFn;
+    FreeFunctionVariant internal immutable FREE_FN;
 
     constructor(FreeFunctionVariant _freeFn) {
-        freeFn = _freeFn;
+        FREE_FN = _freeFn;
     }
 
     function defaultOrderUids() internal view returns (bytes[] memory orderUids) {
@@ -26,9 +26,9 @@ abstract contract Variant is Helper {
     }
 
     function freeFunctionCall(bytes[] memory orderUids) private {
-        if (freeFn == FreeFunctionVariant.FreeFilledAmountStorage) {
+        if (FREE_FN == FreeFunctionVariant.FreeFilledAmountStorage) {
             settlement.freeFilledAmountStorage(orderUids);
-        } else if (freeFn == FreeFunctionVariant.FreePreSignatureStorage) {
+        } else if (FREE_FN == FreeFunctionVariant.FreePreSignatureStorage) {
             settlement.freePreSignatureStorage(orderUids);
         } else {
             revert("Invalid free function");
@@ -36,9 +36,9 @@ abstract contract Variant is Helper {
     }
 
     function freeFunctionCallTest(bytes[] memory orderUids) private {
-        if (freeFn == FreeFunctionVariant.FreeFilledAmountStorage) {
+        if (FREE_FN == FreeFunctionVariant.FreeFilledAmountStorage) {
             settlement.freeFilledAmountStorageTest(orderUids);
-        } else if (freeFn == FreeFunctionVariant.FreePreSignatureStorage) {
+        } else if (FREE_FN == FreeFunctionVariant.FreePreSignatureStorage) {
             settlement.freePreSignatureStorageTest(orderUids);
         } else {
             revert("Invalid free function");

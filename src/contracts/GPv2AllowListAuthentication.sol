@@ -3,8 +3,8 @@ pragma solidity >=0.7.6 <0.9.0;
 
 import {GPv2Authentication} from "./interfaces/GPv2Authentication.sol";
 import {GPv2EIP1967} from "./libraries/GPv2EIP1967.sol";
-import "./mixins/Initializable.sol";
-import "./mixins/StorageAccessible.sol";
+import {Initializable} from "./mixins/Initializable.sol";
+import {StorageAccessible} from "./mixins/StorageAccessible.sol";
 
 /// @title Gnosis Protocol v2 Access Control Contract
 /// @author Gnosis Developers
@@ -47,7 +47,7 @@ contract GPv2AllowListAuthentication is
     /// @dev Modifier that ensures a method can only be called by the contract
     /// manager. Reverts if called by other addresses.
     modifier onlyManager() {
-        require(manager == msg.sender, "GPv2: caller not manager");
+        _onlyManager();
         _;
     }
 
@@ -57,11 +57,19 @@ contract GPv2AllowListAuthentication is
     /// This modifier assumes that the proxy uses an EIP-1967 compliant storage
     /// slot for the admin.
     modifier onlyManagerOrOwner() {
+        _onlyManagerOrOwner();
+        _;
+    }
+
+    function _onlyManager() internal view {
+        require(manager == msg.sender, "GPv2: caller not manager");
+    }
+
+    function _onlyManagerOrOwner() internal view {
         require(
             manager == msg.sender || GPv2EIP1967.getAdmin() == msg.sender,
             "GPv2: not authorized"
         );
-        _;
     }
 
     /// @dev Set the manager for this contract.

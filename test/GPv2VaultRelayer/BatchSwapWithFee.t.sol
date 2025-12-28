@@ -16,14 +16,14 @@ contract BatchSwapWithFee is BatchSwapWithFeeHelper {
     }
 
     function test_performs_swaps_given_in() public {
-        performs_swaps_for_swap_kind(IVault.SwapKind.GIVEN_IN);
+        performsSwapsForSwapKind(IVault.SwapKind.GIVEN_IN);
     }
 
     function test_performs_swaps_given_out() public {
-        performs_swaps_for_swap_kind(IVault.SwapKind.GIVEN_OUT);
+        performsSwapsForSwapKind(IVault.SwapKind.GIVEN_OUT);
     }
 
-    function performs_swaps_for_swap_kind(IVault.SwapKind kind) private {
+    function performsSwapsForSwapKind(IVault.SwapKind kind) private {
         address trader0 = makeAddr("trader 0");
         address trader1 = makeAddr("trader 1");
 

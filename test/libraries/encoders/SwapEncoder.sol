@@ -117,7 +117,7 @@ library SwapEncoder {
 
     /// @dev Encode the state into an EncodedSwap struct
     function encode(State storage state) internal returns (EncodedSwap memory) {
-        return EncodedSwap(state.steps, tokens(state), state.trade);
+        return EncodedSwap({swaps: state.steps, tokens: tokens(state), trade: state.trade});
     }
 
     /// @dev Convert a Swap struct into a BatchSwapStep struct

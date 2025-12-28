@@ -19,6 +19,7 @@ library Bytecode {
         returns (bytes[] memory immutables)
     {
         string memory json =
+        /// forge-lint: disable-next-line(unsafe-cheatcode)
             vm.readFile(string.concat(vm.projectRoot(), "/out/", contractName, ".sol/", contractName, ".json"));
         string memory jsonPath = ".deployedBytecode.immutableReferences";
 

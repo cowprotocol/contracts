@@ -67,7 +67,7 @@ abstract contract Helper is Test {
         swapEncoder = SwapEncoder.makeSwapEncoder();
 
         // Set the domain separator
-        domainSeparator = settlement.domainSeparator();
+        domainSeparator = settlement.DOMAIN_SEPARATOR();
 
         // Create wallets
         trader = vm.createWallet("GPv2Settlement.Helper: trader");

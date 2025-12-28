@@ -35,6 +35,6 @@ contract Helper is Test {
 
     function setUp() public {
         executor = new Harness();
-        domainSeparator = executor.domainSeparator();
+        domainSeparator = executor.DOMAIN_SEPARATOR();
     }
 }

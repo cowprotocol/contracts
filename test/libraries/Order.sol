@@ -32,42 +32,42 @@ library Order {
     // type are implemented." and "Library cannot have non-constant state
     // variables". So I'm left with defining them as functions.
 
-    function ALL_KINDS() internal pure returns (bytes32[2] memory) {
+    function allKinds() internal pure returns (bytes32[2] memory) {
         return [GPv2Order.KIND_SELL, GPv2Order.KIND_BUY];
     }
 
-    function ALL_SELL_TOKEN_BALANCES() internal pure returns (bytes32[3] memory) {
+    function allSellTokenBalances() internal pure returns (bytes32[3] memory) {
         return [GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_EXTERNAL, GPv2Order.BALANCE_INTERNAL];
     }
 
-    function ALL_BUY_TOKEN_BALANCES() internal pure returns (bytes32[2] memory) {
+    function allBuyTokenBalances() internal pure returns (bytes32[2] memory) {
         return [GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_INTERNAL];
     }
 
-    function ALL_FLAGS() internal pure returns (Flags[] memory out) {
+    function allFlags() internal pure returns (Flags[] memory out) {
         uint256 numBools = 1;
         uint256 boolLength = 2;
         // "out" has as many entries as there are distinct options to fill the
         // `Flags` struct.
         out = new Flags[](
-            ALL_KINDS().length * ALL_SELL_TOKEN_BALANCES().length * ALL_BUY_TOKEN_BALANCES().length
+            allKinds().length * allSellTokenBalances().length * allBuyTokenBalances().length
                 * (boolLength * numBools)
         );
         uint256 offset = 0;
-        for (uint256 kindI = 0; kindI < ALL_KINDS().length; kindI++) {
+        for (uint256 kindI = 0; kindI < allKinds().length; kindI++) {
             for (
                 uint256 sellTokenBalanceI = 0;
-                sellTokenBalanceI < ALL_SELL_TOKEN_BALANCES().length;
+                sellTokenBalanceI < allSellTokenBalances().length;
                 sellTokenBalanceI++
             ) {
                 for (
                     uint256 buyTokenBalanceI = 0;
-                    buyTokenBalanceI < ALL_BUY_TOKEN_BALANCES().length;
+                    buyTokenBalanceI < allBuyTokenBalances().length;
                     buyTokenBalanceI++
                 ) {
-                    bytes32 kind = ALL_KINDS()[kindI];
-                    bytes32 sellTokenBalance = ALL_SELL_TOKEN_BALANCES()[sellTokenBalanceI];
-                    bytes32 buyTokenBalance = ALL_BUY_TOKEN_BALANCES()[buyTokenBalanceI];
+                    bytes32 kind = allKinds()[kindI];
+                    bytes32 sellTokenBalance = allSellTokenBalances()[sellTokenBalanceI];
+                    bytes32 buyTokenBalance = allBuyTokenBalances()[buyTokenBalanceI];
                     out[offset] = Flags({
                         kind: kind,
                         sellTokenBalance: sellTokenBalance,
@@ -174,10 +174,10 @@ library Order {
     }
 
     function fuzz(Fuzzed memory params) internal pure returns (GPv2Order.Data memory) {
-        Order.Flags[] memory allFlags = Order.ALL_FLAGS();
+        Order.Flags[] memory allFlagsArray = Order.allFlags();
         // `flags` isn't exactly random, but for fuzzing purposes it should be
         // more than enough.
-        Order.Flags memory flags = allFlags[uint256(params.flagsPick) % allFlags.length];
+        Order.Flags memory flags = allFlagsArray[uint256(params.flagsPick) % allFlagsArray.length];
         return GPv2Order.Data({
             sellToken: IERC20(params.sellToken),
             buyToken: IERC20(params.buyToken),

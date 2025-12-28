@@ -63,7 +63,7 @@ abstract contract Helper is Test {
     address internal solver;
     Vm.Wallet internal trader;
 
-    bool immutable isForked;
+    bool immutable IS_FORKED;
     uint256 forkId;
 
     WETH9 weth;
@@ -71,11 +71,11 @@ abstract contract Helper is Test {
     bytes32 constant SALT = "Mattresses in Berlin!";
 
     constructor(bool _isForked) {
-        isForked = _isForked;
+        IS_FORKED = _isForked;
     }
 
     function setUp() public virtual {
-        if (isForked) {
+        if (IS_FORKED) {
             string memory forkUrl;
 
             try vm.envString("FORK_URL") returns (string memory url) {
@@ -121,7 +121,7 @@ abstract contract Helper is Test {
         swapEncoder = SwapEncoder.makeSwapEncoder();
 
         // Set the domain separator
-        domainSeparator = settlement.domainSeparator();
+        domainSeparator = settlement.DOMAIN_SEPARATOR();
 
         // Create wallets
         trader = vm.createWallet("E2E.Helper: trader");
@@ -172,6 +172,7 @@ abstract contract Helper is Test {
     }
 
     function _getBalancerBytecode(string memory artifactName) internal view returns (bytes memory) {
+        /// forge-lint: disable-next-line(unsafe-cheatcode)
         string memory data = vm.readFile(string(abi.encodePacked("balancer/", artifactName, ".json")));
         return vm.parseJsonBytes(data, ".bytecode");
     }

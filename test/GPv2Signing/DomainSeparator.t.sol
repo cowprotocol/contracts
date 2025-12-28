@@ -11,11 +11,11 @@ contract DomainSeparator is Helper {
                 name: "Gnosis Protocol", version: "v2", chainId: block.chainid, verifyingContract: address(executor)
             })
         );
-        assertEq(executor.domainSeparator(), expectedDomainSeparator);
+        assertEq(executor.DOMAIN_SEPARATOR(), expectedDomainSeparator);
     }
 
     function test_should_have_a_different_replay_protection_for_each_deployment() public {
         Harness signing = new Harness();
-        assertNotEq(executor.domainSeparator(), signing.domainSeparator());
+        assertNotEq(executor.DOMAIN_SEPARATOR(), signing.DOMAIN_SEPARATOR());
     }
 }

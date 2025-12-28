@@ -51,7 +51,7 @@ abstract contract GPv2Signing {
     /// separator is computed following the EIP-712 standard and has replay
     /// protection mixed in so that signed orders are only valid for specific
     /// GPv2 contracts.
-    bytes32 public immutable domainSeparator;
+    bytes32 public immutable DOMAIN_SEPARATOR;
 
     /// @dev Storage indicating whether or not an order has been signed by a
     /// particular address.
@@ -70,7 +70,7 @@ abstract contract GPv2Signing {
             chainId := chainid()
         }
 
-        domainSeparator = keccak256(
+        DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 DOMAIN_TYPE_HASH,
                 DOMAIN_NAME,
@@ -154,7 +154,7 @@ abstract contract GPv2Signing {
         Scheme signingScheme,
         bytes calldata signature
     ) internal view returns (bytes32 orderDigest, address owner) {
-        orderDigest = order.hash(domainSeparator);
+        orderDigest = order.hash(DOMAIN_SEPARATOR);
         if (signingScheme == Scheme.Eip712) {
             owner = recoverEip712Signer(orderDigest, signature);
         } else if (signingScheme == Scheme.EthSign) {
@@ -253,9 +253,13 @@ abstract contract GPv2Signing {
         // `"\x19Ethereum Signed Message:\n" || length || data`, where
         // the length is a constant (32 bytes) and the data is defined as:
         // `orderDigest`.
-        bytes32 ethsignDigest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", orderDigest)
-        );
+        bytes32 ethsignDigest;
+        assembly {
+            let freeMemoryPointer := mload(0x40)
+            mstore(freeMemoryPointer, "\x19Ethereum Signed Message:\n32")
+            mstore(add(freeMemoryPointer, 28), orderDigest)
+            ethsignDigest := keccak256(freeMemoryPointer, 60)
+        }
 
         owner = ecdsaRecover(ethsignDigest, encodedSignature);
     }

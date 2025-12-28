@@ -2,8 +2,8 @@
 // Vendored from: <https://github.com/1inch-exchange/chi/blob/master/contracts/ChiToken.sol>
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 abstract contract ERC20WithoutTotalSupply is IERC20 {
 
@@ -71,9 +71,13 @@ abstract contract ERC20WithoutTotalSupply is IERC20 {
     }
 }
 
-contract ChiToken is IERC20, ERC20WithoutTotalSupply {
+contract ChiToken is ERC20WithoutTotalSupply {
+    // we disable forge lints here because these view functions are sort of defined by standard and creating the actual functions is tedious and unnecessary
+    /// forge-lint: disable-next-line(screaming-snake-case-const)
     string public constant name = "Chi Token by 1inch";
+    /// forge-lint: disable-next-line(screaming-snake-case-const)
     string public constant symbol = "CHI";
+    /// forge-lint: disable-next-line(screaming-snake-case-const)
     uint8 public constant decimals = 0;
 
     uint256 public totalMinted;

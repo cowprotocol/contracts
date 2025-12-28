@@ -8,6 +8,7 @@ library Eip712 {
     /// parameter is intentionally omitted as there is no need to disambiguate
     /// with the available information. More details can be found at:
     /// https://eips.ethereum.org/EIPS/eip-712#definition-of-domainseparator
+    /// forge-lint: disable-next-line(pascal-case-struct)
     struct EIP712Domain {
         string name;
         string version;
@@ -35,7 +36,7 @@ library Eip712 {
     // Ideally, this would be replaced by type(EIP712Domain).typehash.
     // Progress tracking for this Solidity feature is here:
     // https://github.com/ethereum/solidity/issues/14157
-    function EIP712DOMAIN_TYPE_HASH() internal pure returns (bytes32) {
+    function eip712DomainTypeHash() internal pure returns (bytes32) {
         return keccak256(
             bytes(
                 string.concat(
@@ -54,7 +55,7 @@ library Eip712 {
     // Ideally, this would be replaced by type(Order).typehash.
     // Progress tracking for this Solidity feature is here:
     // https://github.com/ethereum/solidity/issues/14157
-    function ORDER_TYPE_HASH() internal pure returns (bytes32) {
+    function orderTypeHash() internal pure returns (bytes32) {
         return keccak256(
             bytes(
                 string.concat(
@@ -133,7 +134,7 @@ library Eip712 {
         return keccak256(
             // Note: dynamic types are hashed.
             abi.encode(
-                EIP712DOMAIN_TYPE_HASH(),
+                eip712DomainTypeHash(),
                 keccak256(bytes(domain.name)),
                 keccak256(bytes(domain.version)),
                 domain.chainId,
@@ -149,7 +150,7 @@ library Eip712 {
         return keccak256(
             // Note: dynamic types are hashed.
             abi.encode(
-                ORDER_TYPE_HASH(),
+                orderTypeHash(),
                 order.sellToken,
                 order.buyToken,
                 order.receiver,

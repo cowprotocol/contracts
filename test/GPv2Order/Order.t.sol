@@ -28,12 +28,12 @@ contract Order is Helper {
     mapping(bytes32 orderHash => bool) seen;
 
     function test_TYPE_HASH_matches_the_EIP_712_order_type_hash() public view {
-        assertEq(executor.typeHashTest(), Eip712.ORDER_TYPE_HASH());
+        assertEq(executor.typeHashTest(), Eip712.orderTypeHash());
     }
 
     function testFuzz_computes_EIP_712_order_signing_hash(Fuzzed memory fuzzed) public {
         bytes32 domainSeparator = keccak256("test domain separator");
-        OrderLib.Flags[] memory flags = OrderLib.ALL_FLAGS();
+        OrderLib.Flags[] memory flags = OrderLib.allFlags();
         for (uint256 i = 0; i < flags.length; i++) {
             GPv2Order.Data memory order = GPv2Order.Data({
                 sellToken: IERC20(fuzzed.sellToken),

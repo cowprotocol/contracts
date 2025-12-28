@@ -80,7 +80,7 @@ bytes4 constant EIP1271_MAGICVALUE = bytes4(keccak256("isValidSignature(bytes32,
 
 contract ContractOrdersWithGnosisSafeTest is Helper(true) {
     IERC20Mintable dai;
-    IERC20Mintable wETH;
+    IERC20Mintable wethToken;
 
     ISafe safe;
 
@@ -94,7 +94,7 @@ contract ContractOrdersWithGnosisSafeTest is Helper(true) {
         super.setUp();
 
         dai = deployMintableErc20("dai", "dai");
-        wETH = deployMintableErc20("wETH", "wETH");
+        wethToken = deployMintableErc20("wethToken", "wethToken");
 
         signer1 = vm.createWallet("signer1");
         signer2 = vm.createWallet("signer2");
@@ -117,24 +117,24 @@ contract ContractOrdersWithGnosisSafeTest is Helper(true) {
     }
 
     function test_should_settle_matching_orders() external {
-        // EOA trader: sell 1 wETH for  900 dai
-        // Safe:       buy  1 wETH for 1100 dai
-        // Settlement price at 1000 dai for 1 wETH.
+        // EOA trader: sell 1 wethToken for  900 dai
+        // Safe:       buy  1 wethToken for 1100 dai
+        // Settlement price at 1000 dai for 1 wethToken.
 
         // mint some tokens to trader
-        wETH.mint(trader.addr, 1.001 ether);
+        wethToken.mint(trader.addr, 1.001 ether);
         // approve the tokens for trading on settlement contract
         vm.prank(trader.addr);
-        wETH.approve(vaultRelayer, type(uint256).max);
+        wethToken.approve(vaultRelayer, type(uint256).max);
 
-        // place order to sell 1 wETH for min 900 dai
+        // place order to sell 1 wethToken for min 900 dai
         encoder.signEncodeTrade(
             vm,
             trader,
             GPv2Order.Data({
                 kind: GPv2Order.KIND_SELL,
                 partiallyFillable: false,
-                sellToken: wETH,
+                sellToken: wethToken,
                 buyToken: dai,
                 sellAmount: 1 ether,
                 buyAmount: 900 ether,
@@ -158,12 +158,12 @@ contract ContractOrdersWithGnosisSafeTest is Helper(true) {
         );
         assertEq(dai.allowance(address(safe), vaultRelayer), type(uint256).max, "allowance not as expected");
 
-        // place order to buy 1 wETH with max 1100 dai
+        // place order to buy 1 wethToken with max 1100 dai
         GPv2Order.Data memory order = GPv2Order.Data({
             kind: GPv2Order.KIND_BUY,
             partiallyFillable: false,
             sellToken: dai,
-            buyToken: wETH,
+            buyToken: wethToken,
             sellAmount: 1100 ether,
             buyAmount: 1 ether,
             feeAmount: 10 ether,
@@ -189,7 +189,7 @@ contract ContractOrdersWithGnosisSafeTest is Helper(true) {
         // set token prices
         IERC20[] memory tokens = new IERC20[](2);
         tokens[0] = dai;
-        tokens[1] = wETH;
+        tokens[1] = wethToken;
         uint256[] memory prices = new uint256[](2);
         prices[0] = 1 ether;
         prices[1] = 1000 ether;
@@ -200,13 +200,13 @@ contract ContractOrdersWithGnosisSafeTest is Helper(true) {
         vm.prank(solver);
         settle(encodedSettlement);
 
-        assertEq(wETH.balanceOf(trader.addr), 0, "trader weth balance not as expected");
+        assertEq(wethToken.balanceOf(trader.addr), 0, "trader wethToken balance not as expected");
         assertEq(dai.balanceOf(trader.addr), 1000 ether, "trader dai balance not as expected");
 
-        assertEq(wETH.balanceOf(address(safe)), 1 ether, "safe weth balance not as expected");
+        assertEq(wethToken.balanceOf(address(safe)), 1 ether, "safe wethToken balance not as expected");
         assertEq(dai.balanceOf(address(safe)), 100 ether, "safe dai balance not as expected");
 
-        assertEq(wETH.balanceOf(address(settlement)), 0.001 ether, "settlement weth fee not as expected");
+        assertEq(wethToken.balanceOf(address(settlement)), 0.001 ether, "settlement wethToken fee not as expected");
         assertEq(dai.balanceOf(address(settlement)), 10 ether, "settlement dai fee not as expected");
     }
 

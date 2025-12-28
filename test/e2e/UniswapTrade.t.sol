@@ -30,7 +30,7 @@ interface IUniswapV2Pair {
 
 contract UniswapTradeTest is Helper(true) {
     IERC20Mintable dai;
-    IERC20Mintable wETH;
+    IERC20Mintable wethToken;
 
     IUniswapV2Factory factory;
     IUniswapV2Pair uniswapPair;
@@ -41,39 +41,39 @@ contract UniswapTradeTest is Helper(true) {
         super.setUp();
 
         dai = deployMintableErc20("dai", "dai");
-        wETH = deployMintableErc20("wETH", "wETH");
+        wethToken = deployMintableErc20("wethToken", "wethToken");
 
         factory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
-        uniswapPair = IUniswapV2Pair(factory.createPair(address(wETH), address(dai)));
+        uniswapPair = IUniswapV2Pair(factory.createPair(address(wethToken), address(dai)));
 
-        isWethToken0 = uniswapPair.token0() == address(wETH);
+        isWethToken0 = uniswapPair.token0() == address(wethToken);
     }
 
     // Settles the following batch:
     //
-    //   /----(1. SELL 1 wETH for dai if p(wETH) >= 500)-----\
+    //   /----(1. SELL 1 wethToken for dai if p(wethToken) >= 500)-----\
     //   |                                                    |
     //   |                                                    v
-    // [dai]<---(Uniswap Pair 1000 wETH / 600.000 dai)--->[wETH]
+    // [dai]<---(Uniswap Pair 1000 wethToken / 600.000 dai)--->[wethToken]
     //   ^                                                    |
     //   |                                                    |
-    //   \----(2. BUY 0.5 wETH for dai if p(wETH) <= 600)----/
+    //   \----(2. BUY 0.5 wethToken for dai if p(wethToken) <= 600)----/
     function test_should_two_overlapping_orders_and_trade_surplus_with_uniswap() external {
         uint256 wethReserve = 1000 ether;
         uint256 daiReserve = 600000 ether;
-        wETH.mint(address(uniswapPair), wethReserve);
+        wethToken.mint(address(uniswapPair), wethReserve);
         dai.mint(address(uniswapPair), daiReserve);
         uniswapPair.mint(address(this));
 
-        // The current batch has a sell order selling 1 wETH and a buy order buying
-        // 0.5 wETH. This means there is exactly a surplus 0.5 wETH that needs to be
+        // The current batch has a sell order selling 1 wethToken and a buy order buying
+        // 0.5 wethToken. This means there is exactly a surplus 0.5 wethToken that needs to be
         // sold to Uniswap. Uniswap is governed by a balancing equation which can be
-        // used to compute the exact buy amount for selling the 0.5 wETH and we can
+        // used to compute the exact buy amount for selling the 0.5 wethToken and we can
         // use to build our the settlement with a smart contract interaction.
         // ```
-        // (reservewETH + inwETH * 0.997) * (reservedai - outdai) = reservewETH * reservedai
-        // outdai = (reservedai * inwETH * 0.997) / (reservewETH + inwETH * 0.997)
-        //         = (reservedai * inwETH * 997) / (reservewETH * 1000 + inwETH * 997)
+        // (reserveweth + inweth * 0.997) * (reservedai - outdai) = reserveweth * reservedai
+        // outdai = (reservedai * inweth * 0.997) / (reserveweth + inweth * 0.997)
+        //         = (reservedai * inweth * 997) / (reserveweth * 1000 + inweth * 997)
         // ```
         uint256 uniswapWethInAmount = 0.5 ether;
         uint256 uniswapDaiOutAmount =
@@ -82,19 +82,19 @@ contract UniswapTradeTest is Helper(true) {
         Vm.Wallet memory trader1 = vm.createWallet("trader1");
         Vm.Wallet memory trader2 = vm.createWallet("trader2");
 
-        // mint some weth
-        wETH.mint(trader1.addr, 1.001 ether);
+        // mint some wethToken
+        wethToken.mint(trader1.addr, 1.001 ether);
         vm.prank(trader1.addr);
-        wETH.approve(vaultRelayer, type(uint256).max);
+        wethToken.approve(vaultRelayer, type(uint256).max);
 
-        // place order to sell 1 wETH for min 500 dai
+        // place order to sell 1 wethToken for min 500 dai
         encoder.signEncodeTrade(
             vm,
             trader1,
             GPv2Order.Data({
                 kind: GPv2Order.KIND_SELL,
                 partiallyFillable: false,
-                sellToken: wETH,
+                sellToken: wethToken,
                 buyToken: dai,
                 sellAmount: 1 ether,
                 buyAmount: 500 ether,
@@ -115,7 +115,7 @@ contract UniswapTradeTest is Helper(true) {
         vm.prank(trader2.addr);
         dai.approve(vaultRelayer, type(uint256).max);
 
-        // place order to buy 0.5 wETH for max 300 dai
+        // place order to buy 0.5 wethToken for max 300 dai
         encoder.signEncodeTrade(
             vm,
             trader2,
@@ -123,7 +123,7 @@ contract UniswapTradeTest is Helper(true) {
                 kind: GPv2Order.KIND_BUY,
                 partiallyFillable: false,
                 sellToken: dai,
-                buyToken: wETH,
+                buyToken: wethToken,
                 sellAmount: 300 ether,
                 buyAmount: 0.5 ether,
                 feeAmount: 0.3 ether,
@@ -141,7 +141,7 @@ contract UniswapTradeTest is Helper(true) {
         // interaction to swap the remainder on uniswap
         encoder.addInteraction(
             GPv2Interaction.Data({
-                target: address(wETH),
+                target: address(wethToken),
                 value: 0,
                 callData: abi.encodeCall(IERC20.transfer, (address(uniswapPair), uniswapWethInAmount))
             }),
@@ -160,7 +160,7 @@ contract UniswapTradeTest is Helper(true) {
 
         // set token prices
         IERC20[] memory tokens = new IERC20[](2);
-        tokens[0] = wETH;
+        tokens[0] = wethToken;
         tokens[1] = dai;
         uint256[] memory prices = new uint256[](2);
         prices[0] = uniswapDaiOutAmount;
@@ -172,13 +172,13 @@ contract UniswapTradeTest is Helper(true) {
         vm.prank(solver);
         settle(encodedSettlement);
 
-        assertEq(wETH.balanceOf(address(settlement)), 0.001 ether, "weth fees not as expected");
+        assertEq(wethToken.balanceOf(address(settlement)), 0.001 ether, "wethToken fees not as expected");
         assertEq(dai.balanceOf(address(settlement)), 0.3 ether, "dai fees not as expected");
 
-        assertEq(wETH.balanceOf(trader1.addr), 0, "not all weth sold");
+        assertEq(wethToken.balanceOf(trader1.addr), 0, "not all wethToken sold");
         assertEq(dai.balanceOf(trader1.addr), uniswapDaiOutAmount * 2, "dai received not as expected");
 
-        assertEq(wETH.balanceOf(trader2.addr), 0.5 ether, "weth bought not correct amount");
+        assertEq(wethToken.balanceOf(trader2.addr), 0.5 ether, "wethToken bought not correct amount");
         assertEq(dai.balanceOf(trader2.addr), 300.3 ether - (uniswapDaiOutAmount + 0.3 ether));
 
         uint256 finalWethReserve;
@@ -189,7 +189,7 @@ contract UniswapTradeTest is Helper(true) {
             (finalWethReserve, finalDaiReserve) =
                 isWethToken0 ? (token0Reserve, token1Reserve) : (token1Reserve, token0Reserve);
         }
-        assertEq(finalWethReserve, wethReserve + uniswapWethInAmount, "weth reserve not as expected");
+        assertEq(finalWethReserve, wethReserve + uniswapWethInAmount, "wethToken reserve not as expected");
         assertEq(finalDaiReserve, daiReserve - uniswapDaiOutAmount, "dai reserve not as expected");
     }
 }

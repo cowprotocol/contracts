@@ -10,30 +10,30 @@ contract Balances is Helper {
     using SwapEncoder for SwapEncoder.State;
 
     function test_performs_a_swap_to_sell_erc20_from_buy_erc20_when_specified() public {
-        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_ERC20);
+        performsASwapWithTheSpecifiedBalances(GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_ERC20);
     }
 
     function test_performs_a_swap_to_sell_erc20_from_buy_internal_when_specified() public {
-        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_INTERNAL);
+        performsASwapWithTheSpecifiedBalances(GPv2Order.BALANCE_ERC20, GPv2Order.BALANCE_INTERNAL);
     }
 
     function test_performs_a_swap_to_sell_external_from_buy_erc20_when_specified() public {
-        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_EXTERNAL, GPv2Order.BALANCE_ERC20);
+        performsASwapWithTheSpecifiedBalances(GPv2Order.BALANCE_EXTERNAL, GPv2Order.BALANCE_ERC20);
     }
 
     function test_performs_a_swap_to_sell_external_from_buy_internal_when_specified() public {
-        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_EXTERNAL, GPv2Order.BALANCE_INTERNAL);
+        performsASwapWithTheSpecifiedBalances(GPv2Order.BALANCE_EXTERNAL, GPv2Order.BALANCE_INTERNAL);
     }
 
     function test_performs_a_swap_to_sell_internal_from_buy_erc20_when_specified() public {
-        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_INTERNAL, GPv2Order.BALANCE_ERC20);
+        performsASwapWithTheSpecifiedBalances(GPv2Order.BALANCE_INTERNAL, GPv2Order.BALANCE_ERC20);
     }
 
     function test_performs_a_swap_to_sell_internal_from_buy_internal_when_specified() public {
-        performs_a_swap_with_the_specified_balances(GPv2Order.BALANCE_INTERNAL, GPv2Order.BALANCE_INTERNAL);
+        performsASwapWithTheSpecifiedBalances(GPv2Order.BALANCE_INTERNAL, GPv2Order.BALANCE_INTERNAL);
     }
 
-    function performs_a_swap_with_the_specified_balances(bytes32 sellTokenBalance, bytes32 buyTokenBalance) private {
+    function performsASwapWithTheSpecifiedBalances(bytes32 sellTokenBalance, bytes32 buyTokenBalance) private {
         address payable receiver = payable(makeAddr("receiver"));
         IERC20 sellToken = IERC20(makeAddr("sell token"));
         IERC20 buyToken = IERC20(makeAddr("buy token"));

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity ^0.8;
 
-import "src/contracts/mixins/StorageAccessible.sol";
+import {StorageAccessible, ViewStorageAccessible} from "src/contracts/mixins/StorageAccessible.sol";
 
 contract StorageAccessibleWrapper is StorageAccessible {
     struct FooBar {

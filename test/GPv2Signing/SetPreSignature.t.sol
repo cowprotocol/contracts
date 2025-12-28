@@ -8,42 +8,42 @@ import {Order} from "test/libraries/Order.sol";
 import {Sign} from "test/libraries/Sign.sol";
 
 contract SetPreSignature is Helper {
-    address private immutable owner = makeAddr("GPv2Signing.SetPreSignature owner");
+    address private immutable OWNER = makeAddr("GPv2Signing.SetPreSignature owner");
     bytes private orderUid =
-        Order.computeOrderUid(keccak256("GPv2Signing.SetPreSignature order hash"), owner, type(uint32).max);
+        Order.computeOrderUid(keccak256("GPv2Signing.SetPreSignature order hash"), OWNER, type(uint32).max);
 
     function test_should_set_the_pre_signature() public {
-        vm.prank(owner);
+        vm.prank(OWNER);
         executor.setPreSignature(orderUid, true);
         assertEq(executor.preSignature(orderUid), Sign.PRE_SIGNED);
     }
 
     function test_should_unset_the_pre_signature() public {
-        vm.prank(owner);
+        vm.prank(OWNER);
         executor.setPreSignature(orderUid, true);
-        vm.prank(owner);
+        vm.prank(OWNER);
         executor.setPreSignature(orderUid, false);
         assertEq(executor.preSignature(orderUid), 0);
     }
 
     function test_should_emit_a_pre_signature_event() public {
-        vm.prank(owner);
+        vm.prank(OWNER);
         vm.expectEmit(address(executor));
-        emit GPv2Signing.PreSignature(owner, orderUid, true);
+        emit GPv2Signing.PreSignature(OWNER, orderUid, true);
         executor.setPreSignature(orderUid, true);
 
-        vm.prank(owner);
+        vm.prank(OWNER);
         vm.expectEmit(address(executor));
-        emit GPv2Signing.PreSignature(owner, orderUid, false);
+        emit GPv2Signing.PreSignature(OWNER, orderUid, false);
         executor.setPreSignature(orderUid, false);
     }
 
     function test_should_emit_a_PreSignature_event_even_if_storage_does_not_change() public {
-        vm.prank(owner);
+        vm.prank(OWNER);
         executor.setPreSignature(orderUid, true);
-        vm.prank(owner);
+        vm.prank(OWNER);
         vm.expectEmit(address(executor));
-        emit GPv2Signing.PreSignature(owner, orderUid, true);
+        emit GPv2Signing.PreSignature(OWNER, orderUid, true);
         executor.setPreSignature(orderUid, true);
     }
 

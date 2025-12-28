@@ -105,17 +105,16 @@ library SettlementEncoder {
 
         // All the order refunds are encoded in the POST interactions so we take some liberty and
         // use a short variable to represent the POST stage.
-        // solhint-disable-next-line var-name-mixedcase
-        uint256 POST = uint256(InteractionStage.POST);
+        uint256 post = uint256(InteractionStage.POST);
         GPv2Interaction.Data[] memory postInteractions =
-            new GPv2Interaction.Data[](state.interactions[POST].length + r.length);
+            new GPv2Interaction.Data[](state.interactions[post].length + r.length);
 
-        for (uint256 i = 0; i < state.interactions[POST].length; i++) {
-            postInteractions[i] = state.interactions[POST][i];
+        for (uint256 i = 0; i < state.interactions[post].length; i++) {
+            postInteractions[i] = state.interactions[post][i];
         }
 
         for (uint256 i = 0; i < r.length; i++) {
-            postInteractions[state.interactions[POST].length + i] = r[i];
+            postInteractions[state.interactions[post].length + i] = r[i];
         }
 
         return [

@@ -32,7 +32,7 @@ library Sign {
         bytes signature;
     }
 
-    function ALL_SIGNING_SCHEMES() internal pure returns (GPv2Signing.Scheme[4] memory) {
+    function allSigningSchemes() internal pure returns (GPv2Signing.Scheme[4] memory) {
         return
             [
                 GPv2Signing.Scheme.Eip712,
@@ -70,7 +70,7 @@ library Sign {
 
     /// @dev Encode the data used to verify a pre-signed signature
     function preSign(address owner) internal pure returns (Signature memory) {
-        return Signature(GPv2Signing.Scheme.PreSign, abi.encodePacked(owner));
+        return Signature({scheme: GPv2Signing.Scheme.PreSign, data: abi.encodePacked(owner)});
     }
 
     /// @dev Decode the data used to verify a pre-signed signature
@@ -89,7 +89,7 @@ library Sign {
 
     /// @dev Encodes the necessary data required to verify an EIP-1271 signature
     function sign(EIP1271Verifier verifier, bytes memory signature) internal pure returns (Signature memory) {
-        return Signature(GPv2Signing.Scheme.Eip1271, abi.encodePacked(verifier, signature));
+        return Signature({scheme: GPv2Signing.Scheme.Eip1271, data: abi.encodePacked(verifier, signature)});
     }
 
     /// @dev Decodes the data used to verify an EIP-1271 signature
@@ -108,7 +108,7 @@ library Sign {
             verifier := shr(96, mload(add(signatureData, 0x20)))
         }
 
-        return Eip1271Signature(verifier, signature);
+        return Eip1271Signature({verifier: verifier, signature: signature});
     }
 
     /// @dev Given a `scheme`, encode it into a uint256 for a GPv2Trade. This makes use of solidity's

@@ -49,7 +49,7 @@ contract FastTransferFromAccount is Helper {
         executor.fastTransferFromAccountTest(vault, transfer, recipient);
     }
 
-    function reverts_when_mistakenly_trying_to_transfer_Ether(bytes32 balanceLocation) private {
+    function revertsWhenMistakenlyTryingToTransferEther(bytes32 balanceLocation) private {
         GPv2Transfer.Data memory transfer = GPv2Transfer.Data({
             account: trader, token: IERC20(GPv2Transfer.BUY_ETH_ADDRESS), amount: amount, balance: balanceLocation
         });
@@ -57,16 +57,16 @@ contract FastTransferFromAccount is Helper {
         executor.fastTransferFromAccountTest(vault, transfer, recipient);
     }
 
-    function test_reverts_when_mistakenly_trying_to_transfer_Ether_erc20() public {
-        reverts_when_mistakenly_trying_to_transfer_Ether(GPv2Order.BALANCE_ERC20);
+    function test_revertsWhenMistakenlyTryingToTransferEther_erc20() public {
+        revertsWhenMistakenlyTryingToTransferEther(GPv2Order.BALANCE_ERC20);
     }
 
-    function test_reverts_when_mistakenly_trying_to_transfer_Ether_internal() public {
-        reverts_when_mistakenly_trying_to_transfer_Ether(GPv2Order.BALANCE_INTERNAL);
+    function test_revertsWhenMistakenlyTryingToTransferEther_internal() public {
+        revertsWhenMistakenlyTryingToTransferEther(GPv2Order.BALANCE_INTERNAL);
     }
 
-    function test_reverts_when_mistakenly_trying_to_transfer_Ether_external() public {
-        reverts_when_mistakenly_trying_to_transfer_Ether(GPv2Order.BALANCE_EXTERNAL);
+    function test_revertsWhenMistakenlyTryingToTransferEther_external() public {
+        revertsWhenMistakenlyTryingToTransferEther(GPv2Order.BALANCE_EXTERNAL);
     }
 
     function test_reverts_on_failed_ERC20_transfer() public {

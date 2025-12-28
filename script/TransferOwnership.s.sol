@@ -106,13 +106,13 @@ contract TransferOwnership is NetworksJson {
             revert(string.concat("No code at target authenticator proxy ", vm.toString(address(candidate)), "."));
         }
 
-        bool isERC173;
-        try ERC165(candidate).supportsInterface(type(ERC173).interfaceId) returns (bool isERC173_) {
-            isERC173 = isERC173_;
+        bool isErc173;
+        try ERC165(candidate).supportsInterface(type(ERC173).interfaceId) returns (bool isErc173_) {
+            isErc173 = isErc173_;
         } catch {
-            isERC173 = false;
+            isErc173 = false;
         }
-        if (!isERC173) {
+        if (!isErc173) {
             revert(
                 string.concat(
                     "Not a valid proxy contract: target address ",
