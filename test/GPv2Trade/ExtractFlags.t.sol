@@ -17,7 +17,7 @@ contract ExtractOrder is Helper {
 
         for (uint256 i = 0; i < flags.length; i++) {
             OrderLib.Flags memory extractedFlags =
-                executor.extractFlagsStructuredTest(OrderLib.toUint256(flags[i])).flags;
+            executor.extractFlagsStructuredTest(OrderLib.toUint256(flags[i])).flags;
             assertEq(extractedFlags.kind, flags[i].kind);
             assertEq(extractedFlags.partiallyFillable, flags[i].partiallyFillable);
             assertEq(extractedFlags.sellTokenBalance, flags[i].sellTokenBalance);

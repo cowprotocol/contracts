@@ -11,8 +11,8 @@ import {GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {SettlementEncoder} from "../libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "../libraries/encoders/TokenRegistry.sol";
-import {Helper, IERC20Mintable} from "./Helper.sol";
 import {ERC20PresetPermit} from "../src/ERC20PresetPermit.sol";
+import {Helper, IERC20Mintable} from "./Helper.sol";
 
 interface IERC2612 {
     function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
@@ -42,7 +42,7 @@ contract OffchainAllowancesTest is Helper(false) {
 
         eur1 = IERC20Mintable(address(new ERC20PresetPermit("eur1")));
         eur2 = IERC20Mintable(address(new ERC20PresetPermit("eur2")));
-        
+
         trader1 = vm.createWallet("trader1");
         trader2 = vm.createWallet("trader2");
     }

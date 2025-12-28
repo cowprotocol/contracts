@@ -68,12 +68,7 @@ contract SmartSellOrder is EIP1271Verifier {
         }
     }
 
-    function isValidSignature(bytes32 hash, bytes memory signature)
-        external
-        view
-        override
-        returns (bytes4 magicValue)
-    {
+    function isValidSignature(bytes32 hash, bytes memory signature) external view override returns (bytes4 magicValue) {
         uint256 sellAmount = abi.decode(signature, (uint256));
         GPv2Order.Data memory order = orderForSellAmount(sellAmount);
 

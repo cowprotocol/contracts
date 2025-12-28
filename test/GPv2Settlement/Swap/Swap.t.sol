@@ -111,10 +111,7 @@ contract Swap is Helper {
         SwapEncoder.EncodedSwap memory encodedSwap = swapEncoder.encode();
 
         IVault.FundManagement memory funds = IVault.FundManagement({
-            sender: trader1.addr,
-            fromInternalBalance: true,
-            recipient: payable(trader2.addr),
-            toInternalBalance: false
+            sender: trader1.addr, fromInternalBalance: true, recipient: payable(trader2.addr), toInternalBalance: false
         });
         int256[] memory limits = new int256[](4);
         limits[0] = int256(order.sellAmount);

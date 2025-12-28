@@ -26,18 +26,10 @@ contract BatchSwapWithFee is BatchSwapWithFeeHelper {
 
         IVault.BatchSwapStep[] memory swaps = new IVault.BatchSwapStep[](2);
         swaps[0] = IVault.BatchSwapStep({
-            poolId: keccak256("pool id 1"),
-            assetInIndex: 0,
-            assetOutIndex: 1,
-            amount: 42 ether,
-            userData: hex"010203"
+            poolId: keccak256("pool id 1"), assetInIndex: 0, assetOutIndex: 1, amount: 42 ether, userData: hex"010203"
         });
         swaps[1] = IVault.BatchSwapStep({
-            poolId: keccak256("pool id 2"),
-            assetInIndex: 1,
-            assetOutIndex: 2,
-            amount: 1337 ether,
-            userData: hex"abcd"
+            poolId: keccak256("pool id 2"), assetInIndex: 1, assetOutIndex: 2, amount: 1337 ether, userData: hex"abcd"
         });
 
         IERC20[] memory tokens = new IERC20[](3);
@@ -46,10 +38,7 @@ contract BatchSwapWithFee is BatchSwapWithFeeHelper {
         tokens[2] = IERC20(makeAddr("token 2"));
 
         IVault.FundManagement memory funds = IVault.FundManagement({
-            sender: trader0,
-            fromInternalBalance: false,
-            recipient: payable(trader1),
-            toInternalBalance: true
+            sender: trader0, fromInternalBalance: false, recipient: payable(trader1), toInternalBalance: true
         });
 
         int256[] memory limits = new int256[](3);

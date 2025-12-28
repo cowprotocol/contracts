@@ -56,10 +56,14 @@ library Order {
         uint256 offset = 0;
         for (uint256 kindI = 0; kindI < ALL_KINDS().length; kindI++) {
             for (
-                uint256 sellTokenBalanceI = 0; sellTokenBalanceI < ALL_SELL_TOKEN_BALANCES().length; sellTokenBalanceI++
+                uint256 sellTokenBalanceI = 0;
+                sellTokenBalanceI < ALL_SELL_TOKEN_BALANCES().length;
+                sellTokenBalanceI++
             ) {
                 for (
-                    uint256 buyTokenBalanceI = 0; buyTokenBalanceI < ALL_BUY_TOKEN_BALANCES().length; buyTokenBalanceI++
+                    uint256 buyTokenBalanceI = 0;
+                    buyTokenBalanceI < ALL_BUY_TOKEN_BALANCES().length;
+                    buyTokenBalanceI++
                 ) {
                     bytes32 kind = ALL_KINDS()[kindI];
                     bytes32 sellTokenBalance = ALL_SELL_TOKEN_BALANCES()[sellTokenBalanceI];

@@ -18,8 +18,8 @@ import {WETH9} from "./WETH9.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
 
-import {ERC20Mintable} from "./ERC20Mintable.sol";
 import {EIP173Proxy} from "../src/EIP173Proxy.sol";
+import {ERC20Mintable} from "./ERC20Mintable.sol";
 
 address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
@@ -156,9 +156,7 @@ abstract contract Helper is Test {
         );
     }
 
-    function _grantBalancerActionRole(address authorizer, address balVault, address to, string memory action)
-        internal
-    {
+    function _grantBalancerActionRole(address authorizer, address balVault, address to, string memory action) internal {
         bytes32 actionId = _getActionId(action, balVault);
         vm.mockCall(
             address(authorizer), abi.encodeCall(IAuthorizer.canPerform, (actionId, to, balVault)), abi.encode(true)
@@ -177,7 +175,7 @@ abstract contract Helper is Test {
     }
 
     function deployMintableErc20(string memory name, string memory symbol) internal returns (IERC20Mintable token) {
-        // the ERC20Mintable constructed from openzeppelin and derived from the interface use a different IERC20, 
+        // the ERC20Mintable constructed from openzeppelin and derived from the interface use a different IERC20,
         // so its easiest just to cast here.
         return IERC20Mintable(address(new ERC20Mintable(name, symbol)));
     }

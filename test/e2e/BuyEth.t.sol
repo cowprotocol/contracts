@@ -7,7 +7,10 @@ import {IERC20} from "src/contracts/interfaces/IERC20.sol";
 import {GPv2Transfer} from "src/contracts/libraries/GPv2Transfer.sol";
 
 import {
-    GPv2Interaction, GPv2Order, GPv2Signing, SettlementEncoder
+    GPv2Interaction,
+    GPv2Order,
+    GPv2Signing,
+    SettlementEncoder
 } from "test/libraries/encoders/SettlementEncoder.sol";
 import {Registry, TokenRegistry} from "test/libraries/encoders/TokenRegistry.sol";
 
@@ -99,9 +102,7 @@ contract BuyEthTest is Helper(true) {
         // encode the weth withdraw interaction
         encoder.addInteraction(
             GPv2Interaction.Data({
-                target: address(WETH),
-                value: 0,
-                callData: abi.encodeWithSignature("withdraw(uint256)", 1 ether)
+                target: address(WETH), value: 0, callData: abi.encodeWithSignature("withdraw(uint256)", 1 ether)
             }),
             SettlementEncoder.InteractionStage.INTRA
         );

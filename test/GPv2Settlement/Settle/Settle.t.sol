@@ -32,25 +32,19 @@ contract Settle is Helper {
         CallOrderEnforcer callOrderEnforcer = new CallOrderEnforcer();
         encoder.addInteraction(
             GPv2Interaction.Data({
-                target: address(callOrderEnforcer),
-                value: 0,
-                callData: abi.encodeCall(CallOrderEnforcer.post, ())
+                target: address(callOrderEnforcer), value: 0, callData: abi.encodeCall(CallOrderEnforcer.post, ())
             }),
             SettlementEncoder.InteractionStage.POST
         );
         encoder.addInteraction(
             GPv2Interaction.Data({
-                target: address(callOrderEnforcer),
-                value: 0,
-                callData: abi.encodeCall(CallOrderEnforcer.pre, ())
+                target: address(callOrderEnforcer), value: 0, callData: abi.encodeCall(CallOrderEnforcer.pre, ())
             }),
             SettlementEncoder.InteractionStage.PRE
         );
         encoder.addInteraction(
             GPv2Interaction.Data({
-                target: address(callOrderEnforcer),
-                value: 0,
-                callData: abi.encodeCall(CallOrderEnforcer.intra, ())
+                target: address(callOrderEnforcer), value: 0, callData: abi.encodeCall(CallOrderEnforcer.intra, ())
             }),
             SettlementEncoder.InteractionStage.INTRA
         );

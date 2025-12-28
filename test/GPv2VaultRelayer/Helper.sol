@@ -39,18 +39,12 @@ contract BatchSwapWithFeeHelper is Helper {
             swaps: new IVault.BatchSwapStep[](0),
             tokens: new IERC20[](0),
             funds: IVault.FundManagement({
-                sender: address(0),
-                fromInternalBalance: true,
-                recipient: payable(address(0)),
-                toInternalBalance: true
+                sender: address(0), fromInternalBalance: true, recipient: payable(address(0)), toInternalBalance: true
             }),
             limits: new int256[](0),
             deadline: 0,
             feeTransfer: GPv2Transfer.Data({
-                account: address(0),
-                token: IERC20(address(0)),
-                amount: 0,
-                balance: GPv2Order.BALANCE_ERC20
+                account: address(0), token: IERC20(address(0)), amount: 0, balance: GPv2Order.BALANCE_ERC20
             })
         });
     }

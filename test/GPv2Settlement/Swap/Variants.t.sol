@@ -132,7 +132,7 @@ abstract contract Variant is Helper {
 
     function test_reverts_when_specified_limit_amount_does_not_satisfy_expected_price() public {
         uint256 limitAmount = kind == GPv2Order.KIND_SELL
-            ? buyAmount - 1 // receive slightly less buy token
+            ? buyAmount - 1  // receive slightly less buy token
             : sellAmount + 1; // pay slightly more sell token;
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap(limitAmount);
 

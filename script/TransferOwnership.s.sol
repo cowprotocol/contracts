@@ -95,11 +95,10 @@ contract TransferOwnership is NetworksJson {
             }
         }
 
-        return ScriptParams({
-            newOwner: newOwner,
-            resetManager: resetManager,
-            authenticatorProxy: ERC173(authenticatorProxy)
-        });
+        return
+            ScriptParams({
+                newOwner: newOwner, resetManager: resetManager, authenticatorProxy: ERC173(authenticatorProxy)
+            });
     }
 
     function checkIsProxy(address candidate) internal view {

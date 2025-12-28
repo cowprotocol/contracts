@@ -8,10 +8,7 @@ contract DomainSeparator is Helper {
     function test_TYPE_HASH_matches_the_EIP_712_order_type_hash() public view {
         bytes32 expectedDomainSeparator = Eip712.hashStruct(
             Eip712.EIP712Domain({
-                name: "Gnosis Protocol",
-                version: "v2",
-                chainId: block.chainid,
-                verifyingContract: address(executor)
+                name: "Gnosis Protocol", version: "v2", chainId: block.chainid, verifyingContract: address(executor)
             })
         );
         assertEq(executor.domainSeparator(), expectedDomainSeparator);
