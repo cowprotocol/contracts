@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.0;
 
-import {GPv2Order, GPv2Transfer, IERC20, IVault} from "src/contracts/GPv2VaultRelayer.sol";
+import {IERC20} from "src/contracts/interfaces/IERC20.sol";
+import {IVault} from "src/contracts/interfaces/IVault.sol";
+import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
+import {GPv2Transfer} from "src/contracts/libraries/GPv2Transfer.sol";
 
 import {BatchSwapWithFeeHelper} from "./Helper.sol";
 

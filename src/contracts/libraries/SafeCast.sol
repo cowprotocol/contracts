@@ -35,6 +35,8 @@ library SafeCast {
      */
     function toUint256(int256 value) internal pure returns (uint256) {
         require(value >= 0, "SafeCast: not positive");
+        // casting to 'uint256' is safe because we've checked value >= 0
+        // forge-lint: disable-next-line(unsafe-typecast)
         return uint256(value);
     }
 
@@ -50,6 +52,8 @@ library SafeCast {
             value <= uint256(type(int256).max),
             "SafeCast: int256 overflow"
         );
+        // casting to 'int256' is safe because we've checked value <= int256.max
+        // forge-lint: disable-next-line(unsafe-typecast)
         return int256(value);
     }
 }

@@ -25,6 +25,10 @@ contract EIP173Proxy is Proxy {
         _setImplementation(implAddress, data);
     }
 
+    receive() external payable {
+        revert("not supported");
+    }
+
     function owner() external view returns (address) {
         return _owner();
     }

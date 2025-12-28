@@ -159,6 +159,7 @@ contract SmartOrderTest is Helper(false) {
         SmartSellOrder smartOrder = new SmartSellOrder(settlement, token2, token1, 0xffffffff, 1 ether, 0.1 ether);
         token2.mint(trader2.addr, 1.1 ether);
         vm.prank(trader2.addr);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         token2.transfer(address(smartOrder), 1.1 ether);
 
         uint256 smartOrderSellAmount = 0.5 ether;

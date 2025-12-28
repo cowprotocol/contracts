@@ -2,6 +2,7 @@
 pragma solidity ^0.8;
 
 import {GPv2Order, GPv2Settlement, GPv2Signing, IERC20, IVault} from "src/contracts/GPv2Settlement.sol";
+import {SafeCast} from "src/contracts/libraries/SafeCast.sol";
 
 import {Helper} from "../Helper.sol";
 
@@ -75,7 +76,7 @@ abstract contract Variant is Helper {
     function test_executes_order_against_swap() public {
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap();
 
-        mockBalancerVaultCallsReturn(int256(sellAmount), -int256(buyAmount));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(sellAmount), -SafeCast.toInt256(buyAmount));
 
         vm.prank(solver);
         swap(encodedSwap);
@@ -84,7 +85,7 @@ abstract contract Variant is Helper {
     function test_updates_the_filled_amount_to_be_the_full_sell_or_buy_amount() public {
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap();
 
-        mockBalancerVaultCallsReturn(int256(sellAmount), -int256(buyAmount));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(sellAmount), -SafeCast.toInt256(buyAmount));
 
         vm.prank(solver);
         swap(encodedSwap);
@@ -122,7 +123,7 @@ abstract contract Variant is Helper {
     function test_reverts_when_not_exactly_trading_expected_amount() public {
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap();
 
-        mockBalancerVaultCallsReturn(int256(sellAmount) - 1, -(int256(buyAmount) + 1));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(sellAmount) - 1, -(SafeCast.toInt256(buyAmount) + 1));
 
         string memory kindString = (kind == GPv2Order.KIND_SELL) ? "sell" : "buy";
         vm.prank(solver);
@@ -136,7 +137,7 @@ abstract contract Variant is Helper {
             : sellAmount + 1; // pay slightly more sell token;
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap(limitAmount);
 
-        mockBalancerVaultCallsReturn(int256(sellAmount), -int256(buyAmount));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(sellAmount), -SafeCast.toInt256(buyAmount));
 
         vm.prank(solver);
         vm.expectRevert(bytes((kind == GPv2Order.KIND_SELL) ? "GPv2: limit too low" : "GPv2: limit too high"));
@@ -153,7 +154,7 @@ abstract contract Variant is Helper {
         } else {
             executedSellAmount = executedSellAmount / 2;
         }
-        mockBalancerVaultCallsReturn(int256(executedSellAmount), -int256(executedBuyAmount));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(executedSellAmount), -SafeCast.toInt256(executedBuyAmount));
 
         vm.prank(solver);
         vm.expectEmit(address(settlement));

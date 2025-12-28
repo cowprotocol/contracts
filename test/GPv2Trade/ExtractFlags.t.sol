@@ -27,8 +27,12 @@ contract ExtractOrder is Helper {
 
     function test_should_accept_0b00_and_0b01_for_ERC20_sell_token_balance_flag() public view {
         uint256 sellTokenBalanceOffset = 2;
+        // shift order is correct: creating flag values at specific bit positions
+        // forge-lint: disable-next-line(incorrect-shift)
         OrderLib.Flags memory flags0b00 = executor.extractFlagsStructuredTest(0 << sellTokenBalanceOffset).flags;
         assertEq(flags0b00.sellTokenBalance, GPv2Order.BALANCE_ERC20);
+        // shift order is correct: creating flag values at specific bit positions
+        // forge-lint: disable-next-line(incorrect-shift)
         OrderLib.Flags memory flags0b01 = executor.extractFlagsStructuredTest(1 << sellTokenBalanceOffset).flags;
         assertEq(flags0b01.sellTokenBalance, GPv2Order.BALANCE_ERC20);
     }

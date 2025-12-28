@@ -15,7 +15,7 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "./IERC20.sol";
+import {IERC20} from "./IERC20.sol";
 
 /**
  * @dev Minimal interface for the Vault core contract only containing methods

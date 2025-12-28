@@ -2,19 +2,19 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "./GPv2VaultRelayer.sol";
-import "./interfaces/GPv2Authentication.sol";
-import "./interfaces/IERC20.sol";
-import "./interfaces/IVault.sol";
-import "./libraries/GPv2Interaction.sol";
-import "./libraries/GPv2Order.sol";
-import "./libraries/GPv2Trade.sol";
-import "./libraries/GPv2Transfer.sol";
-import "./libraries/SafeCast.sol";
-import "./libraries/SafeMath.sol";
-import "./mixins/GPv2Signing.sol";
-import "./mixins/ReentrancyGuard.sol";
-import "./mixins/StorageAccessible.sol";
+import {GPv2VaultRelayer} from "./GPv2VaultRelayer.sol";
+import {GPv2Authentication} from "./interfaces/GPv2Authentication.sol";
+import {IERC20} from "./interfaces/IERC20.sol";
+import {IVault} from "./interfaces/IVault.sol";
+import {GPv2Interaction} from "./libraries/GPv2Interaction.sol";
+import {GPv2Order} from "./libraries/GPv2Order.sol";
+import {GPv2Trade} from "./libraries/GPv2Trade.sol";
+import {GPv2Transfer} from "./libraries/GPv2Transfer.sol";
+import {SafeCast} from "./libraries/SafeCast.sol";
+import {SafeMath} from "./libraries/SafeMath.sol";
+import {GPv2Signing} from "./mixins/GPv2Signing.sol";
+import {ReentrancyGuard} from "./mixins/ReentrancyGuard.sol";
+import {StorageAccessible} from "./mixins/StorageAccessible.sol";
 
 /// @title Gnosis Protocol v2 Settlement Contract
 /// @author Gnosis Developers

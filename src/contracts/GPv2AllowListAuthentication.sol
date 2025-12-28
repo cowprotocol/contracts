@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity >=0.7.6 <0.9.0;
 
-import "./interfaces/GPv2Authentication.sol";
-import "./libraries/GPv2EIP1967.sol";
+import {GPv2Authentication} from "./interfaces/GPv2Authentication.sol";
+import {GPv2EIP1967} from "./libraries/GPv2EIP1967.sol";
 import "./mixins/Initializable.sol";
 import "./mixins/StorageAccessible.sol";
 

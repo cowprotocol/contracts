@@ -2,9 +2,9 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "./interfaces/IERC20.sol";
-import "./interfaces/IVault.sol";
-import "./libraries/GPv2Transfer.sol";
+import {IERC20} from "./interfaces/IERC20.sol";
+import {IVault} from "./interfaces/IVault.sol";
+import {GPv2Transfer} from "./libraries/GPv2Transfer.sol";
 
 /// @title Gnosis Protocol v2 Vault Relayer Contract
 /// @author Gnosis Developers

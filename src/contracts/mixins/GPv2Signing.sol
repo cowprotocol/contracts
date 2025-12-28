@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity >=0.7.6 <0.9.0;
 
-import "../interfaces/GPv2EIP1271.sol";
-import "../libraries/GPv2Order.sol";
-import "../libraries/GPv2Trade.sol";
+import {EIP1271Verifier, GPv2EIP1271} from "../interfaces/GPv2EIP1271.sol";
+import {IERC20} from "../interfaces/IERC20.sol";
+import {GPv2Order} from "../libraries/GPv2Order.sol";
+import {GPv2Trade} from "../libraries/GPv2Trade.sol";
 
 /// @title Gnosis Protocol v2 Signing Library.
 /// @author Gnosis Developers

@@ -165,6 +165,8 @@ abstract contract Helper is Test {
 
     function _getActionId(string memory fnDef, address vaultAddr) internal pure returns (bytes32) {
         bytes32 hash = keccak256(bytes(fnDef));
+        // casting to 'bytes4' is safe because we're intentionally extracting the function selector (first 4 bytes)
+        // forge-lint: disable-next-line(unsafe-typecast)
         bytes4 selector = bytes4(hash);
         return keccak256(abi.encodePacked(uint256(uint160(vaultAddr)), selector));
     }

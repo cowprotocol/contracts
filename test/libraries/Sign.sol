@@ -3,7 +3,8 @@ pragma solidity ^0.8;
 
 import {Vm} from "forge-std/Test.sol";
 
-import {EIP1271Verifier, GPv2Order, GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
+import {EIP1271Verifier} from "src/contracts/interfaces/GPv2EIP1271.sol";
+import {GPv2Order, GPv2Signing} from "src/contracts/mixins/GPv2Signing.sol";
 
 import {Bytes} from "./Bytes.sol";
 import {Order} from "./Order.sol";
