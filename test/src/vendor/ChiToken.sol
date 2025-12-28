@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: Unlicensed
 // Vendored from: <https://github.com/1inch-exchange/chi/blob/master/contracts/ChiToken.sol>
-// solhint-disable-next-line compiler-version
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/math/Math.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 abstract contract ERC20WithoutTotalSupply is IERC20 {
-    using SafeMath for uint256;
 
     mapping(address => uint256) private _balances;
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -32,17 +29,19 @@ abstract contract ERC20WithoutTotalSupply is IERC20 {
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+        require(_balances[sender] >= amount, "ERC20: transfer amount exceeds allowance");
         _transfer(sender, recipient, amount);
         uint256 allowed = _allowances[sender][msg.sender];
         if ((allowed >> 255) == 0) {
-            _approve(sender, msg.sender, allowed.sub(amount, "ERC20: transfer amount exceeds allowance"));
+            _approve(sender, msg.sender, allowed - amount);
         }
         return true;
     }
 
     function _transfer(address sender, address recipient, uint256 amount) internal {
-        _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
-        _balances[recipient] = _balances[recipient].add(amount);
+        require(_balances[sender] >= amount, "ERC20: transfer amount exceeds balance");
+        _balances[sender] = _balances[sender] - amount;
+        _balances[recipient] = _balances[recipient] + amount;
         emit Transfer(sender, recipient, amount);
     }
 
@@ -52,12 +51,13 @@ abstract contract ERC20WithoutTotalSupply is IERC20 {
     }
 
     function _mint(address account, uint256 amount) internal {
-        _balances[account] = _balances[account].add(amount);
+        _balances[account] = _balances[account] + amount;
         emit Transfer(address(0), account, amount);
     }
 
     function _burn(address account, uint256 amount) internal {
-        _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
+        require(_balances[account] >= amount, "ERC20: burn amount exceeds balance");
+        _balances[account] = _balances[account] - amount;
         emit Transfer(account, address(0), amount);
     }
 
@@ -65,7 +65,8 @@ abstract contract ERC20WithoutTotalSupply is IERC20 {
         _burn(account, amount);
         uint256 allowed = _allowances[account][msg.sender];
         if ((allowed >> 255) == 0) {
-            _approve(account, msg.sender, allowed.sub(amount, "ERC20: burn amount exceeds allowance"));
+            require(allowed >= amount, "ERC20: burn amount exceeds allowance");
+            _approve(account, msg.sender, allowed - amount);
         }
     }
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // solhint-disable-next-line compiler-version
-pragma solidity ^0.7;
+pragma solidity ^0.8;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 

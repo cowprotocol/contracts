@@ -18,6 +18,9 @@ import {WETH9} from "./WETH9.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
 
+import {ERC20Mintable} from "./ERC20Mintable.sol";
+import {EIP173Proxy} from "../src/EIP173Proxy.sol";
+
 address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
@@ -100,8 +103,6 @@ abstract contract Helper is Test {
         );
         authenticator = allowList;
 
-        (balancerVaultAuthorizer, vault) = _deployBalancerVault();
-
         // Deploy the settlement contract
         settlement = new GPv2Settlement{salt: SALT}(authenticator, vault);
         vaultRelayer = address(settlement.vaultRelayer());
@@ -143,23 +144,6 @@ abstract contract Helper is Test {
         });
     }
 
-    function _deployBalancerVault() internal returns (address, IBalancerVault) {
-        if (isForked) {
-            IBalancerVault balancerVault = IBalancerVault(BALANCER_VAULT);
-            address authorizer = balancerVault.getAuthorizer();
-            return (authorizer, balancerVault);
-        } else {
-            bytes memory authorizerInitCode = abi.encodePacked(_getBalancerBytecode("Authorizer"), abi.encode(owner));
-            address authorizer = _create(authorizerInitCode, 0);
-
-            bytes memory vaultInitCode =
-                abi.encodePacked(_getBalancerBytecode("Vault"), abi.encode(authorizer, address(weth), 0, 0));
-            address deployedVault = _create(vaultInitCode, 0);
-
-            return (authorizer, IBalancerVault(deployedVault));
-        }
-    }
-
     function _grantBalancerRolesToRelayer(address authorizer, address deployedVault, address relayer) internal {
         _grantBalancerActionRole(
             authorizer, deployedVault, relayer, "manageUserBalance((uint8,address,uint256,address,address)[])"
@@ -192,31 +176,16 @@ abstract contract Helper is Test {
         return vm.parseJsonBytes(data, ".bytecode");
     }
 
-    function _create(bytes memory initCode, uint256 value) internal returns (address deployed) {
-        assembly ("memory-safe") {
-            deployed := create(value, add(initCode, 0x20), mload(initCode))
-        }
-        require(deployed != address(0), "deployment failed");
-    }
-
-    function _create2(bytes memory initCode, uint256 value, bytes32 salt) internal returns (address deployed) {
-        assembly ("memory-safe") {
-            deployed := create2(value, add(initCode, 0x20), mload(initCode), salt)
-        }
-        require(deployed != address(0), "deployment failed");
-    }
-
     function deployMintableErc20(string memory name, string memory symbol) internal returns (IERC20Mintable token) {
-        // need to use like this because OZ requires ^0.7 and tests are on ^0.8
-        bytes memory initCode = abi.encodePacked(vm.getCode("ERC20Mintable"), abi.encode(name, symbol));
-        token = IERC20Mintable(_create(initCode, 0));
+        // the ERC20Mintable constructed from openzeppelin and derived from the interface use a different IERC20, 
+        // so its easiest just to cast here.
+        return IERC20Mintable(address(new ERC20Mintable(name, symbol)));
     }
 
     function deployProxy(address implAddress, address ownerAddress, bytes memory data, bytes32 salt)
         internal
         returns (address proxy)
     {
-        proxy =
-            _create2(abi.encodePacked(vm.getCode("EIP173Proxy"), abi.encode(implAddress, ownerAddress, data)), 0, salt);
+        return address(new EIP173Proxy{salt: salt}(implAddress, ownerAddress, data));
     }
 }
