@@ -2,8 +2,8 @@ name = "cow-settlement"
 version = "2.0.0"
 
 [var.main]
-#salt = "<%= formatBytes32String('Mattresses in Berlin!') %>"
-salt = "0x4d61747472657373657320696e204265726c696e210000000000000000000000"
+salt = "<%= formatBytes32String('Mattresses in Berlin!') %>"
+#salt = "0x4d61747472657373657320696e204265726c696e210000000000000000000000"
 owner = "0x6Fb5916c0f57f88004d5b5EB25f6f4D77353a1eD"
 manager = "0x6Fb5916c0f57f88004d5b5EB25f6f4D77353a1eD"
 balancerVaultAddress = "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
@@ -22,6 +22,8 @@ args = [
     "<%= settings.owner %>",
     "<%= encodeFunctionData({ abi: contracts.AuthenticatorImplementation.abi, functionName: 'initializeManager', args: [settings.manager] }) %>"
 ]
+
+abiOf = ["AuthenticatorImplementation"]
 
 #[deploy.VaultRelayer]
 #artifact = "GPv2VaultRelayer"
