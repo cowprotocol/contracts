@@ -60,6 +60,7 @@
     "ethers": "^5.3.0",
     "globby": "^11.0.3",
     "hardhat": "^2.3.0",
+    "hardhat-cannon": "^2.25.1",
     "hardhat-deploy": "^0.7.3",
     "hardhat-gas-reporter": "^1.0.4",
     "prettier": "^2.3.1",
@@ -79,9 +80,5 @@
     "lib/",
     "networks.json",
     "src/"
-  ],
-  "dependencies": {
-    "@usecannon/cli": "^2.24.2",
-    "hardhat-cannon": "^2.25.1"
-  }
+  ]
 }

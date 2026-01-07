@@ -10,12 +10,12 @@ balancerVaultAddress = "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
 
 [deploy.AuthenticatorImplementation]
 artifact = "GPv2AllowListAuthentication"
-create2 = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
+create2 = true
 salt = "<%= settings.salt %>"
 
 [deploy.Authenticator]
 artifact = "EIP173Proxy"
-create2 = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
+create2 = true
 salt = "<%= settings.salt %>"
 args = [
     "<%= contracts.AuthenticatorImplementation.address %>",
@@ -33,6 +33,6 @@ abiOf = ["AuthenticatorImplementation"]
 
 [deploy.Settlement]
 artifact = "GPv2Settlement"
-create2 = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
+create2 = true
 salt = "<%= settings.salt %>"
 args = ["<%= contracts.AuthenticatorImplementation.address %>", "<%= settings.balancerVaultAddress %>"]

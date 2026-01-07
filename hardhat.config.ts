@@ -2,10 +2,10 @@ import "@nomiclabs/hardhat-waffle";
 import "hardhat-deploy";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
-import "@tenderly/hardhat-tenderly";
+//import "@tenderly/hardhat-tenderly";
 import "@nomicfoundation/hardhat-verify";
 
-import 'hardhat-cannon'
+import 'hardhat-cannon';
 
 import dotenv from "dotenv";
 import type { HttpNetworkUserConfig } from "hardhat/types";
@@ -92,7 +92,7 @@ export default {
     ],
     overrides: {
       "src/contracts/Proxy.sol": {
-        version: "0.8.10",
+        version: "0.7.6",
         settings: {
             optimizer: {
                 enabled: true,
@@ -119,7 +119,34 @@ export default {
         },
       },
       "src/contracts/EIP173Proxy.sol": {
-        version: "0.8.10",
+        version: "0.7.6",
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 999999
+            },
+            outputSelection: {
+                "*": {
+                    "*": [
+                        "abi",
+                        "evm.bytecode",
+                        "evm.deployedBytecode",
+                        "evm.methodIdentifiers",
+                        "metadata",
+                        "devdoc",
+                        "userdoc",
+                        "storageLayout",
+                        "evm.gasEstimates"
+                    ],
+                    "": [
+                        "ast"
+                    ]
+                }
+            },
+        },
+      },
+      "src/contracts/EIP173ProxyWithReceive.sol": {
+        version: "0.7.6",
         settings: {
             optimizer: {
                 enabled: true,
@@ -150,6 +177,11 @@ export default {
   networks: {
     hardhat: {
       blockGasLimit: 12.5e6,
+    },
+    localhost: {
+      ...sharedNetworkConfig,
+      chainId: 31337,
+      url: `http://localhost:8545`,
     },
     mainnet: {
       ...sharedNetworkConfig,
