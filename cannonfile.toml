@@ -1,5 +1,5 @@
 name = "cow-settlement"
-version = "2.0.0"
+version = "2.0.2"
 
 [var.main]
 salt = "<%= formatBytes32String('Mattresses in Berlin!') %>"
@@ -11,11 +11,13 @@ balancerVaultAddress = "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
 [deploy.AuthenticatorImplementation]
 artifact = "GPv2AllowListAuthentication"
 create2 = true
+ifExists = "continue"
 salt = "<%= settings.salt %>"
 
 [deploy.Authenticator]
 artifact = "EIP173Proxy"
 create2 = true
+ifExists = "continue"
 salt = "<%= settings.salt %>"
 args = [
     "<%= contracts.AuthenticatorImplementation.address %>",
@@ -34,5 +36,6 @@ abiOf = ["AuthenticatorImplementation"]
 [deploy.Settlement]
 artifact = "GPv2Settlement"
 create2 = true
+ifExists = "continue"
 salt = "<%= settings.salt %>"
-args = ["<%= contracts.AuthenticatorImplementation.address %>", "<%= settings.balancerVaultAddress %>"]
+args = ["<%= contracts.Authenticator.address %>", "<%= settings.balancerVaultAddress %>"]

@@ -91,87 +91,38 @@ export default {
       },
     ],
     overrides: {
-      "src/contracts/Proxy.sol": {
+      "solc_0.7/proxy/Proxy.sol": {
         version: "0.7.6",
         settings: {
-            optimizer: {
-                enabled: true,
-                runs: 999999
+            "metadata": {
+              "bytecodeHash": "ipfs",
+              "useLiteralContent": true
             },
-            outputSelection: {
-                "*": {
-                    "*": [
-                        "abi",
-                        "evm.bytecode",
-                        "evm.deployedBytecode",
-                        "evm.methodIdentifiers",
-                        "metadata",
-                        "devdoc",
-                        "userdoc",
-                        "storageLayout",
-                        "evm.gasEstimates"
-                    ],
-                    "": [
-                        "ast"
-                    ]
-                }
+            "libraries": {},
+            "optimizer": {
+              "runs": 2000000,
+              "enabled": true
             },
-        },
+            "evmVersion": "istanbul",
+            "remappings": []
+          },
       },
-      "src/contracts/EIP173Proxy.sol": {
+      "solc_0.7/proxy/EIP173Proxy.sol": {
         version: "0.7.6",
         settings: {
-            optimizer: {
-                enabled: true,
-                runs: 999999
+            "metadata": {
+              "bytecodeHash": "ipfs",
+              "useLiteralContent": true
             },
-            outputSelection: {
-                "*": {
-                    "*": [
-                        "abi",
-                        "evm.bytecode",
-                        "evm.deployedBytecode",
-                        "evm.methodIdentifiers",
-                        "metadata",
-                        "devdoc",
-                        "userdoc",
-                        "storageLayout",
-                        "evm.gasEstimates"
-                    ],
-                    "": [
-                        "ast"
-                    ]
-                }
+            "libraries": {},
+            "optimizer": {
+              "runs": 2000000,
+              "enabled": true
             },
-        },
+            "evmVersion": "istanbul",
+            "remappings": []
+          },
       },
-      "src/contracts/EIP173ProxyWithReceive.sol": {
-        version: "0.7.6",
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 999999
-            },
-            outputSelection: {
-                "*": {
-                    "*": [
-                        "abi",
-                        "evm.bytecode",
-                        "evm.deployedBytecode",
-                        "evm.methodIdentifiers",
-                        "metadata",
-                        "devdoc",
-                        "userdoc",
-                        "storageLayout",
-                        "evm.gasEstimates"
-                    ],
-                    "": [
-                        "ast"
-                    ]
-                }
-            },
-        },
-      }
     }
   },
   networks: {
@@ -199,6 +150,14 @@ export default {
       ...sharedNetworkConfig,
       url: "https://rpc.lens.xyz",
     },
+    plasma: {
+      ...sharedNetworkConfig,
+      url: "https://rpc.plasma.to"
+    },
+    ink: {
+      ...sharedNetworkConfig,
+      url: "https://rpc-qnd.inkonchain.com"
+    }
   },
   namedAccounts: {
     // Note: accounts defined by a number refer to the the accounts as configured
@@ -217,7 +176,8 @@ export default {
   },
   etherscan: {
     apiKey: {
-      lens: "unneeded",
+        a: "TVKVASRR1G2H63JUGHRMZ863HHENETT7XP",
+        ink: "unused",
     },
     customChains: [
       {
@@ -229,6 +189,22 @@ export default {
           browserURL: "https://explorer.lens.xyz/",
         },
       },
+      {
+          network: "plasma",
+          chainId: 9745,
+          urls: {
+              apiURL: 'https://api.etherscan.io/v2/api',
+              browserURL: 'https://plasmascan.to'
+          }
+      },
+      {
+          network: "ink",
+          chainId: 57073,
+          urls: {
+              apiURL: 'https://explorer.inkonchain.com/api',
+              browserURL: 'https://explorer.inkonchain.com'
+          }
+      }
     ],
   },
   sourcify: {
