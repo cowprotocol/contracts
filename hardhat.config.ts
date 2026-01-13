@@ -79,9 +79,9 @@ export default {
       {
         version: "0.7.6",
         settings: {
-          "optimizer": {
-            "enabled": true,
-            "runs": 1000000
+          optimizer: {
+            enabled: true,
+            runs: 1000000,
           },
         },
       },
@@ -146,18 +146,6 @@ export default {
       ...sharedNetworkConfig,
       url: "https://xdai.poanetwork.dev",
     },
-    lens: {
-      ...sharedNetworkConfig,
-      url: "https://rpc.lens.xyz",
-    },
-    plasma: {
-      ...sharedNetworkConfig,
-      url: "https://rpc.plasma.to"
-    },
-    ink: {
-      ...sharedNetworkConfig,
-      url: "https://rpc-qnd.inkonchain.com"
-    }
   },
   namedAccounts: {
     // Note: accounts defined by a number refer to the the accounts as configured
@@ -173,42 +161,6 @@ export default {
       default: "0x6Fb5916c0f57f88004d5b5EB25f6f4D77353a1eD",
       hardhat: 2,
     },
-  },
-  etherscan: {
-    apiKey: {
-        a: "TVKVASRR1G2H63JUGHRMZ863HHENETT7XP",
-        ink: "unused",
-    },
-    customChains: [
-      {
-        network: "lens",
-        chainId: 232,
-        urls: {
-          apiURL:
-            "https://api-explorer-verify.lens.matterhosted.dev/contract_verification",
-          browserURL: "https://explorer.lens.xyz/",
-        },
-      },
-      {
-          network: "plasma",
-          chainId: 9745,
-          urls: {
-              apiURL: 'https://api.etherscan.io/v2/api',
-              browserURL: 'https://plasmascan.to'
-          }
-      },
-      {
-          network: "ink",
-          chainId: 57073,
-          urls: {
-              apiURL: 'https://explorer.inkonchain.com/api',
-              browserURL: 'https://explorer.inkonchain.com'
-          }
-      }
-    ],
-  },
-  sourcify: {
-    enabled: true,
   },
   gasReporter: {
     enabled: REPORT_GAS ? true : false,
