@@ -1786,7 +1786,7 @@
     viem "^2.25.1"
     zod "^3.24.2"
 
-"@usecannon/cli@2.25.1":
+"@usecannon/cli@2.25.1", "@usecannon/cli@^2.25.1":
   version "2.25.1"
   resolved "https://registry.yarnpkg.com/@usecannon/cli/-/cli-2.25.1.tgz#1eb71777c4dbda69d3815788f4a166b61d9cd334"
   integrity sha512-O8kRQtUA/7bI0iUcsKZhkl945kHr/3a2VVN0wDzbjvzBMfwOkobDHescqPS48rCkY5EVgErZfw+UVTSVsEB2qw==
@@ -10086,7 +10086,7 @@ semver@^7.2.1, semver@^7.3.4, semver@^7.3.5:
   dependencies:
     lru-cache "^6.0.0"
 
-semver@^7.7.1:
+semver@^7.6.2, semver@^7.7.1:
   version "7.7.3"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.3.tgz#4b5f4143d007633a8dc671cd0a6ef9147b8bb946"
   integrity sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==
@@ -11569,6 +11569,13 @@ viem@^2.25.1:
     isows "1.0.7"
     ox "0.11.3"
     ws "8.18.3"
+
+web-solc@0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/web-solc/-/web-solc-0.5.1.tgz#2f257550323236aa8f81cc7f171fdd7393d8d6cd"
+  integrity sha512-Z/hBplZq1+4i4bYeIeD9N3vP1BLUBXpSDa4h0Ipm2Z2cHv7x7DtZ2zFb0E1L1VZo4BF+OJGVtGlT+nTUXGgncQ==
+  dependencies:
+    semver "^7.6.2"
 
 web3-bzz@1.2.11:
   version "1.2.11"

@@ -54,56 +54,52 @@ In order to get a detailed trace of a settlement to identify how much gas is bei
 yarn bench:trace
 ```
 
-## Deployment
+## Building a Cannon Package for Deployment
 
-Contracts deployment (including contract verification) is run automatically with GitHub Actions. The deployment process is triggered manually.
-Maintainers of this repository can deploy a new version of the contract in the "Actions" tab, "Deploy GPv2 contracts", "Run workflow". The target branch can be selected before running.
-A successful workflow results in a new PR asking to merge the deployment artifacts into the main branch.
+This project uses [Cannon](https://usecannon.com/) to generate a deployable artifact for the contracts in this repository. The deployment on live networks does not occur on this repository.
 
-Contracts can also be deployed and verified manually as follows.
+To learn more or browse artifacts for the actual deployed contracts, see [`cow-deployments` repository](https://github.com/cowprotocol/cow-deployments) or [`cow-omnibus` on Cannon Explorer](https://usecannon.com/packages/cow-omnibus).
 
-### Deploying Contracts
+### Building the Cannon Package
 
-Choose the network and gas price in wei for the deployment.
-After replacing these values, run:
+To build a new Cannon package for the GPv2 Settlement contracts:
 
 ```sh
-NETWORK='rinkeby'
-GAS_PRICE_WEI='1000000000'
-yarn deploy --network $NETWORK --gasprice $GAS_PRICE_WEI
+yarn hardhat cannon:build
 ```
 
-New files containing details of this deployment will be created in the `deployment` folder.
-These files should be committed to this repository.
+This will:
+- Recompile the Solidity contracts as needed
+- Generate a deployment manifest including the solidity input json, default settings, ABIs, as well as predicted deployment addresses.
+- Store the deployment artifacts in the `cannon-deploys/` directory
 
-### Verify Deployed Contracts
+### Building with Custom Settings
 
-#### Etherscan
-
-For verifying all deployed contracts:
+To build with custom owner or manager addresses, you can pass variables:
 
 ```sh
-export ETHERSCAN_API_KEY=<Your Key>
-yarn verify:etherscan --network $NETWORK
+yarn hardhat cannon:build owner=0xYourOwnerAddress manager=0xYourManagerAddress
 ```
 
-#### Tenderly
+The contracts use deterministic deployment (CREATE2) with the salt "Mattresses in Berlin!" to ensure the same addresses across all networks.
 
-For verifying all deployed contracts:
+### Publishing the Cannon Package
 
-```sh
-yarn verify:tenderly --network $NETWORK
+Upon release, the cannon package for this repository should be published, and the deployment artifacts should be recorded on this repository.
+
+To publish the cannon package, using a wallet that has permission to publish on behalf of the `cow-settlement` package on the Cannon Registry, execute the publish command:
+
+```
+yarn cannon publish cow-settlement:<version> --chain-id 13370
 ```
 
-For a single contract, named `GPv2Contract` and located at address `0xFeDbc87123caF3925145e1bD1Be844c03b36722f` in the example:
+To record the release artifacts to this repository, run:
 
-```sh
-npx hardhat tenderly:verify --network $NETWORK GPv2Contract=0xFeDbc87123caF3925145e1bD1Be844c03b36722f
+```
+yarn record-cannon
 ```
 
-## Deployed Contract Addresses
-
-This package additionally contains a `networks.json` file at the root with the address of each deployed contract as well the hash of the Ethereum transaction used to create the contract.
+Commit the result.
 
 ## Test coverage [![Coverage Status](https://coveralls.io/repos/github/gnosis/gp-v2-contracts/badge.svg?branch=main)](https://coveralls.io/github/gnosis/gp-v2-contracts?branch=main)
 

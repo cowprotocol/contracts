@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "license": "LGPL-3.0-or-later",
   "scripts": {
-    "deploy": "hardhat deploy",
     "verify:etherscan": "hardhat etherscan-verify --license LGPL-3.0 --force-license",
     "verify:tenderly": "hardhat tenderly",
     "solvers": "hardhat solvers",
@@ -23,7 +22,8 @@
     "bench:trace": "hardhat run bench/trace/index.ts",
     "bench:uniswap": "hardhat run bench/uniswap/index.ts",
     "fmt:sol": "prettier 'src/contracts/**/*.sol' -w",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "record-cannon": "yarn cannon inspect cow-settlement:latest --chain-id 13370 --out deploy-json > cannon/deploy.json && yarn cannon inspect cow-settlement:latest --chain-id 13370 --out misc-json > cannon/misc.json"
   },
   "peerDependencies": {
     "ethers": "~5.0.18"
@@ -45,6 +45,7 @@
     "@typescript-eslint/parser": "^4.26.1",
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "@usecannon/cli": "^2.25.1",
     "axios": "^0.21.1",
     "canonical-weth": "^1.4.0",
     "chai": "^4.3.4",
@@ -61,7 +62,6 @@
     "globby": "^11.0.3",
     "hardhat": "^2.3.0",
     "hardhat-cannon": "^2.25.1",
-    "hardhat-deploy": "^0.7.3",
     "hardhat-gas-reporter": "^1.0.4",
     "prettier": "^2.3.1",
     "prettier-plugin-solidity": "^1.0.0-beta.11",
