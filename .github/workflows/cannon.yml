@@ -14,6 +14,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@8789b3e21e6c11b2697f5eb56eddae542f746c10
+        with:
+          version: v1.5.1
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
@@ -27,7 +31,6 @@ jobs:
             ${{ matrix.os }}-yarn-
       - run: yarn --frozen-lockfile
       - run: yarn build
-      - run: yarn hardhat cannon:build --network cannon --wipe
       - run: yarn record-cannon
       - name: Verify no unexpected changes from record-cannon
         run: |
@@ -36,3 +39,5 @@ jobs:
             git diff
             exit 1
           fi
+      # Run the cannon build to ensure it is valid cannonfile
+      - run: yarn hardhat cannon:build --network cannon --wipe
