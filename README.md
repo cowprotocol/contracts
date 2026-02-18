@@ -54,61 +54,64 @@ In order to get a detailed trace of a settlement to identify how much gas is bei
 yarn bench:trace
 ```
 
-## Deployment
+## Building a Cannon Package for Deployment
 
-Contracts deployment (including contract verification) is run automatically with GitHub Actions. The deployment process is triggered manually.
-Maintainers of this repository can deploy a new version of the contract in the "Actions" tab, "Deploy GPv2 contracts", "Run workflow". The target branch can be selected before running.
-A successful workflow results in a new PR asking to merge the deployment artifacts into the main branch.
+This project uses [Cannon](https://usecannon.com/) to generate a deployable artifact for the contracts in this repository. The deployment on live networks does not occur on this repository.
 
-Contracts can also be deployed and verified manually as follows.
+To learn more or browse artifacts for the actual deployed contracts, see [`cowprotocol/deployments` repository](https://github.com/cowprotocol/deployments) or [`cow-omnibus` on Cannon Explorer](https://usecannon.com/packages/cow-omnibus).
 
-### Deploying Contracts
+### Building the Cannon Package
 
-Choose the network and gas price in wei for the deployment.
-After replacing these values, run:
+To build a new Cannon package for the GPv2 Settlement contracts:
 
 ```sh
-NETWORK='rinkeby'
-GAS_PRICE_WEI='1000000000'
-yarn deploy --network $NETWORK --gasprice $GAS_PRICE_WEI
+yarn hardhat cannon:build --network cannon --wipe
 ```
 
-New files containing details of this deployment will be created in the `deployment` folder.
-These files should be committed to this repository.
+This will:
+- Recompile the Solidity contracts as needed
+- Generate a deployment manifest including the solidity input json, default settings, ABIs, as well as predicted deployment addresses.
+- Store the deployment artifacts in the `cannon-deploys/` directory
 
-### Verify Deployed Contracts
+### Building with Custom Settings
 
-#### Etherscan
-
-For verifying all deployed contracts:
+To build with custom owner, manager, or CREATE2 salt, you can pass variables:
 
 ```sh
-export ETHERSCAN_API_KEY=<Your Key>
-yarn verify:etherscan --network $NETWORK
+yarn hardhat cannon:build --network cannon owner=0xYourOwnerAddress manager=0xYourManagerAddress salt="Beds in USA"
 ```
 
-Single contracts can be verified as well, but the constructor arguments must be explicitly given to the command.
-A common example is the vault relayer contract, which is not automatically verified with the command above since it is only deployed indirectly during initialization. This contract can be manually verified with:
+The contracts use deterministic deployment (CREATE2) with the salt "Beds in USA" to ensure the same addresses across all networks.
 
-```sh
-npx hardhat verify --network $NETWORK 0xC92E8bdf79f0507f65a392b0ab4667716BFE0110 0xBA12222222228d8Ba445958a75a0704d566BF2C8
+### Publishing the Cannon Package
+
+Upon release, the cannon package for this repository should be published, and the deployment artifacts should be recorded on this repository.
+
+First, double check that the version of the cannon package recorded in `cannonfile.toml` is as expected, and modify as necessary.
+
+Next, follow instructions in [Building the Cannon Package](#Building the Cannon Package) above to ensure the built package artifacts are up to date.
+
+To publish the cannon package, using an EOA that has permission to publish on behalf of the `cow-settlement` package on the Cannon Registry. You will also need 0.0025 ETH + gas on Optimism Mainnet.
+
+To publish, execute the publish command:
+
+```
+yarn cannon publish cow-settlement:<version> --chain-id 13370
 ```
 
-The first address is the vault relayer address, the second is the deployment input (usually, the Balancer vault).
+Where `<version>` is the version recorded in the `cannonfile.toml` from earlier.
 
-#### Tenderly
+You will be prompted for the private key of the account to use to publish.
 
-For verifying all deployed contracts:
+Record the release artifacts to this repository. Run:
 
-```sh
-yarn verify:tenderly --network $NETWORK
+```
+yarn record-cannon
 ```
 
-For a single contract, named `GPv2Contract` and located at address `0xFeDbc87123caF3925145e1bD1Be844c03b36722f` in the example:
+Finally, its necessary to bump the patch version of the package as specified in `cannonfile.toml`. This version should be bumped *after* the publish is complete.
 
-```sh
-npx hardhat tenderly:verify --network $NETWORK GPv2Contract=0xFeDbc87123caF3925145e1bD1Be844c03b36722f
-```
+Commit all the changes to a PR. A CI job will ensure consistency between the published package and .
 
 ## Deployed Contract Addresses
 
