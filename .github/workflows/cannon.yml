@@ -19,7 +19,7 @@ jobs:
           node-version: ${{ matrix.node }}
       - id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
-      - uses: actions/cache@v2
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
           key: ${{ matrix.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
