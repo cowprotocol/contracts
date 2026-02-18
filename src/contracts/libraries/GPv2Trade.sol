@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity >=0.7.6 <0.9.0;
+pragma solidity ^0.7.6;
 
 import "../interfaces/IERC20.sol";
 import "../mixins/GPv2Signing.sol";
@@ -68,7 +68,7 @@ library GPv2Trade {
     ///
     /// ```
     /// bit | 31 ...   | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-    /// ----+----------+-------+---+-------+---+---+
+    /// ----+----------+---+---+-------+---+---+
     ///     | reserved | *   * | * | *   * | * | * |
     ///                  |   |   |   |   |   |   |
     ///                  |   |   |   |   |   |   +---- order kind bit, 0 for a sell order
@@ -92,9 +92,7 @@ library GPv2Trade {
     ///                                                10: EIP-1271
     ///                                                11: pre_sign
     /// ```
-    function extractFlags(
-        uint256 flags
-    )
+    function extractFlags(uint256 flags)
         internal
         pure
         returns (

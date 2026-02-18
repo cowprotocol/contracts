@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity >=0.7.6 <0.9.0;
+pragma solidity ^0.7.6;
 pragma abicoder v2;
 
 import "./GPv2VaultRelayer.sol";
@@ -26,12 +26,12 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     using SafeMath for uint256;
 
     /// @dev The authenticator is used to determine who can call the settle function.
-    /// That is, only authorized solvers have the ability to invoke settlements.
+    /// That is, only authorised solvers have the ability to invoke settlements.
     /// Any valid authenticator implements an isSolver method called by the onlySolver
     /// modifier below.
     GPv2Authentication public immutable authenticator;
 
-    /// @dev The Balancer Vault the protocol used for managing user funds.
+    /// @dev The Balancer Vault the protocol uses for managing user funds.
     IVault public immutable vault;
 
     /// @dev The Balancer Vault relayer which can interact on behalf of users.
@@ -59,12 +59,12 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
 
     /// @dev Event emitted for each executed interaction.
     ///
-    /// For gas efficiency, only the interaction calldata selector (first 4
+    /// For gas effeciency, only the interaction calldata selector (first 4
     /// bytes) is included in the event. For interactions without calldata or
     /// whose calldata is shorter than 4 bytes, the selector will be `0`.
     event Interaction(address indexed target, uint256 value, bytes4 selector);
 
-    /// @dev Event emitted when a settlement completes
+    /// @dev Event emitted when a settlement complets
     event Settlement(address indexed solver);
 
     /// @dev Event emitted when an order is invalidated.
@@ -84,14 +84,14 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
 
     /// @dev This modifier is called by settle function to block any non-listed
     /// senders from settling batches.
-    modifier onlySolver() {
+    modifier onlySolver {
         require(authenticator.isSolver(msg.sender), "GPv2: not a solver");
         _;
     }
 
     /// @dev Modifier to ensure that an external function is only callable as a
     /// settlement interaction.
-    modifier onlyInteraction() {
+    modifier onlyInteraction {
         require(address(this) == msg.sender, "GPv2: not an interaction");
         _;
     }
@@ -159,9 +159,10 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
         GPv2Order.Data memory order = recoveredOrder.data;
         recoverOrderFromTrade(recoveredOrder, tokens, trade);
 
-        IVault.SwapKind kind = order.kind == GPv2Order.KIND_SELL
-            ? IVault.SwapKind.GIVEN_IN
-            : IVault.SwapKind.GIVEN_OUT;
+        IVault.SwapKind kind =
+            order.kind == GPv2Order.KIND_SELL
+                ? IVault.SwapKind.GIVEN_IN
+                : IVault.SwapKind.GIVEN_OUT;
 
         IVault.FundManagement memory funds;
         funds.sender = recoveredOrder.owner;
@@ -192,27 +193,28 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
         feeTransfer.amount = order.feeAmount;
         feeTransfer.balance = order.sellTokenBalance;
 
-        int256[] memory tokenDeltas = vaultRelayer.batchSwapWithFee(
-            kind,
-            swaps,
-            tokens,
-            funds,
-            limits,
-            // NOTE: Specify a deadline to ensure that an expire order
-            // cannot be used to trade.
-            order.validTo,
-            feeTransfer
-        );
+        int256[] memory tokenDeltas =
+            vaultRelayer.batchSwapWithFee(
+                kind,
+                swaps,
+                tokens,
+                funds,
+                limits,
+                // NOTE: Specify a deadline to ensure that an expire order
+                // cannot be used to trade.
+                order.validTo,
+                feeTransfer
+            );
 
         bytes memory orderUid = recoveredOrder.uid;
-        uint256 executedSellAmount = tokenDeltas[trade.sellTokenIndex]
-            .toUint256();
-        uint256 executedBuyAmount = (-tokenDeltas[trade.buyTokenIndex])
-            .toUint256();
+        uint256 executedSellAmount =
+            tokenDeltas[trade.sellTokenIndex].toUint256();
+        uint256 executedBuyAmount =
+            (-tokenDeltas[trade.buyTokenIndex]).toUint256();
 
         // NOTE: Check that the orders were completely filled and update their
         // filled amounts to avoid replaying them. The limit price and order
-        // validity has already been verified when executing the swap through
+        // validity have already been verified when executing the swap through
         // the `limit` and `deadline` parameters.
         require(filledAmount[orderUid] == 0, "GPv2: order filled");
         if (order.kind == GPv2Order.KIND_SELL) {
@@ -245,12 +247,12 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     ///
     /// @param orderUid The unique identifier of the order that is to be made
     /// invalid after calling this function. The user that created the order
-    /// must be the sender of this message. See [`extractOrderUidParams`]
+    /// must be the the sender of this message. See [`extractOrderUidParams`]
     /// for details on orderUid.
     function invalidateOrder(bytes calldata orderUid) external {
         (, address owner, ) = orderUid.extractOrderUidParams();
         require(owner == msg.sender, "GPv2: caller does not own order");
-        filledAmount[orderUid] = type(uint256).max;
+        filledAmount[orderUid] = uint256(-1);
         emit OrderInvalidated(owner, orderUid);
     }
 
@@ -259,9 +261,10 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     ///
     /// @param orderUids The unique identifiers of the expired order to free
     /// storage for.
-    function freeFilledAmountStorage(
-        bytes[] calldata orderUids
-    ) external onlyInteraction {
+    function freeFilledAmountStorage(bytes[] calldata orderUids)
+        external
+        onlyInteraction
+    {
         freeOrderStorage(filledAmount, orderUids);
     }
 
@@ -270,9 +273,10 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     ///
     /// @param orderUids The unique identifiers of the expired order to free
     /// storage for.
-    function freePreSignatureStorage(
-        bytes[] calldata orderUids
-    ) external onlyInteraction {
+    function freePreSignatureStorage(bytes[] calldata orderUids)
+        external
+        onlyInteraction
+    {
         freeOrderStorage(preSignature, orderUids);
     }
 
@@ -303,7 +307,7 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
         inTransfers = new GPv2Transfer.Data[](trades.length);
         outTransfers = new GPv2Transfer.Data[](trades.length);
 
-        for (uint256 i; i < trades.length; ++i) {
+        for (uint256 i = 0; i < trades.length; i++) {
             GPv2Trade.Data calldata trade = trades[i];
 
             recoverOrderFromTrade(recoveredOrder, tokens, trade);
@@ -443,10 +447,10 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
 
     /// @dev Execute a list of arbitrary contract calls from this contract.
     /// @param interactions The list of interactions to execute.
-    function executeInteractions(
-        GPv2Interaction.Data[] calldata interactions
-    ) internal {
-        for (uint256 i; i < interactions.length; ++i) {
+    function executeInteractions(GPv2Interaction.Data[] calldata interactions)
+        internal
+    {
+        for (uint256 i; i < interactions.length; i++) {
             GPv2Interaction.Data calldata interaction = interactions[i];
 
             // To prevent possible attack on user funds, we explicitly disable
@@ -475,7 +479,7 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
         mapping(bytes => uint256) storage orderStorage,
         bytes[] calldata orderUids
     ) internal {
-        for (uint256 i; i < orderUids.length; ++i) {
+        for (uint256 i = 0; i < orderUids.length; i++) {
             bytes calldata orderUid = orderUids[i];
 
             (, , uint32 validTo) = orderUid.extractOrderUidParams();

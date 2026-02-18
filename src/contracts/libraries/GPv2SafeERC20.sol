@@ -1,15 +1,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity >=0.7.6 <0.9.0;
+pragma solidity ^0.7.6;
 
 import "../interfaces/IERC20.sol";
 
 /// @title Gnosis Protocol v2 Safe ERC20 Transfer Library
 /// @author Gnosis Developers
-/// @dev Gas-efficient version of Openzeppelin's SafeERC20 contract.
+/// @dev Gas-efficient version of Openzeppelin's SafeERC20 contract that notably
+/// does not revert when calling a non-contract.
 library GPv2SafeERC20 {
     /// @dev Wrapper around a call to the ERC20 function `transfer` that reverts
     /// also when the token returns `false`.
-    function safeTransfer(IERC20 token, address to, uint256 value) internal {
+    function safeTransfer(
+        IERC20 token,
+        address to,
+        uint256 value
+    ) internal {
         bytes4 selector_ = token.transfer.selector;
 
         // solhint-disable-next-line no-inline-assembly
@@ -28,7 +33,7 @@ library GPv2SafeERC20 {
             }
         }
 
-        require(getLastTransferResult(token), "GPv2: failed transfer");
+        require(getLastTansferResult(token), "GPv2: failed transfer");
     }
 
     /// @dev Wrapper around a call to the ERC20 function `transferFrom` that
@@ -61,15 +66,17 @@ library GPv2SafeERC20 {
             }
         }
 
-        require(getLastTransferResult(token), "GPv2: failed transferFrom");
+        require(getLastTansferResult(token), "GPv2: failed transferFrom");
     }
 
     /// @dev Verifies that the last return was a successful `transfer*` call.
     /// This is done by checking that the return data is either empty, or
     /// is a valid ABI encoded boolean.
-    function getLastTransferResult(
-        IERC20 token
-    ) private view returns (bool success) {
+    function getLastTansferResult(IERC20 token)
+        private
+        view
+        returns (bool success)
+    {
         // NOTE: Inspecting previous return data requires assembly. Note that
         // we write the return data to memory 0 in the case where the return
         // data size is 32, this is OK since the first 64 bytes of memory are
@@ -99,33 +106,33 @@ library GPv2SafeERC20 {
             }
 
             switch returndatasize()
-            // Non-standard ERC20 transfer without return.
-            case 0 {
-                // NOTE: When the return data size is 0, verify that there
-                // is code at the address. This is done in order to maintain
-                // compatibility with Solidity calling conventions.
-                // <https://docs.soliditylang.org/en/v0.7.6/control-structures.html#external-function-calls>
-                if iszero(extcodesize(token)) {
-                    revertWithMessage(20, "GPv2: not a contract")
+                // Non-standard ERC20 transfer without return.
+                case 0 {
+                    // NOTE: When the return data size is 0, verify that there
+                    // is code at the address. This is done in order to maintain
+                    // compatibility with Solidity calling conventions.
+                    // <https://docs.soliditylang.org/en/v0.7.6/control-structures.html#external-function-calls>
+                    if iszero(extcodesize(token)) {
+                        revertWithMessage(20, "GPv2: not a contract")
+                    }
+
+                    success := 1
                 }
+                // Standard ERC20 transfer returning boolean success value.
+                case 32 {
+                    returndatacopy(0, 0, returndatasize())
 
-                success := 1
-            }
-            // Standard ERC20 transfer returning boolean success value.
-            case 32 {
-                returndatacopy(0, 0, returndatasize())
-
-                // NOTE: For ABI encoding v1, any non-zero value is accepted
-                // as `true` for a boolean. In order to stay compatible with
-                // OpenZeppelin's `SafeERC20` library which is known to work
-                // with the existing ERC20 implementation we care about,
-                // make sure we return success for any non-zero return value
-                // from the `transfer*` call.
-                success := iszero(iszero(mload(0)))
-            }
-            default {
-                revertWithMessage(31, "GPv2: malformed transfer result")
-            }
+                    // NOTE: For ABI encoding v1, any non-zero value is accepted
+                    // as `true` for a boolean. In order to stay compatible with
+                    // OpenZeppelin's `SafeERC20` library which is known to work
+                    // with the existing ERC20 implementation we care about,
+                    // make sure we return success for any non-zero return value
+                    // from the `transfer*` call.
+                    success := iszero(iszero(mload(0)))
+                }
+                default {
+                    revertWithMessage(31, "GPv2: malformed transfer result")
+                }
         }
     }
 }

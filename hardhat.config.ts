@@ -1,5 +1,6 @@
 import "@nomiclabs/hardhat-waffle";
 import "hardhat-deploy";
+import "hardhat-cannon";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "@tenderly/hardhat-tenderly";
@@ -9,6 +10,8 @@ import dotenv from "dotenv";
 import type { HttpNetworkUserConfig } from "hardhat/types";
 import type { MochaOptions } from "mocha";
 import yargs from "yargs";
+
+import { setupTasks } from "./src/tasks";
 
 const argv = yargs
   .option("network", {
@@ -80,6 +83,8 @@ switch (MOCHA_CONF) {
     throw new Error("Invalid MOCHA_CONF");
 }
 
+setupTasks();
+
 export default {
   mocha,
   paths: {
@@ -104,6 +109,40 @@ export default {
         version: "0.4.11",
       },
     ],
+    overrides: {
+      "solc_0.7/proxy/Proxy.sol": {
+        version: "0.7.6",
+        settings: {
+            "metadata": {
+              "bytecodeHash": "ipfs",
+              "useLiteralContent": true
+            },
+            "libraries": {},
+            "optimizer": {
+              "runs": 2000000,
+              "enabled": true
+            },
+            "evmVersion": "istanbul",
+            "remappings": []
+          },
+      },
+      "solc_0.7/proxy/EIP173Proxy.sol": {
+        version: "0.7.6",
+        settings: {
+            "metadata": {
+              "bytecodeHash": "ipfs",
+              "useLiteralContent": true
+            },
+            "libraries": {},
+            "optimizer": {
+              "runs": 2000000,
+              "enabled": true
+            },
+            "evmVersion": "istanbul",
+            "remappings": []
+          },
+      },
+    }
   },
   networks: {
     hardhat: {

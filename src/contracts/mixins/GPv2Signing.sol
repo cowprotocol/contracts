@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity >=0.7.6 <0.9.0;
+pragma solidity ^0.7.6;
 
 import "../interfaces/GPv2EIP1271.sol";
 import "../libraries/GPv2Order.sol";
@@ -21,12 +21,7 @@ abstract contract GPv2Signing {
     }
 
     /// @dev Signing scheme used for recovery.
-    enum Scheme {
-        Eip712,
-        EthSign,
-        Eip1271,
-        PreSign
-    }
+    enum Scheme {Eip712, EthSign, Eip1271, PreSign}
 
     /// @dev The EIP-712 domain type hash used for computing the domain
     /// separator.
@@ -83,8 +78,6 @@ abstract contract GPv2Signing {
     /// @dev Sets a presignature for the specified order UID.
     ///
     /// @param orderUid The unique identifier of the order to pre-sign.
-    /// @param signed True to set the order as tradable with pre-sign, false to
-    /// false to unset it.
     function setPreSignature(bytes calldata orderUid, bool signed) external {
         (, address owner, ) = orderUid.extractOrderUidParams();
         require(owner == msg.sender, "GPv2: cannot presign order");
@@ -123,11 +116,8 @@ abstract contract GPv2Signing {
         GPv2Order.Data memory order = recoveredOrder.data;
 
         Scheme signingScheme = GPv2Trade.extractOrder(trade, tokens, order);
-        (bytes32 orderDigest, address owner) = recoverOrderSigner(
-            order,
-            signingScheme,
-            trade.signature
-        );
+        (bytes32 orderDigest, address owner) =
+            recoverOrderSigner(order, signingScheme, trade.signature);
 
         recoveredOrder.uid.packOrderUidParams(
             orderDigest,
@@ -180,10 +170,11 @@ abstract contract GPv2Signing {
     ///
     /// @param message The signed message.
     /// @param encodedSignature The encoded signature.
-    function ecdsaRecover(
-        bytes32 message,
-        bytes calldata encodedSignature
-    ) internal pure returns (address signer) {
+    function ecdsaRecover(bytes32 message, bytes calldata encodedSignature)
+        internal
+        pure
+        returns (address signer)
+    {
         require(
             encodedSignature.length == ECDSA_SIGNATURE_LENGTH,
             "GPv2: malformed ecdsa signature"
@@ -252,9 +243,13 @@ abstract contract GPv2Signing {
         // `"\x19Ethereum Signed Message:\n" || length || data`, where
         // the length is a constant (32 bytes) and the data is defined as:
         // `orderDigest`.
-        bytes32 ethsignDigest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", orderDigest)
-        );
+        bytes32 ethsignDigest =
+            keccak256(
+                abi.encodePacked(
+                    "\x19Ethereum Signed Message:\n32",
+                    orderDigest
+                )
+            );
 
         owner = ecdsaRecover(ethsignDigest, encodedSignature);
     }

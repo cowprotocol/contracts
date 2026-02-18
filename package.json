@@ -31,7 +31,8 @@
     "bench:uniswap": "hardhat run bench/uniswap/index.ts",
     "fmt:sol": "prettier 'src/contracts/**/*.sol' -w",
     "fmt:ts": "npx eslint --max-warnings 0 . --fix",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "record-cannon": "yarn cannon inspect cow-settlement:latest --chain-id 13370 --out deploy-json > cannon/deploy.json && yarn cannon inspect cow-settlement:latest --chain-id 13370 --out misc-json > cannon/misc.json"
   },
   "peerDependencies": {
     "ethers": "^5.4.0"
@@ -75,6 +76,7 @@
     "ethers": "^5.7.2",
     "globby": "^11.0.4",
     "hardhat": "^2.13.1",
+    "hardhat-cannon": "2.26.0-alpha.0",
     "hardhat-deploy": "^0.11.26",
     "hardhat-gas-reporter": "^1.0.9",
     "prettier": "^2.8.7",

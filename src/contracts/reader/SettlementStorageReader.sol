@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity >=0.7.6 <0.9.0;
+pragma solidity ^0.7.6;
 pragma abicoder v2;
 
 /// @title Gnosis Protocol v2 Settlement Storage Reader
@@ -12,9 +12,11 @@ contract SettlementStorageReader {
     mapping(bytes => uint256) public preSignature;
     mapping(bytes => uint256) public filledAmount;
 
-    function filledAmountsForOrders(
-        bytes[] calldata orderUids
-    ) public view returns (uint256[] memory filledAmounts) {
+    function filledAmountsForOrders(bytes[] calldata orderUids)
+        public
+        view
+        returns (uint256[] memory filledAmounts)
+    {
         filledAmounts = new uint256[](orderUids.length);
         for (uint256 i = 0; i < orderUids.length; i++) {
             filledAmounts[i] = filledAmount[orderUids[i]];

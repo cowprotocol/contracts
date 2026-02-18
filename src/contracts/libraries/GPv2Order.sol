@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity >=0.7.6 <0.9.0;
+pragma solidity ^0.7.6;
 
 import "../interfaces/IERC20.sol";
 
@@ -38,8 +38,8 @@ library GPv2Order {
     ///         "bytes32 appData," +
     ///         "uint256 feeAmount," +
     ///         "string kind," +
-    ///         "bool partiallyFillable," +
-    ///         "string sellTokenBalance," +
+    ///         "bool partiallyFillable" +
+    ///         "string sellTokenBalance" +
     ///         "string buyTokenBalance" +
     ///     ")"
     /// )
@@ -114,10 +114,11 @@ library GPv2Order {
     /// it is the same as the order owner.
     ///
     /// @return receiver The actual receiver of trade proceeds.
-    function actualReceiver(
-        Data memory order,
-        address owner
-    ) internal pure returns (address receiver) {
+    function actualReceiver(Data memory order, address owner)
+        internal
+        pure
+        returns (address receiver)
+    {
         if (order.receiver == RECEIVER_SAME_AS_OWNER) {
             receiver = owner;
         } else {
@@ -130,15 +131,16 @@ library GPv2Order {
     /// @param order The order to compute the EIP-712 signing hash for.
     /// @param domainSeparator The EIP-712 domain separator to use.
     /// @return orderDigest The 32 byte EIP-712 struct hash.
-    function hash(
-        Data memory order,
-        bytes32 domainSeparator
-    ) internal pure returns (bytes32 orderDigest) {
+    function hash(Data memory order, bytes32 domainSeparator)
+        internal
+        pure
+        returns (bytes32 orderDigest)
+    {
         bytes32 structHash;
 
         // NOTE: Compute the EIP-712 order struct hash in place. As suggested
-        // in the EIP proposal, noting that the order struct has 12 fields, and
-        // prefixing the type hash `(1 + 12) * 32 = 416` bytes to hash.
+        // in the EIP proposal, noting that the order struct has 10 fields, and
+        // including the type hash `(12 + 1) * 32 = 416` bytes to hash.
         // <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md#rationale-for-encodedata>
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -223,12 +225,14 @@ library GPv2Order {
     /// parameters.
     /// @return owner The address of the user who owns this order.
     /// @return validTo The epoch time at which the order will stop being valid.
-    function extractOrderUidParams(
-        bytes calldata orderUid
-    )
+    function extractOrderUidParams(bytes calldata orderUid)
         internal
         pure
-        returns (bytes32 orderDigest, address owner, uint32 validTo)
+        returns (
+            bytes32 orderDigest,
+            address owner,
+            uint32 validTo
+        )
     {
         require(orderUid.length == UID_LENGTH, "GPv2: invalid uid");
 

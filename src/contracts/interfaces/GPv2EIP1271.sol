@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity >=0.7.6 <0.9.0;
+pragma solidity ^0.7.6;
 
 library GPv2EIP1271 {
     /// @dev Value returned by a call to `isValidSignature` if the signature
@@ -24,8 +24,8 @@ interface EIP1271Verifier {
     /// solc > 0.5)
     /// MUST allow external calls
     ///
-    function isValidSignature(
-        bytes32 _hash,
-        bytes memory _signature
-    ) external view returns (bytes4 magicValue);
+    function isValidSignature(bytes32 _hash, bytes memory _signature)
+        external
+        view
+        returns (bytes4 magicValue);
 }

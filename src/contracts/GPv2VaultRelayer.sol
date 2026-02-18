@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity >=0.7.6 <0.9.0;
+pragma solidity ^0.7.6;
 pragma abicoder v2;
 
 import "./interfaces/IERC20.sol";
@@ -25,7 +25,7 @@ contract GPv2VaultRelayer {
 
     /// @dev Modifier that ensures that a function can only be called by the
     /// creator of this contract.
-    modifier onlyCreator() {
+    modifier onlyCreator {
         require(msg.sender == creator, "GPv2: not creator");
         _;
     }
@@ -38,9 +38,10 @@ contract GPv2VaultRelayer {
     /// - Any ERC20 transfer fails
     ///
     /// @param transfers The transfers to execute.
-    function transferFromAccounts(
-        GPv2Transfer.Data[] calldata transfers
-    ) external onlyCreator {
+    function transferFromAccounts(GPv2Transfer.Data[] calldata transfers)
+        external
+        onlyCreator
+    {
         vault.transferFromAccounts(transfers, msg.sender);
     }
 
