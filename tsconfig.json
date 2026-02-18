@@ -8,5 +8,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["hardhat.imports.ts", "src/**/*", "test/**/*", "bench/**/*"]
 }

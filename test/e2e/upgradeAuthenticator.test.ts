@@ -13,7 +13,7 @@ async function rejectError(
     await promise;
     return undefined;
   } catch (err) {
-    return err;
+    return err as Error;
   }
 }
 
