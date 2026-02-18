@@ -24,7 +24,7 @@
     "bench:uniswap": "hardhat run bench/uniswap/index.ts",
     "fmt:sol": "prettier 'src/contracts/**/*.sol' -w",
     "prepack": "yarn build",
-    "record-cannon": "yarn cannon inspect cow-settlement:latest --chain-id 13370 --out deploy-json > cannon/deploy.json && yarn cannon inspect cow-settlement:latest --chain-id 13370 --out misc-json > cannon/misc.json"
+    "record-cannon": "CANNON_REGISTRY_PRIORITY=local yarn cannon inspect cow-settlement:latest --chain-id 13370 --out deploy-json > cannon/deploy.json && CANNON_REGISTRY_PRIORITY=local yarn cannon inspect cow-settlement:latest --chain-id 13370 --out misc-json > cannon/misc.json"
   },
   "peerDependencies": {
     "ethers": "~5.0.18"

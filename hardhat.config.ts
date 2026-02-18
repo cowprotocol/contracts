@@ -93,36 +93,36 @@ export default {
       "solc_0.7/proxy/Proxy.sol": {
         version: "0.7.6",
         settings: {
-            "metadata": {
-              "bytecodeHash": "ipfs",
-              "useLiteralContent": true
-            },
-            "libraries": {},
-            "optimizer": {
-              "runs": 2000000,
-              "enabled": true
-            },
-            "evmVersion": "istanbul",
-            "remappings": []
+          metadata: {
+            bytecodeHash: "ipfs",
+            useLiteralContent: true,
           },
+          libraries: {},
+          optimizer: {
+            runs: 2000000,
+            enabled: true,
+          },
+          evmVersion: "istanbul",
+          remappings: [],
+        },
       },
       "solc_0.7/proxy/EIP173Proxy.sol": {
         version: "0.7.6",
         settings: {
-            "metadata": {
-              "bytecodeHash": "ipfs",
-              "useLiteralContent": true
-            },
-            "libraries": {},
-            "optimizer": {
-              "runs": 2000000,
-              "enabled": true
-            },
-            "evmVersion": "istanbul",
-            "remappings": []
+          metadata: {
+            bytecodeHash: "ipfs",
+            useLiteralContent: true,
           },
+          libraries: {},
+          optimizer: {
+            runs: 2000000,
+            enabled: true,
+          },
+          evmVersion: "istanbul",
+          remappings: [],
+        },
       },
-    }
+    },
   },
   networks: {
     hardhat: {

@@ -27,7 +27,7 @@ jobs:
             ${{ matrix.os }}-yarn-
       - run: yarn --frozen-lockfile
       - run: yarn build
-      - run: yarn hardhat cannon build cannonfile.toml
+      - run: yarn hardhat cannon:build --network cannon --wipe
       - run: yarn record-cannon
       - name: Verify no unexpected changes from record-cannon
         run: |
