@@ -58,6 +58,65 @@ In order to get a detailed trace of a settlement to identify how much gas is bei
 yarn bench:trace
 ```
 
+## Building a Cannon Package for Deployment
+
+This project uses [Cannon](https://usecannon.com/) to generate a deployable artifact for the contracts in this repository. The deployment on live networks does not occur on this repository.
+
+To learn more or browse artifacts for the actual deployed contracts, see [`cowprotocol/deployments` repository](https://github.com/cowprotocol/deployments) or [`cow-omnibus` on Cannon Explorer](https://usecannon.com/packages/cow-omnibus).
+
+### Building the Cannon Package
+
+To build a new Cannon package for the GPv2 Settlement contracts:
+
+```sh
+yarn hardhat cannon:build --network cannon --wipe
+```
+
+This will:
+- Recompile the Solidity contracts as needed
+- Generate a deployment manifest including the solidity input json, default settings, ABIs, as well as predicted deployment addresses.
+- Store the deployment artifacts in the `cannon-deploys/` directory
+
+### Building with Custom Settings
+
+To build with custom owner, manager, or CREATE2 salt, you can pass variables:
+
+```sh
+yarn hardhat cannon:build --network cannon owner=0xYourOwnerAddress manager=0xYourManagerAddress salt="Beds in USA"
+```
+
+The contracts use deterministic deployment (CREATE2) with the salt "Beds in USA" to ensure the same addresses across all networks.
+
+### Publishing the Cannon Package
+
+Upon release, the cannon package for this repository should be published, and the deployment artifacts should be recorded on this repository.
+
+First, double check that the version of the cannon package recorded in `cannonfile.toml` is as expected, and modify as necessary.
+
+Next, follow instructions in [Building the Cannon Package](#Building the Cannon Package) above to ensure the built package artifacts are up to date.
+
+To publish the cannon package, using an EOA that has permission to publish on behalf of the `cow-settlement` package on the Cannon Registry. You will also need 0.0025 ETH + gas on Optimism Mainnet.
+
+To publish, execute the publish command:
+
+```
+yarn cannon publish cow-settlement:<version> --chain-id 13370
+```
+
+Where `<version>` is the version recorded in the `cannonfile.toml` from earlier.
+
+You will be prompted for the private key of the account to use to publish.
+
+Record the release artifacts to this repository. Run:
+
+```
+yarn record-cannon
+```
+
+Finally, its necessary to bump the patch version of the package as specified in `cannonfile.toml`. This version should be bumped *after* the publish is complete.
+
+Commit all the changes to a PR. A CI job will ensure consistency between the published package and .
+
 ## Deployment
 
 ### Deploying Contracts
