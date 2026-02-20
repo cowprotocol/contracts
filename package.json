@@ -7,9 +7,12 @@
     "verify:etherscan": "hardhat etherscan-verify --license LGPL-3.0 --force-license",
     "verify:tenderly": "hardhat tenderly",
     "solvers": "hardhat solvers",
-    "build": "yarn build:sol && yarn build:ts",
+    "build": "yarn build:sol && yarn build:ts && yarn build:cannon",
     "build:sol": "hardhat compile --force",
     "build:ts": "tsc && tsc -p tsconfig.lib.esm.json && tsc -p tsconfig.lib.commonjs.json",
+    "build:cannon": "yarn hardhat cannon:build --network cannon --wipe",
+    "cannon:publish": "yarn cannon publish cow-settlement --chain-id 13370 --registry-chain-id 10 && yarn cannon:record",
+    "cannon:record": "CANNON_REGISTRY_PRIORITY=local yarn cannon inspect cow-settlement:latest --chain-id 13370 --out deploy-json > cannon/deploy.json && CANNON_REGISTRY_PRIORITY=local yarn cannon inspect cow-settlement:latest --chain-id 13370 --out misc-json > cannon/misc.json",
     "lint": "yarn lint:sol && yarn lint:ts",
     "lint:sol": "solhint 'src/contracts/**/*.sol'",
     "lint:ts": "eslint --max-warnings 0 .",
@@ -23,8 +26,7 @@
     "bench:trace": "hardhat run bench/trace/index.ts",
     "bench:uniswap": "hardhat run bench/uniswap/index.ts",
     "fmt:sol": "prettier 'src/contracts/**/*.sol' -w",
-    "prepack": "yarn build",
-    "record-cannon": "CANNON_REGISTRY_PRIORITY=local yarn cannon inspect cow-settlement:latest --chain-id 13370 --out deploy-json > cannon/deploy.json && CANNON_REGISTRY_PRIORITY=local yarn cannon inspect cow-settlement:latest --chain-id 13370 --out misc-json > cannon/misc.json"
+    "prepack": "yarn build"
   },
   "peerDependencies": {
     "ethers": "~5.0.18"
