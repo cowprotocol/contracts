@@ -66,20 +66,20 @@ switch (MOCHA_CONF) {
 setupTasks();
 
 const hardhatDeployProxyOverrides = {
-version: "0.7.6",
-settings: {
-  metadata: {
-    bytecodeHash: "ipfs",
-    useLiteralContent: true,
+  version: "0.7.6",
+  settings: {
+    metadata: {
+      bytecodeHash: "ipfs",
+      useLiteralContent: true,
+    },
+    libraries: {},
+    optimizer: {
+      runs: 2000000,
+      enabled: true,
+    },
+    evmVersion: "istanbul",
+    remappings: [],
   },
-  libraries: {},
-  optimizer: {
-    runs: 2000000,
-    enabled: true,
-  },
-  evmVersion: "istanbul",
-  remappings: [],
-},
 };
 
 export default {
