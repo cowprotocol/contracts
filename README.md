@@ -71,7 +71,7 @@ yarn hardhat cannon:build --network cannon --wipe
 This will:
 - Recompile the Solidity contracts as needed
 - Generate a deployment manifest including the solidity input json, default settings, ABIs, as well as predicted deployment addresses.
-- Store the deployment artifacts in the `cannon-deploys/` directory
+- Store the deployment artifacts in the `cannon/` directory
 
 ### Building with Custom Settings
 
