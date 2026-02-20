@@ -99,7 +99,7 @@ To publish, execute the publish command:
 yarn cannon publish cow-settlement:<version> --chain-id 13370
 ```
 
-Where `<version>` is the version recorded in the `cannonfile.toml` from earlier.
+Where `<version>` is the version recorded in the `cannonfile.toml` from earlier, and `13370` is the anvil network created by cannon and used to prepare the packages before publishing. 
 
 You will be prompted for the private key of the account to use to publish.
 
