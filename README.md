@@ -65,7 +65,7 @@ To learn more or browse artifacts for the actual deployed contracts, see [`cowpr
 To build a new Cannon package for the GPv2 Settlement contracts:
 
 ```sh
-yarn hardhat cannon:build --network cannon --wipe
+yarn cannon:build
 ```
 
 This will:
@@ -96,17 +96,17 @@ When the contracts should be released to staging or production:
 To publish, execute the publish command:
 
 ```
-yarn cannon publish cow-settlement:<version> --chain-id 13370
+yarn cannon:publish
 ```
 
 Where `<version>` is the version recorded in the `cannonfile.toml` from earlier.
 
-You will be prompted for the private key of the account to use to publish.
+You will be prompted for the publishing network (select "Optimism") and for the private key of the account to use to publish.
 
-4. Record the release artifacts to this repository. Run:
+4. Ensure that you have changes for git in your `cannon/` directory. If not, you may need to run the `cannon:record` command:
 
 ```
-yarn record-cannon
+yarn cannon:record 
 ```
 
 5. Bump the patch version of the package as specified in `cannonfile.toml`. This version should be bumped *after* the publish is complete.
