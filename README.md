@@ -65,7 +65,7 @@ To learn more or browse artifacts for the actual deployed contracts, see [`cowpr
 To build a new Cannon package for the GPv2 Settlement contracts:
 
 ```sh
-yarn cannon:build
+yarn build:cannon
 ```
 
 This will:
@@ -75,7 +75,7 @@ This will:
 
 ### Building with Custom Settings
 
-To build with custom owner, manager, or CREATE2 salt, you can pass variables:
+To build with custom owner, manager, or CREATE2 salt, you can pass variables (using the internal cannon build command):
 
 ```sh
 yarn hardhat cannon:build --network cannon owner=0xYourOwnerAddress manager=0xYourManagerAddress salt="Beds in USA"
