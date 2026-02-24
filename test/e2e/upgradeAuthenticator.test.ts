@@ -13,7 +13,11 @@ async function rejectError(
     await promise;
     return undefined;
   } catch (err) {
-    return err;
+    if (err instanceof Error) {
+      return err;
+    }
+
+    return new Error(`Unknown error occured: ${err}`);
   }
 }
 

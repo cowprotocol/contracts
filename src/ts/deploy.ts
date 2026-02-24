@@ -32,7 +32,7 @@ export type ContractName = typeof CONTRACT_NAMES[keyof typeof CONTRACT_NAMES];
  */
 export type DeploymentArguments<T> =
   T extends typeof CONTRACT_NAMES.authenticator
-    ? never
+    ? []
     : T extends typeof CONTRACT_NAMES.settlement
     ? [string, string]
     : unknown[];

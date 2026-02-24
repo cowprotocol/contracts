@@ -1,9 +1,10 @@
+import "@nomicfoundation/hardhat-verify";
 import "@nomiclabs/hardhat-waffle";
+import "@tenderly/hardhat-tenderly";
+import "hardhat-cannon";
 import "hardhat-deploy";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
-import "@tenderly/hardhat-tenderly";
-import "@nomicfoundation/hardhat-verify";
 
 import dotenv from "dotenv";
 import type { HttpNetworkUserConfig } from "hardhat/types";
@@ -64,6 +65,23 @@ switch (MOCHA_CONF) {
 
 setupTasks();
 
+const hardhatDeployProxyOverrides = {
+  version: "0.7.6",
+  settings: {
+    metadata: {
+      bytecodeHash: "ipfs",
+      useLiteralContent: true,
+    },
+    libraries: {},
+    optimizer: {
+      runs: 2000000,
+      enabled: true,
+    },
+    evmVersion: "istanbul",
+    remappings: [],
+  },
+};
+
 export default {
   mocha,
   paths: {
@@ -88,6 +106,10 @@ export default {
         version: "0.4.11",
       },
     ],
+    overrides: {
+      "solc_0.7/proxy/Proxy.sol": hardhatDeployProxyOverrides,
+      "solc_0.7/proxy/EIP173Proxy.sol": hardhatDeployProxyOverrides,
+    },
   },
   networks: {
     hardhat: {

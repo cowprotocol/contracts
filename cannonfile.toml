@@ -1,0 +1,46 @@
+name = "cow-settlement"
+version = "2.0.2"
+
+[var.main]
+salt = "<%= formatBytes32String('Mattresses in Berlin!') %>"
+owner = "0x6Fb5916c0f57f88004d5b5EB25f6f4D77353a1eD"
+manager = "0x6Fb5916c0f57f88004d5b5EB25f6f4D77353a1eD"
+balancerVaultAddress = "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
+
+[deploy.AuthenticatorImplementation]
+artifact = "GPv2AllowListAuthentication"
+create2 = true
+ifExists = "continue"
+salt = "<%= settings.salt %>"
+
+[deploy.Authenticator]
+artifact = "EIP173Proxy"
+create2 = true
+ifExists = "continue"
+salt = "<%= settings.salt %>"
+args = [
+    "<%= contracts.AuthenticatorImplementation.address %>",
+    "<%= settings.owner %>",
+    "<%= encodeFunctionData({ abi: contracts.AuthenticatorImplementation.abi, functionName: 'initializeManager', args: [settings.manager] }) %>"
+]
+
+abiOf = ["AuthenticatorImplementation"]
+
+# Currently Cannon doesn't have a way to specify the deployment of a contract at the same time as another because there is no "action" being taken.
+# This has some minor negative side effects that will need to be accounted:
+# * VaultRelayer cannot be automatically verified by Cannon
+# * The contract will not appear in deployment manifests/informations, even though it exists
+# This type of feature is supported in `invoke` style steps so it could probably be added as well to eliminate this issue
+# I leave this action here for now as evidence of the issue and what it might look like in config after its fixed
+#[deploy.VaultRelayer]
+#artifact = "GPv2VaultRelayer"
+#create2 = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
+#salt = "<%= settings.salt %>"
+#args = ["<%= settings.balancerVaultAddress %>"]
+
+[deploy.Settlement]
+artifact = "GPv2Settlement"
+create2 = true
+ifExists = "continue"
+salt = "<%= settings.salt %>"
+args = ["<%= contracts.Authenticator.address %>", "<%= settings.balancerVaultAddress %>"]
