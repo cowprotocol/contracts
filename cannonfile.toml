@@ -1,5 +1,5 @@
 name = "cow-settlement"
-version = "2.0.2"
+version = "2.0.3"
 
 [var.main]
 salt = "<%= formatBytes32String('Mattresses in Berlin!') %>"

@@ -1,3 +1,4 @@
+yarn run v1.22.22
 $ /home/kaze/code/contracts/node_modules/.bin/cannon inspect cow-settlement:latest --chain-id 13370 --out misc-json
 {
   "artifacts": {
@@ -970,4 +971,4 @@ $ /home/kaze/code/contracts/node_modules/.bin/cannon inspect cow-settlement:late
       }
     }
   }
-}
+}Done in 0.56s.

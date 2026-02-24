@@ -1,0 +1,33 @@
+name: Cannon Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify-cannon-record:
+    strategy:
+      matrix:
+        node-version: [20.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 #v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 #v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install
+      - run: pnpm cannon:record
+      - name: Verify no unexpected changes from cannon:record
+        run: |
+          if ! git diff --quiet; then
+            echo "Error: Please run `pnpm cannon:record` to sync the repository state with the published cannon package"
+            git diff
+            exit 1
+          fi
