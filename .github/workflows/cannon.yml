@@ -2,7 +2,7 @@ name: Cannon Build
 
 on:
   push:
-    branches: [main]
+    branches: [main, new-chain-deployments]
   pull_request:
 
 jobs:
