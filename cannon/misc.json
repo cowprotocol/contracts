@@ -1,4 +1,3 @@
-$ /home/kaze/code/contracts/node_modules/.bin/cannon inspect cow-settlement:latest --chain-id 13370 --out misc-json
 {
   "artifacts": {
     "GPv2AllowListAuthentication": {
