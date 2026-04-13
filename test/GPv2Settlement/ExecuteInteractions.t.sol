@@ -19,9 +19,7 @@ contract ExecuteInteractions is Helper {
             callData: abi.encodeCall(EventEmitter.emitEvent, (2))
         });
         interactions[2] = GPv2Interaction.Data({
-            target: address(new EventEmitter()),
-            value: 0,
-            callData: abi.encodeCall(EventEmitter.emitEvent, (3))
+            target: address(new EventEmitter()), value: 0, callData: abi.encodeCall(EventEmitter.emitEvent, (3))
         });
 
         deal(address(settlement), 1 ether);
@@ -48,14 +46,10 @@ contract ExecuteInteractions is Helper {
 
         GPv2Interaction.Data[] memory interactions = new GPv2Interaction.Data[](2);
         interactions[0] = GPv2Interaction.Data({
-            target: alwaysPasses,
-            value: 0,
-            callData: abi.encodeCall(InteractionHelper.alwaysPasses, ())
+            target: alwaysPasses, value: 0, callData: abi.encodeCall(InteractionHelper.alwaysPasses, ())
         });
         interactions[0] = GPv2Interaction.Data({
-            target: alwaysReverts,
-            value: 0,
-            callData: abi.encodeCall(InteractionHelper.alwaysReverts, ())
+            target: alwaysReverts, value: 0, callData: abi.encodeCall(InteractionHelper.alwaysReverts, ())
         });
 
         vm.expectRevert("mock revert");
@@ -90,9 +84,7 @@ contract ExecuteInteractions is Helper {
         deal(address(settlement), value);
         GPv2Interaction.Data[] memory interactions = new GPv2Interaction.Data[](1);
         interactions[0] = GPv2Interaction.Data({
-            target: target,
-            value: value,
-            callData: abi.encodeCall(InteractionHelper.someFunction, (parameter))
+            target: target, value: value, callData: abi.encodeCall(InteractionHelper.someFunction, (parameter))
         });
         vm.expectEmit(address(settlement));
         emit GPv2Settlement.Interaction(target, value, InteractionHelper.someFunction.selector);

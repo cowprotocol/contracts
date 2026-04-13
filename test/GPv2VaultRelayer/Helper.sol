@@ -3,7 +3,11 @@ pragma solidity ^0.8;
 
 import {Test} from "forge-std/Test.sol";
 
-import {GPv2Order, GPv2Transfer, GPv2VaultRelayer, IERC20, IVault} from "src/contracts/GPv2VaultRelayer.sol";
+import {IERC20} from "src/contracts/interfaces/IERC20.sol";
+import {IVault} from "src/contracts/interfaces/IVault.sol";
+import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
+import {GPv2Transfer} from "src/contracts/libraries/GPv2Transfer.sol";
+import {GPv2VaultRelayer} from "src/contracts/GPv2VaultRelayer.sol";
 
 contract Helper is Test {
     address payable internal creator = payable(makeAddr("GPv2VaultRelayer.Helper creator"));
@@ -39,18 +43,12 @@ contract BatchSwapWithFeeHelper is Helper {
             swaps: new IVault.BatchSwapStep[](0),
             tokens: new IERC20[](0),
             funds: IVault.FundManagement({
-                sender: address(0),
-                fromInternalBalance: true,
-                recipient: payable(address(0)),
-                toInternalBalance: true
+                sender: address(0), fromInternalBalance: true, recipient: payable(address(0)), toInternalBalance: true
             }),
             limits: new int256[](0),
             deadline: 0,
             feeTransfer: GPv2Transfer.Data({
-                account: address(0),
-                token: IERC20(address(0)),
-                amount: 0,
-                balance: GPv2Order.BALANCE_ERC20
+                account: address(0), token: IERC20(address(0)), amount: 0, balance: GPv2Order.BALANCE_ERC20
             })
         });
     }

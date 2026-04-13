@@ -46,7 +46,7 @@ contract ExtractOrder is Helper {
     }
 
     function testFuzz_should_round_trip_encode_order_data(Fuzzed memory fuzzed) public {
-        OrderLib.Flags[] memory flags = OrderLib.ALL_FLAGS();
+        OrderLib.Flags[] memory flags = OrderLib.allFlags();
 
         for (uint256 i = 0; i < flags.length; i++) {
             GPv2Order.Data memory order = GPv2Order.Data({
@@ -73,7 +73,7 @@ contract ExtractOrder is Helper {
         }
     }
 
-    function should_revert_for_invalid_token_indices(GPv2Order.Data memory order, IERC20[] memory tokens) internal {
+    function shouldRevertForInvalidTokenIndices(GPv2Order.Data memory order, IERC20[] memory tokens) internal {
         SettlementEncoder.State storage encoder = SettlementEncoder.makeSettlementEncoder();
         encoder.signEncodeTrade(vm, trader, order, domainSeparator, GPv2Signing.Scheme.Eip712, 0);
         // TODO: once Foundry supports catching EVM errors, require that this
@@ -87,13 +87,13 @@ contract ExtractOrder is Helper {
         GPv2Order.Data memory order = sampleOrder();
         IERC20[] memory tokens = new IERC20[](1);
         tokens[0] = order.buyToken;
-        should_revert_for_invalid_token_indices(order, tokens);
+        shouldRevertForInvalidTokenIndices(order, tokens);
     }
 
     function test_should_revert_for_invalid_buy_token_indices() public {
         GPv2Order.Data memory order = sampleOrder();
         IERC20[] memory tokens = new IERC20[](1);
         tokens[0] = order.sellToken;
-        should_revert_for_invalid_token_indices(order, tokens);
+        shouldRevertForInvalidTokenIndices(order, tokens);
     }
 }

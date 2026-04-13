@@ -11,6 +11,7 @@ contract NetworksJson is Script {
     }
 
     function addressByChainId(string memory contractName, uint256 chainId) public view returns (address) {
+        /// forge-lint: disable-next-line(unsafe-cheatcode)
         string memory networksJson = vm.readFile(PATH);
         return
             vm.parseJsonAddress(networksJson, string.concat(".", contractName, ".", vm.toString(chainId), ".address"));

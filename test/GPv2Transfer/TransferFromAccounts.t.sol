@@ -62,7 +62,8 @@ contract TransferFromAccounts is Helper {
         uint256 numVaultBalanceLocations = 2;
         uint256 numTraders = 42;
         GPv2Transfer.Data[] memory transfers = new GPv2Transfer.Data[](numTraders);
-        IVault.UserBalanceOp[] memory expectedVaultOps = new IVault.UserBalanceOp[](
+        IVault.UserBalanceOp[] memory expectedVaultOps = new IVault
+            .UserBalanceOp[](
             numTraders / numBalanceLocations * numVaultBalanceLocations + numTraders % numBalanceLocations
         );
         uint256 erc20OpCount = 0;
@@ -84,16 +85,16 @@ contract TransferFromAccounts is Helper {
                     address(token), abi.encodeCall(IERC20.transferFrom, (traderi, recipient, amount)), abi.encode(true)
                 );
             } else {
-                expectedVaultOps[i / numBalanceLocations * numVaultBalanceLocations + (isExternal ? 0 : 1)] = IVault
-                    .UserBalanceOp({
-                    kind: isExternal
-                        ? IVault.UserBalanceOpKind.TRANSFER_EXTERNAL
-                        : IVault.UserBalanceOpKind.WITHDRAW_INTERNAL,
-                    asset: token,
-                    amount: amount,
-                    sender: traderi,
-                    recipient: recipient
-                });
+                expectedVaultOps[i / numBalanceLocations * numVaultBalanceLocations + (isExternal ? 0 : 1)] =
+                    IVault.UserBalanceOp({
+                        kind: isExternal
+                            ? IVault.UserBalanceOpKind.TRANSFER_EXTERNAL
+                            : IVault.UserBalanceOpKind.WITHDRAW_INTERNAL,
+                        asset: token,
+                        amount: amount,
+                        sender: traderi,
+                        recipient: recipient
+                    });
             }
         }
 
@@ -108,28 +109,25 @@ contract TransferFromAccounts is Helper {
         executor.transferFromAccountsTest(vault, transfers, recipient);
     }
 
-    function reverts_when_mistakenly_trying_to_transfer_Ether(bytes32 balanceLocation) private {
+    function revertsWhenMistakenlyTryingToTransferEther(bytes32 balanceLocation) private {
         GPv2Transfer.Data[] memory transfers = new GPv2Transfer.Data[](1);
         transfers[0] = GPv2Transfer.Data({
-            account: trader,
-            token: IERC20(GPv2Transfer.BUY_ETH_ADDRESS),
-            amount: amount,
-            balance: balanceLocation
+            account: trader, token: IERC20(GPv2Transfer.BUY_ETH_ADDRESS), amount: amount, balance: balanceLocation
         });
         vm.expectRevert("GPv2: cannot transfer native ETH");
         executor.transferFromAccountsTest(vault, transfers, recipient);
     }
 
-    function test_reverts_when_mistakenly_trying_to_transfer_Ether_erc20() public {
-        reverts_when_mistakenly_trying_to_transfer_Ether(GPv2Order.BALANCE_ERC20);
+    function test_revertsWhenMistakenlyTryingToTransferEther_erc20() public {
+        revertsWhenMistakenlyTryingToTransferEther(GPv2Order.BALANCE_ERC20);
     }
 
-    function test_reverts_when_mistakenly_trying_to_transfer_Ether_internal() public {
-        reverts_when_mistakenly_trying_to_transfer_Ether(GPv2Order.BALANCE_INTERNAL);
+    function test_revertsWhenMistakenlyTryingToTransferEther_internal() public {
+        revertsWhenMistakenlyTryingToTransferEther(GPv2Order.BALANCE_INTERNAL);
     }
 
-    function test_reverts_when_mistakenly_trying_to_transfer_Ether_external() public {
-        reverts_when_mistakenly_trying_to_transfer_Ether(GPv2Order.BALANCE_EXTERNAL);
+    function test_revertsWhenMistakenlyTryingToTransferEther_external() public {
+        revertsWhenMistakenlyTryingToTransferEther(GPv2Order.BALANCE_EXTERNAL);
     }
 
     function test_reverts_on_failed_ERC20_transfer() public {

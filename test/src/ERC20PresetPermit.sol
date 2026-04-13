@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-// solhint-disable-next-line compiler-version
-pragma solidity ^0.7.6;
+pragma solidity ^0.8;
 
-import "@openzeppelin/contracts/drafts/ERC20Permit.sol";
-import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 contract ERC20PresetPermit is ERC20Permit {
     constructor(string memory symbol) ERC20(symbol, symbol) ERC20Permit(symbol) 

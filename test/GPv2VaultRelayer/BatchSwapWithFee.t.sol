@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.0;
 
-import {GPv2Order, GPv2Transfer, IERC20, IVault} from "src/contracts/GPv2VaultRelayer.sol";
+import {IERC20} from "src/contracts/interfaces/IERC20.sol";
+import {IVault} from "src/contracts/interfaces/IVault.sol";
+import {GPv2Order} from "src/contracts/libraries/GPv2Order.sol";
+import {GPv2Transfer} from "src/contracts/libraries/GPv2Transfer.sol";
 
 import {BatchSwapWithFeeHelper} from "./Helper.sol";
 
@@ -13,31 +16,23 @@ contract BatchSwapWithFee is BatchSwapWithFeeHelper {
     }
 
     function test_performs_swaps_given_in() public {
-        performs_swaps_for_swap_kind(IVault.SwapKind.GIVEN_IN);
+        performsSwapsForSwapKind(IVault.SwapKind.GIVEN_IN);
     }
 
     function test_performs_swaps_given_out() public {
-        performs_swaps_for_swap_kind(IVault.SwapKind.GIVEN_OUT);
+        performsSwapsForSwapKind(IVault.SwapKind.GIVEN_OUT);
     }
 
-    function performs_swaps_for_swap_kind(IVault.SwapKind kind) private {
+    function performsSwapsForSwapKind(IVault.SwapKind kind) private {
         address trader0 = makeAddr("trader 0");
         address trader1 = makeAddr("trader 1");
 
         IVault.BatchSwapStep[] memory swaps = new IVault.BatchSwapStep[](2);
         swaps[0] = IVault.BatchSwapStep({
-            poolId: keccak256("pool id 1"),
-            assetInIndex: 0,
-            assetOutIndex: 1,
-            amount: 42 ether,
-            userData: hex"010203"
+            poolId: keccak256("pool id 1"), assetInIndex: 0, assetOutIndex: 1, amount: 42 ether, userData: hex"010203"
         });
         swaps[1] = IVault.BatchSwapStep({
-            poolId: keccak256("pool id 2"),
-            assetInIndex: 1,
-            assetOutIndex: 2,
-            amount: 1337 ether,
-            userData: hex"abcd"
+            poolId: keccak256("pool id 2"), assetInIndex: 1, assetOutIndex: 2, amount: 1337 ether, userData: hex"abcd"
         });
 
         IERC20[] memory tokens = new IERC20[](3);
@@ -46,10 +41,7 @@ contract BatchSwapWithFee is BatchSwapWithFeeHelper {
         tokens[2] = IERC20(makeAddr("token 2"));
 
         IVault.FundManagement memory funds = IVault.FundManagement({
-            sender: trader0,
-            fromInternalBalance: false,
-            recipient: payable(trader1),
-            toInternalBalance: true
+            sender: trader0, fromInternalBalance: false, recipient: payable(trader1), toInternalBalance: true
         });
 
         int256[] memory limits = new int256[](3);

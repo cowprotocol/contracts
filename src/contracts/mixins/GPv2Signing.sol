@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity >=0.7.6 <0.9.0;
 
-import "../interfaces/GPv2EIP1271.sol";
-import "../libraries/GPv2Order.sol";
-import "../libraries/GPv2Trade.sol";
+import {EIP1271Verifier, GPv2EIP1271} from "../interfaces/GPv2EIP1271.sol";
+import {IERC20} from "../interfaces/IERC20.sol";
+import {GPv2Order} from "../libraries/GPv2Order.sol";
+import {GPv2Trade} from "../libraries/GPv2Trade.sol";
 
 /// @title Gnosis Protocol v2 Signing Library.
 /// @author Gnosis Developers
@@ -50,7 +51,7 @@ abstract contract GPv2Signing {
     /// separator is computed following the EIP-712 standard and has replay
     /// protection mixed in so that signed orders are only valid for specific
     /// GPv2 contracts.
-    bytes32 public immutable domainSeparator;
+    bytes32 public immutable DOMAIN_SEPARATOR;
 
     /// @dev Storage indicating whether or not an order has been signed by a
     /// particular address.
@@ -69,7 +70,7 @@ abstract contract GPv2Signing {
             chainId := chainid()
         }
 
-        domainSeparator = keccak256(
+        DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 DOMAIN_TYPE_HASH,
                 DOMAIN_NAME,
@@ -153,7 +154,7 @@ abstract contract GPv2Signing {
         Scheme signingScheme,
         bytes calldata signature
     ) internal view returns (bytes32 orderDigest, address owner) {
-        orderDigest = order.hash(domainSeparator);
+        orderDigest = order.hash(DOMAIN_SEPARATOR);
         if (signingScheme == Scheme.Eip712) {
             owner = recoverEip712Signer(orderDigest, signature);
         } else if (signingScheme == Scheme.EthSign) {
@@ -252,9 +253,13 @@ abstract contract GPv2Signing {
         // `"\x19Ethereum Signed Message:\n" || length || data`, where
         // the length is a constant (32 bytes) and the data is defined as:
         // `orderDigest`.
-        bytes32 ethsignDigest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", orderDigest)
-        );
+        bytes32 ethsignDigest;
+        assembly {
+            let freeMemoryPointer := mload(0x40)
+            mstore(freeMemoryPointer, "\x19Ethereum Signed Message:\n32")
+            mstore(add(freeMemoryPointer, 28), orderDigest)
+            ethsignDigest := keccak256(freeMemoryPointer, 60)
+        }
 
         owner = ecdsaRecover(ethsignDigest, encodedSignature);
     }

@@ -2,6 +2,7 @@
 pragma solidity ^0.8;
 
 import {GPv2Order, GPv2Settlement, GPv2Signing, IERC20, IVault} from "src/contracts/GPv2Settlement.sol";
+import {SafeCast} from "src/contracts/libraries/SafeCast.sol";
 
 import {Helper} from "../Helper.sol";
 
@@ -14,21 +15,21 @@ abstract contract Variant is Helper {
     IERC20 private sellToken = IERC20(makeAddr("GPv2Settlement.Swap.Variants sell token"));
     IERC20 private buyToken = IERC20(makeAddr("GPv2Settlement.Swap.Variants buy token"));
 
-    uint256 constant sellAmount = 4.2 ether;
-    uint256 constant buyAmount = 13.37 ether;
+    uint256 constant SELL_AMOUNT = 4.2 ether;
+    uint256 constant BUY_AMOUNT = 13.37 ether;
 
-    bytes32 immutable kind;
+    bytes32 immutable KIND;
 
     constructor(bytes32 _kind) {
-        kind = _kind;
+        KIND = _kind;
     }
 
     function defaultOrder() private view returns (GPv2Order.Data memory) {
         return GPv2Order.Data({
             sellToken: sellToken,
             buyToken: buyToken,
-            sellAmount: sellAmount,
-            buyAmount: buyAmount,
+            sellAmount: SELL_AMOUNT,
+            buyAmount: BUY_AMOUNT,
             receiver: address(0),
             validTo: 0x01020304,
             appData: keccak256("GPv2Settlement.Swap.Variants default app data"),
@@ -36,7 +37,7 @@ abstract contract Variant is Helper {
             sellTokenBalance: GPv2Order.BALANCE_INTERNAL,
             buyTokenBalance: GPv2Order.BALANCE_ERC20,
             partiallyFillable: true,
-            kind: kind
+            kind: KIND
         });
     }
 
@@ -75,7 +76,7 @@ abstract contract Variant is Helper {
     function test_executes_order_against_swap() public {
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap();
 
-        mockBalancerVaultCallsReturn(int256(sellAmount), -int256(buyAmount));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(SELL_AMOUNT), -SafeCast.toInt256(BUY_AMOUNT));
 
         vm.prank(solver);
         swap(encodedSwap);
@@ -84,12 +85,12 @@ abstract contract Variant is Helper {
     function test_updates_the_filled_amount_to_be_the_full_sell_or_buy_amount() public {
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap();
 
-        mockBalancerVaultCallsReturn(int256(sellAmount), -int256(buyAmount));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(SELL_AMOUNT), -SafeCast.toInt256(BUY_AMOUNT));
 
         vm.prank(solver);
         swap(encodedSwap);
 
-        uint256 expectedFilledAmount = (kind == GPv2Order.KIND_SELL) ? sellAmount : buyAmount;
+        uint256 expectedFilledAmount = (KIND == GPv2Order.KIND_SELL) ? SELL_AMOUNT : BUY_AMOUNT;
         assertEq(settlement.filledAmount(defaultOrderUid()), expectedFilledAmount);
     }
 
@@ -122,38 +123,38 @@ abstract contract Variant is Helper {
     function test_reverts_when_not_exactly_trading_expected_amount() public {
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap();
 
-        mockBalancerVaultCallsReturn(int256(sellAmount) - 1, -(int256(buyAmount) + 1));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(SELL_AMOUNT) - 1, -(SafeCast.toInt256(BUY_AMOUNT) + 1));
 
-        string memory kindString = (kind == GPv2Order.KIND_SELL) ? "sell" : "buy";
+        string memory kindString = (KIND == GPv2Order.KIND_SELL) ? "sell" : "buy";
         vm.prank(solver);
         vm.expectRevert(bytes(string.concat("GPv2: ", kindString, " amount not respected")));
         swap(encodedSwap);
     }
 
     function test_reverts_when_specified_limit_amount_does_not_satisfy_expected_price() public {
-        uint256 limitAmount = kind == GPv2Order.KIND_SELL
-            ? buyAmount - 1 // receive slightly less buy token
-            : sellAmount + 1; // pay slightly more sell token;
+        uint256 limitAmount = KIND == GPv2Order.KIND_SELL
+            ? BUY_AMOUNT - 1  // receive slightly less buy token
+            : SELL_AMOUNT + 1; // pay slightly more sell token;
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap(limitAmount);
 
-        mockBalancerVaultCallsReturn(int256(sellAmount), -int256(buyAmount));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(SELL_AMOUNT), -SafeCast.toInt256(BUY_AMOUNT));
 
         vm.prank(solver);
-        vm.expectRevert(bytes((kind == GPv2Order.KIND_SELL) ? "GPv2: limit too low" : "GPv2: limit too high"));
+        vm.expectRevert(bytes((KIND == GPv2Order.KIND_SELL) ? "GPv2: limit too low" : "GPv2: limit too high"));
         swap(encodedSwap);
     }
 
     function test_emits_a_trade_event() public {
         SwapEncoder.EncodedSwap memory encodedSwap = encodedDefaultSwap();
 
-        uint256 executedSellAmount = sellAmount;
-        uint256 executedBuyAmount = buyAmount;
-        if (kind == GPv2Order.KIND_SELL) {
+        uint256 executedSellAmount = SELL_AMOUNT;
+        uint256 executedBuyAmount = BUY_AMOUNT;
+        if (KIND == GPv2Order.KIND_SELL) {
             executedBuyAmount = executedBuyAmount * 2;
         } else {
             executedSellAmount = executedSellAmount / 2;
         }
-        mockBalancerVaultCallsReturn(int256(executedSellAmount), -int256(executedBuyAmount));
+        mockBalancerVaultCallsReturn(SafeCast.toInt256(executedSellAmount), -SafeCast.toInt256(executedBuyAmount));
 
         vm.prank(solver);
         vm.expectEmit(address(settlement));

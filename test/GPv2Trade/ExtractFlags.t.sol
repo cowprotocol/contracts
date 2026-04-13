@@ -13,11 +13,11 @@ contract ExtractOrder is Helper {
     using SettlementEncoder for SettlementEncoder.State;
 
     function test_should_extract_all_supported_order_flags() public view {
-        OrderLib.Flags[] memory flags = OrderLib.ALL_FLAGS();
+        OrderLib.Flags[] memory flags = OrderLib.allFlags();
 
         for (uint256 i = 0; i < flags.length; i++) {
             OrderLib.Flags memory extractedFlags =
-                executor.extractFlagsStructuredTest(OrderLib.toUint256(flags[i])).flags;
+            executor.extractFlagsStructuredTest(OrderLib.toUint256(flags[i])).flags;
             assertEq(extractedFlags.kind, flags[i].kind);
             assertEq(extractedFlags.partiallyFillable, flags[i].partiallyFillable);
             assertEq(extractedFlags.sellTokenBalance, flags[i].sellTokenBalance);
@@ -27,14 +27,18 @@ contract ExtractOrder is Helper {
 
     function test_should_accept_0b00_and_0b01_for_ERC20_sell_token_balance_flag() public view {
         uint256 sellTokenBalanceOffset = 2;
+        // shift order is correct: creating flag values at specific bit positions
+        // forge-lint: disable-next-line(incorrect-shift)
         OrderLib.Flags memory flags0b00 = executor.extractFlagsStructuredTest(0 << sellTokenBalanceOffset).flags;
         assertEq(flags0b00.sellTokenBalance, GPv2Order.BALANCE_ERC20);
+        // shift order is correct: creating flag values at specific bit positions
+        // forge-lint: disable-next-line(incorrect-shift)
         OrderLib.Flags memory flags0b01 = executor.extractFlagsStructuredTest(1 << sellTokenBalanceOffset).flags;
         assertEq(flags0b01.sellTokenBalance, GPv2Order.BALANCE_ERC20);
     }
 
     function test_should_extract_all_supported_signing_schemes() public view {
-        GPv2Signing.Scheme[4] memory schemes = SignLib.ALL_SIGNING_SCHEMES();
+        GPv2Signing.Scheme[4] memory schemes = SignLib.allSigningSchemes();
         for (uint256 i = 0; i < schemes.length; i++) {
             TradeLib.Flags memory flags = TradeLib.Flags({
                 signingScheme: schemes[i],

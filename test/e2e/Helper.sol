@@ -18,6 +18,9 @@ import {WETH9} from "./WETH9.sol";
 import {SettlementEncoder} from "test/libraries/encoders/SettlementEncoder.sol";
 import {SwapEncoder} from "test/libraries/encoders/SwapEncoder.sol";
 
+import {EIP173Proxy} from "../src/EIP173Proxy.sol";
+import {ERC20Mintable} from "./ERC20Mintable.sol";
+
 address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
@@ -60,7 +63,7 @@ abstract contract Helper is Test {
     address internal solver;
     Vm.Wallet internal trader;
 
-    bool immutable isForked;
+    bool immutable IS_FORKED;
     uint256 forkId;
 
     WETH9 weth;
@@ -68,11 +71,11 @@ abstract contract Helper is Test {
     bytes32 constant SALT = "Mattresses in Berlin!";
 
     constructor(bool _isForked) {
-        isForked = _isForked;
+        IS_FORKED = _isForked;
     }
 
     function setUp() public virtual {
-        if (isForked) {
+        if (IS_FORKED) {
             string memory forkUrl;
 
             try vm.envString("FORK_URL") returns (string memory url) {
@@ -100,8 +103,6 @@ abstract contract Helper is Test {
         );
         authenticator = allowList;
 
-        (balancerVaultAuthorizer, vault) = _deployBalancerVault();
-
         // Deploy the settlement contract
         settlement = new GPv2Settlement{salt: SALT}(authenticator, vault);
         vaultRelayer = address(settlement.vaultRelayer());
@@ -120,7 +121,7 @@ abstract contract Helper is Test {
         swapEncoder = SwapEncoder.makeSwapEncoder();
 
         // Set the domain separator
-        domainSeparator = settlement.domainSeparator();
+        domainSeparator = settlement.DOMAIN_SEPARATOR();
 
         // Create wallets
         trader = vm.createWallet("E2E.Helper: trader");
@@ -143,23 +144,6 @@ abstract contract Helper is Test {
         });
     }
 
-    function _deployBalancerVault() internal returns (address, IBalancerVault) {
-        if (isForked) {
-            IBalancerVault balancerVault = IBalancerVault(BALANCER_VAULT);
-            address authorizer = balancerVault.getAuthorizer();
-            return (authorizer, balancerVault);
-        } else {
-            bytes memory authorizerInitCode = abi.encodePacked(_getBalancerBytecode("Authorizer"), abi.encode(owner));
-            address authorizer = _create(authorizerInitCode, 0);
-
-            bytes memory vaultInitCode =
-                abi.encodePacked(_getBalancerBytecode("Vault"), abi.encode(authorizer, address(weth), 0, 0));
-            address deployedVault = _create(vaultInitCode, 0);
-
-            return (authorizer, IBalancerVault(deployedVault));
-        }
-    }
-
     function _grantBalancerRolesToRelayer(address authorizer, address deployedVault, address relayer) internal {
         _grantBalancerActionRole(
             authorizer, deployedVault, relayer, "manageUserBalance((uint8,address,uint256,address,address)[])"
@@ -172,9 +156,7 @@ abstract contract Helper is Test {
         );
     }
 
-    function _grantBalancerActionRole(address authorizer, address balVault, address to, string memory action)
-        internal
-    {
+    function _grantBalancerActionRole(address authorizer, address balVault, address to, string memory action) internal {
         bytes32 actionId = _getActionId(action, balVault);
         vm.mockCall(
             address(authorizer), abi.encodeCall(IAuthorizer.canPerform, (actionId, to, balVault)), abi.encode(true)
@@ -183,40 +165,28 @@ abstract contract Helper is Test {
 
     function _getActionId(string memory fnDef, address vaultAddr) internal pure returns (bytes32) {
         bytes32 hash = keccak256(bytes(fnDef));
+        // casting to 'bytes4' is safe because we're intentionally extracting the function selector (first 4 bytes)
+        // forge-lint: disable-next-line(unsafe-typecast)
         bytes4 selector = bytes4(hash);
         return keccak256(abi.encodePacked(uint256(uint160(vaultAddr)), selector));
     }
 
     function _getBalancerBytecode(string memory artifactName) internal view returns (bytes memory) {
+        /// forge-lint: disable-next-line(unsafe-cheatcode)
         string memory data = vm.readFile(string(abi.encodePacked("balancer/", artifactName, ".json")));
         return vm.parseJsonBytes(data, ".bytecode");
     }
 
-    function _create(bytes memory initCode, uint256 value) internal returns (address deployed) {
-        assembly ("memory-safe") {
-            deployed := create(value, add(initCode, 0x20), mload(initCode))
-        }
-        require(deployed != address(0), "deployment failed");
-    }
-
-    function _create2(bytes memory initCode, uint256 value, bytes32 salt) internal returns (address deployed) {
-        assembly ("memory-safe") {
-            deployed := create2(value, add(initCode, 0x20), mload(initCode), salt)
-        }
-        require(deployed != address(0), "deployment failed");
-    }
-
     function deployMintableErc20(string memory name, string memory symbol) internal returns (IERC20Mintable token) {
-        // need to use like this because OZ requires ^0.7 and tests are on ^0.8
-        bytes memory initCode = abi.encodePacked(vm.getCode("ERC20Mintable"), abi.encode(name, symbol));
-        token = IERC20Mintable(_create(initCode, 0));
+        // the ERC20Mintable constructed from openzeppelin and derived from the interface use a different IERC20,
+        // so its easiest just to cast here.
+        return IERC20Mintable(address(new ERC20Mintable(name, symbol)));
     }
 
     function deployProxy(address implAddress, address ownerAddress, bytes memory data, bytes32 salt)
         internal
         returns (address proxy)
     {
-        proxy =
-            _create2(abi.encodePacked(vm.getCode("EIP173Proxy"), abi.encode(implAddress, ownerAddress, data)), 0, salt);
+        return address(new EIP173Proxy{salt: salt}(implAddress, ownerAddress, data));
     }
 }

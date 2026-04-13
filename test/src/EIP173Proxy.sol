@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // solhint-disable-next-line compiler-version
-pragma solidity ^0.7;
+pragma solidity ^0.8;
 
 import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
 
@@ -16,13 +16,21 @@ contract EIP173Proxy is Proxy {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     modifier onlyOwner() {
-        require(msg.sender == _owner(), "NOT_AUTHORIZED");
+        _onlyOwner();
         _;
+    }
+
+    function _onlyOwner() internal view {
+        require(msg.sender == _owner(), "NOT_AUTHORIZED");
     }
 
     constructor(address implAddress, address ownerAddress, bytes memory data) {
         _setOwner(ownerAddress);
         _setImplementation(implAddress, data);
+    }
+
+    receive() external payable {
+        revert("not supported");
     }
 
     function owner() external view returns (address) {

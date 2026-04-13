@@ -67,6 +67,7 @@ contract StorageAccessible {
             calldataPayload
         );
         // solhint-disable-next-line avoid-low-level-calls
+        // forge-lint: disable-next-line(unchecked-call)
         (, response) = address(this).call(innerCall);
         bool innerSuccess = response[response.length - 1] == 0x01;
         setLength(response, response.length - 1);

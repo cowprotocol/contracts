@@ -2,23 +2,24 @@
 pragma solidity >=0.7.6 <0.9.0;
 pragma abicoder v2;
 
-import "./GPv2VaultRelayer.sol";
-import "./interfaces/GPv2Authentication.sol";
-import "./interfaces/IERC20.sol";
-import "./interfaces/IVault.sol";
-import "./libraries/GPv2Interaction.sol";
-import "./libraries/GPv2Order.sol";
-import "./libraries/GPv2Trade.sol";
-import "./libraries/GPv2Transfer.sol";
-import "./libraries/SafeCast.sol";
-import "./libraries/SafeMath.sol";
-import "./mixins/GPv2Signing.sol";
-import "./mixins/ReentrancyGuard.sol";
-import "./mixins/StorageAccessible.sol";
+import {GPv2VaultRelayer} from "./GPv2VaultRelayer.sol";
+import {GPv2Authentication} from "./interfaces/GPv2Authentication.sol";
+import {IGPv2Settlement} from "./interfaces/IGPv2Settlement.sol";
+import {IERC20} from "./interfaces/IERC20.sol";
+import {IVault} from "./interfaces/IVault.sol";
+import {GPv2Interaction} from "./libraries/GPv2Interaction.sol";
+import {GPv2Order} from "./libraries/GPv2Order.sol";
+import {GPv2Trade} from "./libraries/GPv2Trade.sol";
+import {GPv2Transfer} from "./libraries/GPv2Transfer.sol";
+import {SafeCast} from "./libraries/SafeCast.sol";
+import {SafeMath} from "./libraries/SafeMath.sol";
+import {GPv2Signing} from "./mixins/GPv2Signing.sol";
+import {ReentrancyGuard} from "./mixins/ReentrancyGuard.sol";
+import {StorageAccessible} from "./mixins/StorageAccessible.sol";
 
 /// @title Gnosis Protocol v2 Settlement Contract
 /// @author Gnosis Developers
-contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
+contract GPv2Settlement is IGPv2Settlement, GPv2Signing, ReentrancyGuard, StorageAccessible {
     using GPv2Order for bytes;
     using GPv2Transfer for IVault;
     using SafeCast for int256;
@@ -29,14 +30,17 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     /// That is, only authorized solvers have the ability to invoke settlements.
     /// Any valid authenticator implements an isSolver method called by the onlySolver
     /// modifier below.
-    GPv2Authentication public immutable authenticator;
+    /// forge-lint: disable-next-line(screaming-snake-case-immutable)
+    GPv2Authentication public immutable override authenticator;
 
     /// @dev The Balancer Vault the protocol used for managing user funds.
-    IVault public immutable vault;
+    /// forge-lint: disable-next-line(screaming-snake-case-immutable)
+    IVault public immutable override vault;
 
     /// @dev The Balancer Vault relayer which can interact on behalf of users.
     /// This contract is created during deployment
-    GPv2VaultRelayer public immutable vaultRelayer;
+    /// forge-lint: disable-next-line(screaming-snake-case-immutable)
+    GPv2VaultRelayer public immutable override vaultRelayer;
 
     /// @dev Map each user order by UID to the amount that has been filled so
     /// far. If this amount is larger than or equal to the amount traded in the
@@ -85,15 +89,23 @@ contract GPv2Settlement is GPv2Signing, ReentrancyGuard, StorageAccessible {
     /// @dev This modifier is called by settle function to block any non-listed
     /// senders from settling batches.
     modifier onlySolver() {
-        require(authenticator.isSolver(msg.sender), "GPv2: not a solver");
+        _onlySolver();
         _;
+    }
+
+    function _onlySolver() internal view {
+        require(authenticator.isSolver(msg.sender), "GPv2: not a solver");
     }
 
     /// @dev Modifier to ensure that an external function is only callable as a
     /// settlement interaction.
     modifier onlyInteraction() {
-        require(address(this) == msg.sender, "GPv2: not an interaction");
+        _onlyInteraction();
         _;
+    }
+
+    function _onlyInteraction() internal view {
+        require(address(this) == msg.sender, "GPv2: not an interaction");
     }
 
     /// @dev Settle the specified orders at a clearing price. Note that it is

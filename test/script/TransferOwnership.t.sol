@@ -61,9 +61,7 @@ contract TestTransferOwnership is Test {
     function test_reverts_if_no_proxy_at_target() public {
         address notAProxy = makeAddr("not a proxy");
         TransferOwnership.ScriptParams memory params = TransferOwnership.ScriptParams({
-            newOwner: makeAddr("some owner"),
-            authenticatorProxy: ERC173(notAProxy),
-            resetManager: false
+            newOwner: makeAddr("some owner"), authenticatorProxy: ERC173(notAProxy), resetManager: false
         });
 
         vm.expectRevert(bytes(string.concat("No code at target authenticator proxy ", vm.toString(notAProxy), ".")));
@@ -73,9 +71,7 @@ contract TestTransferOwnership is Test {
     function test_reverts_if_proxy_does_not_support_ERC173() public {
         address noERC173Proxy = makeAddr("proxy not supporting ERC173");
         TransferOwnership.ScriptParams memory params = TransferOwnership.ScriptParams({
-            newOwner: makeAddr("some owner"),
-            authenticatorProxy: ERC173(noERC173Proxy),
-            resetManager: false
+            newOwner: makeAddr("some owner"), authenticatorProxy: ERC173(noERC173Proxy), resetManager: false
         });
         vm.etch(noERC173Proxy, hex"1337");
         vm.mockCall(
@@ -97,9 +93,7 @@ contract TestTransferOwnership is Test {
     function test_reverts_if_proxy_reverts_on_supportsInterface() public {
         address revertingProxy = makeAddr("proxy reverting on calls to supportsInterface");
         TransferOwnership.ScriptParams memory params = TransferOwnership.ScriptParams({
-            newOwner: makeAddr("some owner"),
-            authenticatorProxy: ERC173(revertingProxy),
-            resetManager: false
+            newOwner: makeAddr("some owner"), authenticatorProxy: ERC173(revertingProxy), resetManager: false
         });
         vm.etch(revertingProxy, hex"1337");
         vm.mockCallRevert(
