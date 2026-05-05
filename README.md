@@ -124,12 +124,8 @@ A summary of coverage results are printed out to console. More detailed informat
 
 ## Known issues
 
-If a user creates an order with:
-- zero sell amount
-- zero buy amount
-- partially fillable set to false
+If a user creates an order with `sellAmount = 0` or `buyAmount = 0`, then this order could be executed an arbitrary amount of times instead of just a single time.
 
-then this order could be executed an arbitrary amount of times instead of just a single time.
 This means that any solver could drain the fee amount from the user until not enough funds are available anymore.
 
 We recommend to never sign orders of this form and, if developing a contract that creates orders on behalf of other users, make sure at a contract level that such orders cannot be created.
