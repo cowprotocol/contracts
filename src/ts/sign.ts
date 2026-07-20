@@ -14,17 +14,6 @@ import {
 } from "./types/ethers";
 
 /**
- * Value returned by a call to `isValidSignature` if the signature was verified
- * successfully. The value is defined in the EIP-1271 standard as:
- * bytes4(keccak256("isValidSignature(bytes32,bytes)"))
- */
-export const EIP1271_MAGICVALUE = ethers.utils.hexDataSlice(
-  ethers.utils.id("isValidSignature(bytes32,bytes)"),
-  0,
-  4,
-);
-
-/**
  * The signing scheme used to sign the order.
  */
 export enum SigningScheme {
