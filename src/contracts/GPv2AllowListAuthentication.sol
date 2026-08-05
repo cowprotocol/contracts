@@ -30,6 +30,13 @@ contract GPv2AllowListAuthentication is
     /// @dev Event emitted when a solver gets removed.
     event SolverRemoved(address solver);
 
+    /// @dev Contract constructor that disables initializers for the
+    /// implementation contract.
+    constructor() {
+        // Disable initializers for the implementation contract
+        _disableInitializers();
+    }
+
     /// @dev Initialize the manager to a value.
     ///
     /// This method is a contract initializer that is called exactly once after
