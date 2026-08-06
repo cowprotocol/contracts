@@ -36,16 +36,3 @@ export function normalizeInteraction(
     ...interaction,
   };
 }
-
-/**
- * Normalizes data for many interactions so that they can be ABI encoded. This
- * calls [`normalizeInteraction`] for each interaction.
- *
- * @param interactions The interactions to normalize.
- * @return The normalized interactions.
- */
-export function normalizeInteractions(
-  interactions: InteractionLike[],
-): Interaction[] {
-  return interactions.map(normalizeInteraction);
-}

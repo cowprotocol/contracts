@@ -39,7 +39,7 @@ export interface Swap {
  * An encoded Balancer swap request that can be used as input to the settlement
  * contract.
  */
-export interface BatchSwapStep {
+interface BatchSwapStep {
   /**
    * The ID of the pool for the swap.
    */
@@ -68,7 +68,7 @@ export interface BatchSwapStep {
 /**
  * Swap execution parameters.
  */
-export interface SwapExecution {
+interface SwapExecution {
   /**
    * The limit amount for the swap.
    *
@@ -81,7 +81,7 @@ export interface SwapExecution {
 /**
  * Encoded swap parameters.
  */
-export type EncodedSwap = [
+type EncodedSwap = [
   /** Swap requests. */
   BatchSwapStep[],
   /** Tokens. */
@@ -94,10 +94,7 @@ export type EncodedSwap = [
  * Encodes a swap as a {@link BatchSwapStep} to be used with the settlement
  * contract.
  */
-export function encodeSwapStep(
-  tokens: TokenRegistry,
-  swap: Swap,
-): BatchSwapStep {
+function encodeSwapStep(tokens: TokenRegistry, swap: Swap): BatchSwapStep {
   return {
     poolId: swap.poolId,
     assetInIndex: tokens.index(swap.assetIn),
