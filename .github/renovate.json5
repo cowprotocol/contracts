@@ -2,6 +2,7 @@
 // easier to maintain.
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["schedule:quarterly"],
   // Enable only the package managers used by this repository.
   enabledManagers: ["github-actions", "npm"],
   npm: {
@@ -14,7 +15,7 @@
   semanticCommits: "enabled",
   semanticCommitType: "deps",
   packageRules: [
-    // GitHub Actions updates: run monthly, skip releases newer than 2 weeks
+    // GitHub Actions updates: run quarterly, skip releases newer than 2 weeks
     // to avoid picking up freshly published versions that may be unstable or
     // compromised, and pin to full commit SHAs (with the version as a
     // trailing comment) rather than mutable tags.
@@ -22,7 +23,6 @@
     // (typically major) instead of a separate minor PR.
     {
       matchManagers: ["github-actions"],
-      schedule: ["* 0-3 1 * *"], // 00:00-03:59 UTC on the first day of each month
       minimumReleaseAge: "14 days",
       // Track upgrades by semver tag, but pin the resolved version to its full
       // commit SHA (semver tag kept as a trailing comment). Use the coerced
@@ -36,10 +36,9 @@
       semanticCommitScope: "{{depName}}",
       commitMessageTopic: "{{depName}}",
     },
-    // Keep all Yarn-managed npm updates in one monthly PR.
+    // Keep all Yarn-managed npm updates in one quarterly PR.
     {
       matchManagers: ["npm"],
-      schedule: ["* 0-3 1 * *"], // 00:00-03:59 UTC on the first day of each month
       minimumReleaseAge: "14 days",
       separateMajorMinor: false,
       groupName: "npm dependencies",
