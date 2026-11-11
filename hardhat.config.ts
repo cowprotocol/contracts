@@ -44,7 +44,7 @@ if (PK) {
 }
 
 if (
-  ["rinkeby", "goerli", "mainnet"].includes(argv.network) &&
+  argv.network === "mainnet" &&
   NODE_URL === undefined &&
   INFURA_KEY === undefined
 ) {
@@ -114,16 +114,6 @@ export default {
       url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
       ...sharedNetworkConfig,
       chainId: 1,
-    },
-    rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
-      ...sharedNetworkConfig,
-      chainId: 4,
-    },
-    goerli: {
-      url: `https://goerli.infura.io/v3/${INFURA_KEY}`,
-      ...sharedNetworkConfig,
-      chainId: 5,
     },
     sepolia: {
       url: "https://ethereum-sepolia.publicnode.com",
