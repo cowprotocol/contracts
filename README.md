@@ -66,7 +66,7 @@ Choose the network and gas price in wei for the deployment.
 After replacing these values, run:
 
 ```sh
-NETWORK='rinkeby'
+NETWORK='sepolia'
 GAS_PRICE_WEI='1000000000'
 yarn deploy --network $NETWORK --gasprice $GAS_PRICE_WEI
 ```
