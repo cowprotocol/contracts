@@ -9,14 +9,34 @@ Extensive [documentation](https://docs.cow.fi/cow-protocol/reference/contracts/c
 
 ## Getting Started
 
-### Building the Project
+### Building and Testing with Foundry
+
+Most of the test suite is written in Solidity and runs with [Foundry](https://getfoundry.sh).
+CI uses Foundry v1.3.5; newer versions may pick a newer solc whose warnings fail the build, since `deny_warnings` is enabled.
+
+```sh
+git submodule update --init --recursive
+yarn   # forge resolves some imports from node_modules
+forge build
+forge test
+```
+
+To run the tests with the same settings as CI (fixed fuzz seed):
+
+```sh
+FOUNDRY_PROFILE=ci forge test
+```
+
+### Building the Project with Hardhat
 
 ```sh
 yarn
 yarn build
 ```
 
-### Running Tests
+### Running Hardhat Tests
+
+`yarn test` only runs the Hardhat tests that have not been migrated to Foundry yet (see [#106](https://github.com/cowprotocol/contracts/issues/106)), not the Foundry suite.
 
 ```sh
 yarn test
@@ -114,7 +134,7 @@ This package additionally contains a `networks.json` file at the root with the a
 
 ## Test coverage
 
-Test coverage can be checked with the command
+Test coverage of the Hardhat tests can be checked with the command
 
 ```sh
 yarn coverage
