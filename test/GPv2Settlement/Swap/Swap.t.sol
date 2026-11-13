@@ -148,6 +148,80 @@ contract Swap is Helper {
         swap(swapEncoder.encode());
     }
 
+    function test_executes_sell_swap_with_the_limit_amount_as_buy_limit() public {
+        GPv2Order.Data memory order = GPv2Order.Data({
+            sellToken: IERC20(makeAddr("sell token")),
+            buyToken: IERC20(makeAddr("buy token")),
+            receiver: trader2.addr,
+            sellAmount: 4.2 ether,
+            buyAmount: 13.37 ether,
+            validTo: 0x01020304,
+            appData: bytes32(0),
+            feeAmount: 1 ether,
+            kind: GPv2Order.KIND_SELL,
+            sellTokenBalance: GPv2Order.BALANCE_INTERNAL,
+            buyTokenBalance: GPv2Order.BALANCE_ERC20,
+            partiallyFillable: false
+        });
+        // For sell orders, the trade's executed amount is the minimum amount
+        // of buy tokens that the swap must output. Pick one that is stricter
+        // than the order's limit, so that the two can be told apart.
+        uint256 limitAmount = 20 ether;
+
+        SwapEncoder.State storage swapEncoder = SwapEncoder.makeSwapEncoder();
+
+        swapEncoder.encodeSwapStep(
+            SwapEncoder.Swap({
+                poolId: keccak256("pool id"),
+                assetIn: order.sellToken,
+                assetOut: order.buyToken,
+                amount: order.sellAmount,
+                userData: bytes("data")
+            })
+        );
+
+        swapEncoder.signEncodeTrade({
+            vm: vm,
+            owner: trader1,
+            order: order,
+            domainSeparator: domainSeparator,
+            signingScheme: GPv2Signing.Scheme.Eip712,
+            executedAmount: limitAmount
+        });
+
+        SwapEncoder.EncodedSwap memory encodedSwap = swapEncoder.encode();
+
+        IVault.FundManagement memory funds = IVault.FundManagement({
+            sender: trader1.addr,
+            fromInternalBalance: true,
+            recipient: payable(trader2.addr),
+            toInternalBalance: false
+        });
+        int256[] memory limits = new int256[](2);
+        limits[0] = int256(order.sellAmount);
+        limits[1] = -int256(limitAmount);
+        vm.mockCall(
+            address(vault),
+            abi.encodeCall(
+                IVault.batchSwap,
+                (IVault.SwapKind.GIVEN_IN, encodedSwap.swaps, encodedSwap.tokens, funds, limits, order.validTo)
+            ),
+            abi.encode(limits)
+        );
+        IVault.UserBalanceOp[] memory vaultOps = new IVault.UserBalanceOp[](1);
+        vaultOps[0] = IVault.UserBalanceOp({
+            kind: IVault.UserBalanceOpKind.TRANSFER_INTERNAL,
+            asset: order.sellToken,
+            amount: order.feeAmount,
+            sender: trader1.addr,
+            recipient: payable(address(settlement))
+        });
+        vm.mockCall(address(vault), abi.encodeCall(IVault.manageUserBalance, (vaultOps)), hex"");
+
+        vm.prank(solver);
+        swap(encodedSwap);
+    }
+
     function test_should_emit_a_settlement_event() public {
         vm.mockCall(address(vault), abi.encodePacked(IVault.batchSwap.selector), abi.encode(new int256[](2)));
         vm.mockCall(address(vault), abi.encodePacked(IVault.manageUserBalance.selector), hex"");
